@@ -119,26 +119,20 @@
   </div>
 
 <script>
+  // ===== Supabase (mesmo projeto do site) =====
+  var SUPABASE_URL = 'https://mowrcqwxtmjuqtxbesfg.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_gSMSa-F4C1FHkEpz1QHN3w_pIQ3epsc';
+  var REST = SUPABASE_URL + '/rest/v1';
+  var HEADERS = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY };
+
   // ===== Telegram para onde vão as compras (troque pelo seu contato) =====
-  var TELEGRAM_LOJA = 'https://t.me/+xsUch4Uybjg4ZmMx';
+  var TELEGRAM_LOJA = 'https://t.me/SEU_CONTATO';
 
   // ===== Links da barra de ícones (troque pelos seus) =====
   var LINKS = {
-    telegram: 'https://t.me/+xsUch4Uybjg4ZmMx',
-    instagram: 'https://www.instagram.com/atavernadoleitor/L'
+    telegram: 'https://t.me/SEU_GRUPO',
+    instagram: 'https://instagram.com/SEU_PERFIL'
   };
-
-  // ===== Produtos =====
-  // foto: URL de uma imagem (deixe '' para mostrar o selo no lugar)
-  // descricao: o texto do produto
-  // preco: como você quiser exibir (ex.: 'R$ 39,90')
-  // link: opcional — Telegram específico desse item; se vazio, usa TELEGRAM_LOJA
-  var PRODUTOS = [
-    { foto:'', descricao:'Marca-páginas de couro legítimo, gravado com o selo da Taverna. Para nunca perder o fio da história.', preco:'R$ 29,90', link:'' },
-    { foto:'', descricao:'Caneca de cerâmica para o chá das madrugadas de leitura, com a divisa da casa.', preco:'R$ 49,90', link:'' },
-    { foto:'', descricao:'Sacola de algodão cru para carregar a próxima pilha de volumes. Resistente a finais inesperados.', preco:'R$ 59,90', link:'' },
-    { foto:'', descricao:'Broche esmaltado com o brasão de Penas & Pergaminhos. Para marcar de que lado você está.', preco:'R$ 24,90', link:'' }
-  ];
 
   function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
@@ -150,14 +144,32 @@
   var emblemaSVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M4 5 a2 2 0 0 1 2-2 h6 v16 h-6 a2 2 0 0 1-2-2 z"/><path d="M20 5 a2 2 0 0 0-2-2 h-6 v16 h6 a2 2 0 0 0 2-2 z"/></svg>';
   var carrinhoSVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.3"/><circle cx="18" cy="20" r="1.3"/><path d="M3 4 h2 l2.2 11 h11 l1.8-8 h-15"/></svg>';
 
-  function render(){
+  async function supaGet(path){
+    var res = await fetch(REST + path, { headers: HEADERS });
+    if(!res.ok) throw new Error('HTTP ' + res.status + ' ' + (await res.text()));
+    return res.json();
+  }
+
+  async function carregar(){
     var box = document.getElementById('produtos');
-    if(!PRODUTOS.length){
+    box.innerHTML = '<div class="vazia"><div class="big">A abrir a loja…</div></div>';
+    try{
+      var rows = await supaGet('/produtos?ativo=eq.true&select=foto,descricao,preco,link,ordem,criado_em&order=ordem.asc,criado_em.desc');
+      render(rows);
+    }catch(e){
+      console.error('Falha ao carregar produtos:', e);
+      box.innerHTML = '<div class="vazia"><div class="big">A loja está fechada</div>Não consegui carregar os produtos. Veja o console (F12).</div>';
+    }
+  }
+
+  function render(lista){
+    var box = document.getElementById('produtos');
+    if(!lista.length){
       box.innerHTML = '<div class="vazia"><div class="big">A loja abre em breve</div>As primeiras peças estão a caminho.</div>';
       return;
     }
     box.innerHTML = '';
-    PRODUTOS.forEach(function(p,i){
+    lista.forEach(function(p,i){
       var link = p.link || TELEGRAM_LOJA;
       var card = document.createElement('div');
       card.className = 'produto';
@@ -178,7 +190,7 @@
     });
   }
 
-  render();
+  carregar();
 </script>
 </body>
 </html>
