@@ -118,6 +118,16 @@
   .topnav a{display:inline-flex;color:var(--ink-soft);transition:color .2s,transform .2s}
   .topnav a:hover{color:var(--wax);transform:translateY(-1px)}
   .topnav svg{width:22px;height:22px;display:block}
+  .chave-box{font-family:'Courier New',monospace;font-size:21px;letter-spacing:1px;color:var(--ink);
+    background:var(--paper-2);border:1px dashed var(--wax);border-radius:4px;padding:14px 16px;text-align:center;word-break:break-all;margin:6px 0 4px}
+  .chave-msg{color:var(--ink-soft);font-style:italic;line-height:1.75;font-size:16px;margin:16px 0 6px}
+  .verificar-area{margin-top:14px;display:none;flex-direction:column;gap:10px}
+  .verificar-area.open{display:flex}
+  .verificar-area input{background:rgba(255,255,255,.45);border:1px solid var(--line);border-radius:3px;padding:10px 13px;font-family:'Courier New',monospace;font-size:15px;color:var(--ink)}
+  .verificar-area input:focus{outline:none;border-color:var(--wax);background:#fff}
+  .verif-result{font-style:italic;font-size:16px;min-height:1px}
+  .verif-result.ok{color:var(--gold)}
+  .verif-result.no{color:var(--wax)}
 </style>
 </head>
 <body>
@@ -192,6 +202,12 @@
       <div class="r-actions">
         <button class="act" id="r-like" data-like=""><span class="lk-heart">♡</span> <span class="lk-count">0</span></button>
         <button class="act" id="r-share">partilhar</button>
+        <button class="act" id="abrir-verificar">provar autoria</button>
+      </div>
+      <div class="verificar-area" id="verificar-area">
+        <input id="verif-chave" placeholder="cole aqui a sua chave de autoria">
+        <button class="btn btn-primary" id="verif-btn" style="align-self:flex-start">Verificar</button>
+        <div class="verif-result" id="verif-result"></div>
       </div>
       <div class="comments">
         <div class="c-head">Comentários</div>
@@ -223,6 +239,19 @@
     </div>
   </div>
 
+  <div class="modal" id="chave-modal">
+    <div class="sheet">
+      <h3>A sua chave de autoria</h3>
+      <p class="note">Guarde-a num lugar seguro — é a prova de que este pergaminho é seu. Ela não será mostrada de novo.</p>
+      <div class="chave-box" id="chave-valor"></div>
+      <div style="text-align:right;margin-bottom:4px"><button class="act" id="copiar-chave" style="font-size:14px;padding:6px 12px">copiar</button></div>
+      <p class="chave-msg">Dizem que, numa velha estalagem à beira da estrada — o Pónei Saltitante —, mais de um viajante distraído perdeu o que era seu para um vulto encapuzado que surgiu da penumbra exigindo o que não lhe cabia. Se um estranho de capa lhe pedir esta chave, não a entregue por ouro nem por juramento. Apenas o Taberneiro da Taverna do Leitor pode zelar por ela.</p>
+      <div class="actions">
+        <button class="btn btn-primary" id="chave-ok">Já guardei a chave</button>
+      </div>
+    </div>
+  </div>
+
 <script>
   // ===== Configuração do Supabase =====
   var SUPABASE_URL = 'https://mowrcqwxtmjuqtxbesfg.supabase.co';
@@ -232,8 +261,8 @@
 
   // ===== Links sociais (preencha com os seus) =====
   var LINKS = {
-    telegram: 'https://t.me/+xsUch4Uybjg4ZmMx',
-    instagram: 'https://www.instagram.com/atavernadoleitor/',
+    telegram: 'https://t.me/SEU_GRUPO',
+    instagram: 'https://instagram.com/SEU_PERFIL',
     loja: 'loja.html'
   };
 
@@ -337,6 +366,9 @@
     document.getElementById('r-like').setAttribute('data-like', w.id);
     updateLikeUI(w.id);
     document.getElementById('r-share').textContent = 'partilhar';
+    document.getElementById('verificar-area').classList.remove('open');
+    document.getElementById('verif-chave').value='';
+    var vr=document.getElementById('verif-result'); vr.textContent=''; vr.className='verif-result';
     els.reader.classList.add('open'); els.reader.scrollTop=0; document.body.style.overflow='hidden';
     carregarComentarios(w.id);
   }
@@ -411,14 +443,49 @@
     if(texto.length<50){fb('O texto precisa de pelo menos 50 caracteres.','err');return;}
     var btn=this;btn.disabled=true;btn.textContent='a enviar…';
     try{
-      await supaPost('/pergaminhos', { autor:autor, titulo:titulo, genero:genero, conteudo:texto });
-      fb('Enviado! Assim que for aprovado, aparece no mural.','ok');
+      var chave=gerarChave();
+      var hash=await sha256hex(chave);
+      await supaPost('/rpc/enviar_pergaminho', { p_autor:autor, p_titulo:titulo, p_genero:genero, p_conteudo:texto, p_chave_hash:hash });
       f.titulo.value='';f.texto.value='';f.count.textContent='0';
-      setTimeout(function(){fechar(els.modal);},2200);
+      fechar(els.modal);
+      document.getElementById('chave-valor').textContent = chave;
+      abrir(document.getElementById('chave-modal'));
     }catch(e){
       console.error('Falha ao enviar:', e);
       fb('Não consegui enviar agora. Veja o console (F12).','err');
     }finally{btn.disabled=false;btn.textContent='Selar e enviar o texto';}
+  });
+
+  // ===== Chave de autoria =====
+  function gerarChave(){
+    var bytes=new Uint8Array(12); crypto.getRandomValues(bytes);
+    var chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789', s='';
+    for(var i=0;i<bytes.length;i++){ s+=chars[bytes[i]%chars.length]; if((i+1)%4===0 && i<bytes.length-1) s+='-'; }
+    return 'TAVERNA-'+s;
+  }
+  async function sha256hex(str){
+    var buf=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+  }
+  document.getElementById('chave-ok').addEventListener('click', function(){ fechar(document.getElementById('chave-modal')); });
+  document.getElementById('copiar-chave').addEventListener('click', function(){
+    var v=document.getElementById('chave-valor').textContent, b=this;
+    if(navigator.clipboard){ navigator.clipboard.writeText(v).then(function(){ b.textContent='copiado!'; setTimeout(function(){b.textContent='copiar';},1500); }); }
+  });
+  document.getElementById('abrir-verificar').addEventListener('click', function(){
+    document.getElementById('verificar-area').classList.toggle('open');
+  });
+  document.getElementById('verif-btn').addEventListener('click', async function(){
+    var chave=document.getElementById('verif-chave').value.trim(), res=document.getElementById('verif-result');
+    if(!chave || currentReaderId==null) return;
+    var b=this; b.disabled=true; b.textContent='a verificar…';
+    try{
+      var hash=await sha256hex(chave);
+      var ok=await supaPost('/rpc/verificar_autoria', { p_id: currentReaderId, p_chave_hash: hash }, 'return=representation');
+      if(ok===true){ res.textContent='✓ Confere — este pergaminho é seu.'; res.className='verif-result ok'; }
+      else { res.textContent='✗ Não confere com este pergaminho.'; res.className='verif-result no'; }
+    }catch(e){ console.error('Falha ao verificar:', e); res.textContent='Não consegui verificar agora. Veja o console (F12).'; res.className='verif-result no'; }
+    finally{ b.disabled=false; b.textContent='Verificar'; }
   });
 
   carregar();
