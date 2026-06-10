@@ -37,12 +37,27 @@
   .flourish::after{content:"❧";position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--paper);padding:0 10px;color:var(--ink-faint);font-size:16px}
 
   .produtos{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:26px;padding:44px 0 40px}
-  .produto{border:1px solid var(--line);border-radius:6px;overflow:hidden;background:rgba(255,255,255,.32);
-    display:flex;flex-direction:column;opacity:0;transform:translateY(12px);animation:rise .6s ease forwards}
+  .produto{position:relative;border:1px solid rgba(154,123,63,.28);border-radius:8px;overflow:hidden;background:rgba(255,255,255,.4);
+    display:flex;flex-direction:column;opacity:0;transform:translateY(12px);animation:rise .6s ease forwards;
+    box-shadow:0 1px 3px rgba(40,33,26,.06);transition:transform .25s ease, box-shadow .25s ease}
+  .produto:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(40,33,26,.13)}
   @keyframes rise{to{opacity:1;transform:none}}
-  .foto{aspect-ratio:4/3;background:var(--paper-2);background-size:cover;background-position:center;
-    display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--line)}
+  .foto{position:relative;aspect-ratio:4/3;background:var(--paper-2);overflow:hidden;
+    display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(154,123,63,.28);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+  .foto img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease}
+  .produto:hover .foto img{transform:scale(1.05)}
+  .foto.com-img{cursor:zoom-in}
+  .foto.com-img::after{content:"\2922";position:absolute;top:9px;right:11px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+    background:rgba(40,33,26,.55);color:#f6efe1;border-radius:50%;font-size:15px;opacity:0;transform:scale(.85);transition:opacity .2s, transform .2s}
+  .produto:hover .foto.com-img::after{opacity:1;transform:scale(1)}
   .foto.sem-foto svg{width:54px;height:54px;color:var(--ink-faint);opacity:.5}
+
+  .lightbox{position:fixed;inset:0;z-index:80;background:rgba(40,33,26,.88);
+    display:none;align-items:center;justify-content:center;padding:24px;cursor:zoom-out}
+  .lightbox.open{display:flex;animation:lbfade .25s ease}
+  @keyframes lbfade{from{opacity:0}to{opacity:1}}
+  .lightbox img{max-width:92vw;max-height:88vh;border-radius:5px;border:4px solid var(--paper);box-shadow:0 24px 70px rgba(0,0,0,.55)}
   .corpo{padding:20px 20px 18px;display:flex;flex-direction:column;flex:1;gap:14px}
   .desc{color:var(--ink-soft);line-height:1.6}
   .rodape{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:6px}
@@ -118,6 +133,8 @@
     </footer>
   </div>
 
+  <div class="lightbox" id="lightbox"><img id="lightbox-img" alt=""></div>
+
 <script>
   // ===== Supabase (mesmo projeto do site) =====
   var SUPABASE_URL = 'https://mowrcqwxtmjuqtxbesfg.supabase.co';
@@ -126,12 +143,12 @@
   var HEADERS = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY };
 
   // ===== Telegram para onde vão as compras (troque pelo seu contato) =====
-  var TELEGRAM_LOJA = 'https://t.me/+xsUch4Uybjg4ZmMx';
+  var TELEGRAM_LOJA = 'https://t.me/SEU_CONTATO';
 
   // ===== Links da barra de ícones (troque pelos seus) =====
   var LINKS = {
-    telegram: 'https://t.me/+xsUch4Uybjg4ZmMx',
-    instagram: 'https://www.instagram.com/atavernadoleitor/L'
+    telegram: 'https://t.me/SEU_GRUPO',
+    instagram: 'https://instagram.com/SEU_PERFIL'
   };
 
   function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -175,7 +192,7 @@
       card.className = 'produto';
       card.style.animationDelay = (i*0.06)+'s';
       var foto = p.foto
-        ? '<div class="foto" style="background-image:url(\''+p.foto+'\')"></div>'
+        ? '<div class="foto com-img"><img src="'+p.foto+'" alt="" loading="lazy"></div>'
         : '<div class="foto sem-foto">'+emblemaSVG+'</div>';
       card.innerHTML =
         foto +
@@ -189,6 +206,16 @@
       box.appendChild(card);
     });
   }
+
+  var lb=document.getElementById('lightbox'), lbImg=document.getElementById('lightbox-img');
+  function abrirLightbox(src){ lbImg.src=src; lb.classList.add('open'); document.body.style.overflow='hidden'; }
+  function fecharLightbox(){ lb.classList.remove('open'); lbImg.src=''; document.body.style.overflow=''; }
+  document.getElementById('produtos').addEventListener('click', function(e){
+    var holder = e.target.closest ? e.target.closest('.foto.com-img') : null;
+    if(holder){ var img=holder.querySelector('img'); if(img) abrirLightbox(img.src); }
+  });
+  lb.addEventListener('click', fecharLightbox);
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape' && lb.classList.contains('open')) fecharLightbox(); });
 
   carregar();
 </script>
