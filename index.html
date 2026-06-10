@@ -381,6 +381,8 @@
   var ordenacao = 'recentes';
   var filtroAutor = null;
   var likedSet = new Set();
+  try{ (JSON.parse(localStorage.getItem('pp_likes')||'[]')||[]).forEach(function(x){ likedSet.add(String(x)); }); }catch(e){}
+  function salvarLikes(){ try{ localStorage.setItem('pp_likes', JSON.stringify(Array.from(likedSet))); }catch(e){} }
   var currentReaderId = null;
 
   function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -478,13 +480,21 @@
   }
 
   async function curtir(id){
-    if(likedSet.has(String(id))) return;
-    likedSet.add(String(id));
-    var t = textosAtuais.find(function(x){ return String(x.id)===String(id); });
-    if(t) t.likes = (t.likes||0)+1;
-    updateLikeUI(id);
-    try{ await supaPost('/rpc/curtir', { p_id: id }); }
-    catch(e){ console.error('Falha ao curtir:', e); }
+    var key=String(id);
+    var t = textosAtuais.find(function(x){ return String(x.id)===key; });
+    if(likedSet.has(key)){
+      likedSet.delete(key);
+      if(t) t.likes = Math.max(0,(t.likes||0)-1);
+      salvarLikes(); updateLikeUI(id);
+      try{ await supaPost('/rpc/descurtir', { p_id: id }); }
+      catch(e){ console.error('Falha ao descurtir:', e); }
+    } else {
+      likedSet.add(key);
+      if(t) t.likes = (t.likes||0)+1;
+      salvarLikes(); updateLikeUI(id);
+      try{ await supaPost('/rpc/curtir', { p_id: id }); }
+      catch(e){ console.error('Falha ao curtir:', e); }
+    }
   }
   function updateLikeUI(id){
     var t = textosAtuais.find(function(x){ return String(x.id)===String(id); });
