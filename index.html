@@ -128,11 +128,48 @@
   .verif-result{font-style:italic;font-size:16px;min-height:1px}
   .verif-result.ok{color:var(--gold)}
   .verif-result.no{color:var(--wax)}
+  .rascunho-nota{font-size:14px;color:var(--ink-faint);font-style:italic;margin:-2px 0 12px}
+  .rascunho-nota a{color:var(--wax)}
+  .aviso-box{background:rgba(143,45,40,.07);border:1px solid rgba(143,45,40,.25);border-left:3px solid var(--wax);border-radius:4px;padding:15px 17px;margin:6px 0 4px}
+  .aviso-box p{font-style:italic;color:var(--ink-soft);line-height:1.7}
+  .aviso-box .aviso-grave{font-style:normal;color:var(--ink);margin-top:10px}
+  .topnav button{background:none;border:none;padding:0;cursor:pointer;color:var(--ink-soft);display:inline-flex;transition:color .2s,transform .2s}
+  .topnav button:hover{color:var(--wax);transform:translateY(-1px)}
+  .topnav button svg{width:22px;height:22px;display:block}
+  body.noite{--paper:#1f1a13;--paper-2:#2a2318;--ink:#ece3d2;--ink-soft:#c4b8a1;--ink-faint:#8c8068;--wax:#d98b6a;--wax-deep:#c2704f;--line:rgba(236,227,210,.14);--gold:#caa86a}
+  body.noite .topnav{background:rgba(31,26,19,.72)}
+  #r-text > p:first-of-type::first-letter{font-family:'Cormorant Garamond',serif;float:left;font-size:64px;line-height:.78;padding:8px 12px 0 0;color:var(--wax);font-weight:600}
+  .controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin:4px 0 18px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{font-family:'EB Garamond',serif;font-size:15px;padding:5px 13px;border:1px solid var(--line);border-radius:30px;background:transparent;color:var(--ink-soft);cursor:pointer;transition:.2s}
+  .chip:hover{border-color:var(--wax);color:var(--wax)}
+  .chip.on{background:var(--wax);border-color:var(--wax);color:var(--paper)}
+  .sort-sel{font-family:'EB Garamond',serif;font-size:15px;color:var(--ink-soft);background:transparent;border:1px solid var(--line);border-radius:4px;padding:6px 10px;cursor:pointer}
+  .autor-bar{display:none;align-items:center;justify-content:space-between;gap:12px;margin:0 0 16px;padding:10px 16px;background:rgba(143,45,40,.06);border:1px solid var(--line);border-radius:6px;font-style:italic;color:var(--ink-soft)}
+  .autor-bar.on{display:flex}
+  .autor-bar a{color:var(--wax);cursor:pointer}
+  .autor-link{cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;color:inherit}
+  .autor-link:hover{color:var(--wax)}
+  .scroll{position:relative}
+  .scroll.is-destaque{border-color:rgba(143,45,40,.4)}
+  .destaque-badge{position:absolute;top:0;right:0;background:var(--wax);color:var(--paper);font-family:'Cormorant Garamond',serif;font-size:13px;letter-spacing:.05em;padding:3px 11px;border-bottom-left-radius:8px}
+  .r-nav{display:flex;justify-content:space-between;gap:12px;margin-top:28px;padding-top:18px;border-top:1px solid var(--line)}
+  .r-nav button{background:transparent;border:none;color:var(--ink-soft);font-family:'Cormorant Garamond',serif;font-size:18px;cursor:pointer;transition:color .2s}
+  .r-nav button:hover:not(:disabled){color:var(--wax)}
+  .r-nav button:disabled{opacity:.32;cursor:default}
+  .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+  .stamp-ov{position:fixed;inset:0;z-index:97;background:rgba(40,33,26,.55);display:none;align-items:center;justify-content:center}
+  .stamp-ov.on{display:flex}
+  .stamp-ov svg{width:150px;height:150px;animation:carimbo .8s ease}
+  @keyframes carimbo{0%{transform:scale(2.6) rotate(-10deg);opacity:0}55%{transform:scale(.9) rotate(0);opacity:1}72%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
 </style>
 </head>
 <body>
 
   <nav class="topnav" aria-label="Atalhos">
+    <button id="toggle-noite" aria-label="Alternar modo noturno" title="Modo noturno" aria-pressed="false">
+      <svg class="ic-noite" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8z"/></svg>
+    </button>
     <a id="top-telegram" href="#" target="_blank" rel="noopener" aria-label="Telegram da Taverna" title="Telegram">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.9 4.3c-.2-.2-.5-.3-.9-.2L3.3 11c-.5.2-.5.9 0 1.1l4.5 1.6 1.7 5.4c.1.4.6.5.9.2l2.6-2.4 4.6 3.4c.4.3.9.1 1-.4L22 4.9c.1-.2 0-.5-.1-.6zM9.4 14.2l-.3 3.3-1-3.5 8.6-5.6-7.3 5.8z"/></svg>
     </a>
@@ -171,6 +208,17 @@
     <div class="cta-row"><button class="btn btn-primary" id="abrir-publicar">Confiar o seu texto</button></div>
 
     <div class="shelf-head">Selados até agora</div>
+    <div class="controls">
+      <div class="chips" id="chips"></div>
+      <select class="sort-sel" id="sort-sel" aria-label="Ordenar">
+        <option value="recentes">mais recentes</option>
+        <option value="curtidos">mais curtidos</option>
+      </select>
+    </div>
+    <div class="autor-bar" id="autor-bar">
+      <span>a mostrar pergaminhos de <b id="autor-bar-nome"></b></span>
+      <a id="autor-bar-todos">ver todos</a>
+    </div>
     <div class="scrolls" id="scrolls"><div class="state"><div class="big">A aquecer a cera…</div></div></div>
 
     <footer>
@@ -209,6 +257,10 @@
         <button class="btn btn-primary" id="verif-btn" style="align-self:flex-start">Verificar</button>
         <div class="verif-result" id="verif-result"></div>
       </div>
+      <div class="r-nav">
+        <button id="r-prev">‹ anterior</button>
+        <button id="r-next">próximo ›</button>
+      </div>
       <div class="comments">
         <div class="c-head">Comentários</div>
         <div id="c-list"></div>
@@ -226,15 +278,32 @@
       <h3>Confiar um pergaminho</h3>
       <p class="note">Escreva à vontade. O taberneiro lê cada texto antes de fixar no mural.</p>
       <div class="feedback" id="fb"></div>
+      <div class="hp" aria-hidden="true"><label>Deixe este campo vazio<input id="f-hp" tabindex="-1" autocomplete="off"></label></div>
       <div class="field"><label>Como assina</label><input id="f-autor" placeholder="nome ou pseudónimo" maxlength="40"></div>
       <div class="field"><label>Título</label><input id="f-titulo" placeholder="o título do seu texto" maxlength="120"></div>
       <div class="field"><label>Género</label>
         <select id="f-genero"><option>Conto</option><option>Poesia</option><option>Crónica</option><option>Ensaio</option><option>Fragmento</option><option>Outro</option></select>
       </div>
       <div class="field"><label>O texto</label><textarea id="f-texto" placeholder="Era uma vez…"></textarea><div class="count"><span id="f-count">0</span> caracteres</div></div>
+      <div class="rascunho-nota" id="rascunho-nota" style="display:none">Rascunho restaurado deste navegador. <a href="#" id="descartar-rascunho">descartar</a></div>
       <div class="actions">
-        <button class="btn btn-ghost" id="cancelar">deixar para depois</button>
+        <button class="btn btn-ghost" id="cancelar">fechar</button>
+        <button class="btn btn-ghost" id="guardar-rascunho">guardar rascunho</button>
         <button class="btn btn-primary" id="enviar">Selar e enviar o texto</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="aviso-modal">
+    <div class="sheet">
+      <h3>Antes de selar</h3>
+      <div class="aviso-box">
+        <p>Uma vez selado, o pergaminho entra para o livro dos dias da taverna — e nem o próprio punho que o escreveu poderá reescrevê-lo.</p>
+        <p class="aviso-grave">Ao confirmar, o texto será enviado como está e <strong>não poderá mais ser alterado</strong>. Reveja com calma.</p>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" id="aviso-rever">Rever o texto</button>
+        <button class="btn btn-primary" id="aviso-confirmar">Selar mesmo assim</button>
       </div>
     </div>
   </div>
@@ -250,6 +319,23 @@
         <button class="btn btn-primary" id="chave-ok">Já guardei a chave</button>
       </div>
     </div>
+  </div>
+
+  <div class="stamp-ov" id="selo-stamp">
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <radialGradient id="wax2" cx="38%" cy="32%" r="72%"><stop offset="0%" stop-color="#c2564b"/><stop offset="48%" stop-color="#a23a32"/><stop offset="100%" stop-color="#6c1e1a"/></radialGradient>
+        <g id="emblem2">
+          <path d="M122 56 C 108 70,92 90,80 110 L74 122 L86 116 C106 104,124 86,138 70 C134 64,128 59,122 56 Z"/>
+          <path d="M120 60 L132 64 L122 72 Z"/><path d="M112 70 L125 73 L114 82 Z"/><path d="M103 81 L116 84 L105 93 Z"/>
+          <path d="M80 110 L73 124 L78 121 L83 113 Z"/><circle cx="71" cy="129" r="3.4"/>
+          <path d="M66 140 C84 150,116 150,138 138 C120 152,86 156,66 145 Z"/>
+        </g>
+      </defs>
+      <path fill="url(#wax2)" d="M100 18 C128 16,150 30,168 52 C184 72,186 104,176 130 C166 156,138 176,104 178 C70 180,40 166,26 138 C13 112,16 78,34 54 C50 32,72 20,100 18 Z"/>
+      <circle cx="100" cy="98" r="66" fill="none" stroke="rgba(70,20,16,.45)" stroke-width="2"/>
+      <use href="#emblem2" fill="rgba(70,20,16,.55)" transform="translate(1.1,1.4)"/><use href="#emblem2" fill="#8e2c25"/><use href="#emblem2" fill="rgba(255,220,210,.30)" transform="translate(-0.8,-1)"/>
+    </svg>
   </div>
 
 <script>
@@ -273,12 +359,16 @@
     fb: document.getElementById('fb')
   };
   var textosAtuais = [];
+  var vistaAtual = [];
+  var filtroGenero = 'Todos';
+  var ordenacao = 'recentes';
+  var filtroAutor = null;
   var likedSet = new Set();
   var currentReaderId = null;
 
   function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
   function tempo(t){var n=(t||'').trim().split(/\s+/).length;return Math.max(1,Math.round(n/200))+' min';}
-  function mapRow(r){return {id:r.id,title:r.titulo,author:r.autor,genre:r.genero,content:r.conteudo,likes:r.curtidas||0};}
+  function mapRow(r){return {id:r.id,title:r.titulo,author:r.autor,genre:r.genero,content:r.conteudo,likes:r.curtidas||0,destaque:!!r.destaque};}
 
   async function supaGet(path){
     var res = await fetch(REST + path, { headers: HEADERS });
@@ -304,7 +394,8 @@
     try{
       var rows = await supaGet('/pergaminhos?status=eq.aprovado&select=*&order=criado_em.desc');
       textosAtuais = rows.map(mapRow);
-      render(textosAtuais);
+      montarChips();
+      aplicarVista();
       abrirDoLink();
     }catch(e){
       console.error('Falha ao carregar:', e);
@@ -312,27 +403,59 @@
     }
   }
 
+  function aplicarVista(){
+    var lista = textosAtuais.slice();
+    if(filtroAutor) lista = lista.filter(function(w){ return (w.author||'Anónimo')===filtroAutor; });
+    if(filtroGenero!=='Todos') lista = lista.filter(function(w){ return (w.genre||'Conto')===filtroGenero; });
+    lista.sort(function(a,b){
+      var d=(b.destaque?1:0)-(a.destaque?1:0); if(d) return d;
+      if(ordenacao==='curtidos'){ var l=(b.likes||0)-(a.likes||0); if(l) return l; }
+      return (b.id||0)-(a.id||0);
+    });
+    vistaAtual = lista;
+    render(lista);
+    var ab=document.getElementById('autor-bar');
+    if(filtroAutor){ document.getElementById('autor-bar-nome').textContent=filtroAutor; ab.classList.add('on'); }
+    else ab.classList.remove('on');
+  }
+  function montarChips(){
+    var box=document.getElementById('chips'); if(!box) return;
+    var generos=['Todos','Conto','Poesia','Crónica','Ensaio','Fragmento','Outro'];
+    box.innerHTML='';
+    generos.forEach(function(g){
+      var b=document.createElement('button');
+      b.className='chip'+(g===filtroGenero?' on':'');
+      b.textContent=g;
+      b.addEventListener('click', function(){ filtroGenero=g; montarChips(); aplicarVista(); });
+      box.appendChild(b);
+    });
+  }
+  function filtrarAutor(nome){ filtroAutor=nome; aplicarVista(); window.scrollTo({top:0,behavior:'smooth'}); }
+
   function render(lista){
     els.scrolls.innerHTML = '';
     if(!lista.length){
-      els.scrolls.innerHTML = '<div class="state"><div class="big">O mural começa agora</div>Nenhum pergaminho selado ainda. Seja o primeiro a deixar o seu.</div>';
+      els.scrolls.innerHTML = '<div class="state"><div class="big">Nada por aqui ainda</div>Nenhum pergaminho com estes filtros.</div>';
       return;
     }
     lista.forEach(function(w,i){
       var card = document.createElement('div');
-      card.className='scroll';
+      card.className='scroll'+(w.destaque?' is-destaque':'');
       card.style.animationDelay=(i*0.06)+'s';
       var prev=(w.content||'').trim().slice(0,150);
       var liked=likedSet.has(String(w.id));
       card.innerHTML =
+        (w.destaque?'<div class="destaque-badge">em destaque</div>':'')+
         '<div class="s-meta"><span class="genre">'+esc(w.genre||'Conto')+'</span> · '+tempo(w.content)+' de leitura</div>'+
         '<div class="s-title">'+esc(w.title||'Sem título')+'</div>'+
         '<div class="s-preview">"'+esc(prev)+'…"</div>'+
-        '<div class="s-author">por <b>'+esc(w.author||'Anónimo')+'</b></div>'+
+        '<div class="s-author">por <a class="autor-link">'+esc(w.author||'Anónimo')+'</a></div>'+
         '<div class="s-foot"><button class="like-btn'+(liked?' liked':'')+'" data-like="'+w.id+'"><span class="lk-heart">'+(liked?'♥':'♡')+'</span> <span class="lk-count">'+(w.likes||0)+'</span></button></div>';
       card.addEventListener('click', function(){ abrirLeitor(w); });
-      var lb = card.querySelector('.like-btn');
-      lb.addEventListener('click', function(e){ e.stopPropagation(); curtir(w.id); });
+      var lk = card.querySelector('.like-btn');
+      lk.addEventListener('click', function(e){ e.stopPropagation(); curtir(w.id); });
+      var al = card.querySelector('.autor-link');
+      if(al) al.addEventListener('click', function(e){ e.stopPropagation(); filtrarAutor(w.author||'Anónimo'); });
       els.scrolls.appendChild(card);
     });
   }
@@ -360,7 +483,10 @@
     currentReaderId = w.id;
     document.getElementById('r-genre').textContent = w.genre||'Conto';
     document.getElementById('r-title').textContent = w.title||'Sem título';
-    document.getElementById('r-by').textContent = 'por '+(w.author||'Anónimo')+' · '+tempo(w.content)+' de leitura';
+    var by=document.getElementById('r-by');
+    by.innerHTML='por <a class="autor-link" id="r-autor"></a> · '+tempo(w.content)+' de leitura';
+    var ra=document.getElementById('r-autor'); ra.textContent=w.author||'Anónimo';
+    ra.addEventListener('click', function(){ els.reader.classList.remove('open'); document.body.style.overflow=''; filtrarAutor(w.author||'Anónimo'); });
     var html=(w.content||'').split(/\n\s*\n/).map(function(p){return '<p>'+esc(p).replace(/\n/g,'<br>')+'</p>';}).join('');
     document.getElementById('r-text').innerHTML = html;
     document.getElementById('r-like').setAttribute('data-like', w.id);
@@ -369,8 +495,18 @@
     document.getElementById('verificar-area').classList.remove('open');
     document.getElementById('verif-chave').value='';
     var vr=document.getElementById('verif-result'); vr.textContent=''; vr.className='verif-result';
+    atualizarNav();
     els.reader.classList.add('open'); els.reader.scrollTop=0; document.body.style.overflow='hidden';
     carregarComentarios(w.id);
+  }
+  function atualizarNav(){
+    var idx = vistaAtual.findIndex(function(x){ return String(x.id)===String(currentReaderId); });
+    var prev=document.getElementById('r-prev'), next=document.getElementById('r-next');
+    if(!prev||!next) return;
+    prev.disabled = idx<=0;
+    next.disabled = idx<0 || idx>=vistaAtual.length-1;
+    prev.onclick = function(){ if(idx>0) abrirLeitor(vistaAtual[idx-1]); };
+    next.onclick = function(){ if(idx>=0 && idx<vistaAtual.length-1) abrirLeitor(vistaAtual[idx+1]); };
   }
   document.getElementById('fechar-reader').addEventListener('click', function(){
     els.reader.classList.remove('open'); document.body.style.overflow='';
@@ -432,28 +568,81 @@
   function fb(m,t){els.fb.textContent=m;els.fb.className='feedback '+t;}
   function abrir(m){m.classList.add('open');document.body.style.overflow='hidden';}
   function fechar(m){m.classList.remove('open');document.body.style.overflow='';}
-  document.getElementById('abrir-publicar').addEventListener('click',function(){fb('','');abrir(els.modal);});
+  var avisoModal = document.getElementById('aviso-modal');
+
+  // ===== Rascunho (guardado neste navegador) =====
+  var RKEY='pp_rascunho';
+  function temConteudo(){ return !!(f.autor.value || f.titulo.value || f.texto.value); }
+  function salvarRascunho(silent){
+    try{
+      localStorage.setItem(RKEY, JSON.stringify({autor:f.autor.value,titulo:f.titulo.value,genero:f.genero.value,texto:f.texto.value}));
+      if(!silent) fb('Rascunho guardado neste navegador.','ok');
+    }catch(e){ if(!silent) fb('Este navegador não deixou guardar o rascunho.','err'); }
+  }
+  function lerRascunho(){ try{ var r=localStorage.getItem(RKEY); return r?JSON.parse(r):null; }catch(e){ return null; } }
+  function limparRascunho(){ try{ localStorage.removeItem(RKEY); }catch(e){} var n=document.getElementById('rascunho-nota'); if(n) n.style.display='none'; }
+  ['autor','titulo','texto'].forEach(function(k){ f[k].addEventListener('input', function(){ if(temConteudo()) salvarRascunho(true); }); });
+  f.genero.addEventListener('change', function(){ if(temConteudo()) salvarRascunho(true); });
+  document.getElementById('guardar-rascunho').addEventListener('click', function(){
+    if(!temConteudo()){ fb('Escreva algo antes de guardar o rascunho.','err'); return; }
+    salvarRascunho(false);
+    setTimeout(function(){ fechar(els.modal); }, 900);
+  });
+  document.getElementById('descartar-rascunho').addEventListener('click', function(e){
+    e.preventDefault(); limparRascunho();
+    f.titulo.value=''; f.texto.value=''; f.count.textContent='0';
+    fb('Rascunho descartado.','ok');
+  });
+
+  document.getElementById('abrir-publicar').addEventListener('click',function(){
+    fb('','');
+    var nota=document.getElementById('rascunho-nota'), r=lerRascunho();
+    if(r && (r.autor||r.titulo||r.texto)){
+      if(r.autor) f.autor.value=r.autor;
+      if(r.titulo) f.titulo.value=r.titulo;
+      if(r.genero) f.genero.value=r.genero;
+      if(r.texto) f.texto.value=r.texto;
+      f.count.textContent=f.texto.value.length;
+      if(nota) nota.style.display='block';
+    } else if(nota){ nota.style.display='none'; }
+    abrir(els.modal);
+  });
   document.getElementById('cancelar').addEventListener('click',function(){fechar(els.modal);});
   els.modal.addEventListener('click',function(e){if(e.target===els.modal)fechar(els.modal);});
 
-  document.getElementById('enviar').addEventListener('click', async function(){
-    var autor=f.autor.value.trim(),titulo=f.titulo.value.trim(),genero=f.genero.value,texto=f.texto.value.trim();
+  // ===== Envio com aviso de que não poderá ser alterado =====
+  document.getElementById('enviar').addEventListener('click', function(){
+    if(document.getElementById('f-hp').value){ fechar(els.modal); return; }
+    var autor=f.autor.value.trim(),titulo=f.titulo.value.trim(),texto=f.texto.value.trim();
     if(!autor){fb('Diga como devemos assinar.','err');return;}
     if(!titulo){fb('O pergaminho precisa de um título.','err');return;}
     if(texto.length<50){fb('O texto precisa de pelo menos 50 caracteres.','err');return;}
-    var btn=this;btn.disabled=true;btn.textContent='a enviar…';
+    fechar(els.modal); abrir(avisoModal);
+  });
+  document.getElementById('aviso-rever').addEventListener('click', function(){ fechar(avisoModal); abrir(els.modal); });
+  document.getElementById('aviso-confirmar').addEventListener('click', async function(){
+    var autor=f.autor.value.trim(),titulo=f.titulo.value.trim(),genero=f.genero.value,texto=f.texto.value.trim();
+    var btn=this;btn.disabled=true;btn.textContent='a selar…';
+    fechar(avisoModal);
+    var stamp=document.getElementById('selo-stamp'); stamp.classList.add('on');
     try{
       var chave=gerarChave();
       var hash=await sha256hex(chave);
-      await supaPost('/rpc/enviar_pergaminho', { p_autor:autor, p_titulo:titulo, p_genero:genero, p_conteudo:texto, p_chave_hash:hash });
+      await Promise.all([
+        supaPost('/rpc/enviar_pergaminho', { p_autor:autor, p_titulo:titulo, p_genero:genero, p_conteudo:texto, p_chave_hash:hash }),
+        new Promise(function(r){ setTimeout(r, 820); })
+      ]);
+      limparRascunho();
       f.titulo.value='';f.texto.value='';f.count.textContent='0';
-      fechar(els.modal);
+      stamp.classList.remove('on');
       document.getElementById('chave-valor').textContent = chave;
       abrir(document.getElementById('chave-modal'));
     }catch(e){
       console.error('Falha ao enviar:', e);
+      stamp.classList.remove('on');
+      abrir(els.modal);
       fb('Não consegui enviar agora. Veja o console (F12).','err');
-    }finally{btn.disabled=false;btn.textContent='Selar e enviar o texto';}
+    }finally{btn.disabled=false;btn.textContent='Selar mesmo assim';}
   });
 
   // ===== Chave de autoria =====
@@ -487,6 +676,16 @@
     }catch(e){ console.error('Falha ao verificar:', e); res.textContent='Não consegui verificar agora. Veja o console (F12).'; res.className='verif-result no'; }
     finally{ b.disabled=false; b.textContent='Verificar'; }
   });
+
+  // ===== Modo noturno =====
+  (function(){
+    var b=document.getElementById('toggle-noite');
+    function setNoite(on){ document.body.classList.toggle('noite',on); b.setAttribute('aria-pressed',on?'true':'false'); try{localStorage.setItem('pp_noite',on?'1':'0');}catch(e){} }
+    b.addEventListener('click', function(){ setNoite(!document.body.classList.contains('noite')); });
+    try{ if(localStorage.getItem('pp_noite')==='1') setNoite(true); }catch(e){}
+  })();
+  document.getElementById('sort-sel').addEventListener('change', function(){ ordenacao=this.value; aplicarVista(); });
+  document.getElementById('autor-bar-todos').addEventListener('click', function(){ filtroAutor=null; aplicarVista(); });
 
   carregar();
 </script>
