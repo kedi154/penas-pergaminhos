@@ -155,6 +155,15 @@
   .topnav button svg{width:22px;height:22px;display:block}
   body.noite{--paper:#1f1a13;--paper-2:#2a2318;--ink:#ece3d2;--ink-soft:#c4b8a1;--ink-faint:#8c8068;--wax:#d98b6a;--wax-deep:#c2704f;--line:rgba(236,227,210,.14);--gold:#caa86a}
   body.noite .topnav{background:rgba(31,26,19,.72)}
+  body.noite .c-input,
+  body.noite .field input, body.noite .field select, body.noite .field textarea,
+  body.noite .verificar-area input{background:rgba(255,255,255,.06);color:var(--ink)}
+  body.noite .c-input::placeholder,
+  body.noite .field input::placeholder, body.noite .field textarea::placeholder,
+  body.noite .verificar-area input::placeholder{color:rgba(236,227,210,.4)}
+  body.noite .c-input:focus,
+  body.noite .field input:focus, body.noite .field select:focus, body.noite .field textarea:focus,
+  body.noite .verificar-area input:focus{background:rgba(255,255,255,.1)}
   #r-text > p:first-of-type::first-letter{font-family:'Cormorant Garamond',serif;float:left;font-size:64px;line-height:.78;padding:8px 12px 0 0;color:var(--wax);font-weight:600}
   .controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin:4px 0 18px}
   .chips{display:flex;flex-wrap:wrap;gap:8px}
@@ -179,6 +188,16 @@
   .stamp-ov.on{display:flex}
   .stamp-ov svg{width:150px;height:150px;animation:carimbo .8s ease}
   @keyframes carimbo{0%{transform:scale(2.6) rotate(-10deg);opacity:0}55%{transform:scale(.9) rotate(0);opacity:1}72%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
+  .controls-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .busca{font-family:'EB Garamond',serif;font-size:15px;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:30px;padding:6px 14px;min-width:150px}
+  .busca:focus{outline:none;border-color:var(--wax)}
+  .fav-toggle{font-family:'EB Garamond',serif;font-size:15px;padding:5px 13px;border:1px solid var(--line);border-radius:30px;background:transparent;color:var(--ink-soft);cursor:pointer;transition:.2s;white-space:nowrap}
+  .fav-toggle:hover{border-color:var(--wax);color:var(--wax)}
+  .fav-toggle.on{background:var(--wax);border-color:var(--wax);color:var(--paper)}
+  .s-foot .cmt-count{color:var(--ink-faint);font-size:15px;font-style:italic;margin-left:12px}
+  .act.on{color:var(--wax)}
+  .fonte-ctrl{display:inline-flex;gap:4px;margin-left:auto}
+  body.noite .busca::placeholder{color:rgba(236,227,210,.4)}
 </style>
 </head>
 <body>
@@ -227,10 +246,14 @@
     <div class="shelf-head">Selados até agora</div>
     <div class="controls">
       <div class="chips" id="chips"></div>
-      <select class="sort-sel" id="sort-sel" aria-label="Ordenar">
-        <option value="recentes">mais recentes</option>
-        <option value="curtidos">mais curtidos</option>
-      </select>
+      <div class="controls-right">
+        <input class="busca" id="busca" type="search" placeholder="buscar…" aria-label="Buscar">
+        <button class="fav-toggle" id="fav-toggle" aria-pressed="false">★ guardados</button>
+        <select class="sort-sel" id="sort-sel" aria-label="Ordenar">
+          <option value="recentes">mais recentes</option>
+          <option value="curtidos">mais curtidos</option>
+        </select>
+      </div>
     </div>
     <div class="autor-bar" id="autor-bar">
       <span>a mostrar pergaminhos de <b id="autor-bar-nome"></b></span>
@@ -249,7 +272,8 @@
           Instagram
         </a>
       </div>
-      <div class="foot-note">Cada pergaminho é lido antes de ser selado.</div>
+      <div class="foot-note" id="contagem"></div>
+      <div class="foot-note">Cada pergaminho é lido antes de ser selado. · <a id="abrir-sobre" style="cursor:pointer;color:var(--wax)">sobre a taverna</a></div>
     </footer>
   </div>
 
@@ -267,7 +291,11 @@
       <div class="r-actions">
         <button class="act" id="r-like" data-like=""><span class="lk-heart">♡</span> <span class="lk-count">0</span></button>
         <button class="act" id="r-share">partilhar</button>
+        <button class="act" id="r-fav">guardar</button>
+        <button class="act" id="r-ouvir">ouvir</button>
+        <button class="act" id="r-citar">criar cartão</button>
         <button class="act" id="abrir-verificar">provar autoria</button>
+        <span class="fonte-ctrl"><button class="act" id="fonte-menos" title="Diminuir fonte">A−</button><button class="act" id="fonte-mais" title="Aumentar fonte">A+</button></span>
       </div>
       <div class="verificar-area" id="verificar-area">
         <input id="verif-chave" placeholder="cole aqui a sua chave de autoria">
@@ -338,6 +366,26 @@
     </div>
   </div>
 
+  <div class="modal" id="sobre-modal">
+    <div class="sheet">
+      <h3>A taverna</h3>
+      <p class="note" style="font-size:17px;line-height:1.85;color:var(--ink-soft)">Penas &amp; Pergaminhos é o mural de histórias da Taverna do Leitor — um canto para guardar o que se escreve à mão e à alma. Aqui não há nome a provar nem conta a criar: você chega, deixa o seu conto, verso ou fragmento, e o taberneiro o sela no livro dos dias. Cada texto fica marcado por uma chave só sua. Escreva sem medo — a taverna não esquece.</p>
+      <div class="actions"><button class="btn btn-primary" id="sobre-ok">Fechar</button></div>
+    </div>
+  </div>
+
+  <div class="modal" id="citar-modal">
+    <div class="sheet" style="max-width:560px">
+      <h3>Cartão de citação</h3>
+      <p class="note">Selecione um trecho do texto antes de abrir, ou usamos o começo. Baixe e partilhe onde quiser.</p>
+      <div style="text-align:center"><canvas id="citar-canvas" width="1080" height="1350" style="width:100%;max-width:340px;border:1px solid var(--line);border-radius:6px"></canvas></div>
+      <div class="actions">
+        <button class="btn btn-ghost" id="citar-tema">alternar fundo</button>
+        <button class="btn btn-primary" id="citar-baixar">Baixar imagem</button>
+      </div>
+    </div>
+  </div>
+
   <div class="stamp-ov" id="selo-stamp">
     <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <defs>
@@ -380,9 +428,18 @@
   var filtroGenero = 'Todos';
   var ordenacao = 'recentes';
   var filtroAutor = null;
+  var busca = '';
+  var soFavoritos = false;
+  var comentMap = {};
   var likedSet = new Set();
   try{ (JSON.parse(localStorage.getItem('pp_likes')||'[]')||[]).forEach(function(x){ likedSet.add(String(x)); }); }catch(e){}
   function salvarLikes(){ try{ localStorage.setItem('pp_likes', JSON.stringify(Array.from(likedSet))); }catch(e){} }
+  var favSet = new Set();
+  try{ (JSON.parse(localStorage.getItem('pp_favs')||'[]')||[]).forEach(function(x){ favSet.add(String(x)); }); }catch(e){}
+  function salvarFavs(){ try{ localStorage.setItem('pp_favs', JSON.stringify(Array.from(favSet))); }catch(e){} }
+  var fonteLeitor = 19;
+  try{ var fl=parseInt(localStorage.getItem('pp_fonte'),10); if(fl>=15 && fl<=30) fonteLeitor=fl; }catch(e){}
+  function aplicarFonte(){ var t=document.getElementById('r-text'); if(t) t.style.fontSize=fonteLeitor+'px'; try{localStorage.setItem('pp_fonte',String(fonteLeitor));}catch(e){} }
   var currentReaderId = null;
 
   function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -413,6 +470,9 @@
     try{
       var rows = await supaGet('/pergaminhos?status=eq.aprovado&select=*&order=criado_em.desc');
       textosAtuais = rows.map(mapRow);
+      try{ var cs=await supaGet('/comentarios?select=pergaminho_id'); comentMap={}; cs.forEach(function(c){ var k=String(c.pergaminho_id); comentMap[k]=(comentMap[k]||0)+1; }); }catch(e){ comentMap={}; }
+      var n=textosAtuais.length;
+      document.getElementById('contagem').textContent = n? (n + (n===1?' pergaminho selado':' pergaminhos selados')) : '';
       montarChips();
       aplicarVista();
       abrirDoLink();
@@ -424,8 +484,10 @@
 
   function aplicarVista(){
     var lista = textosAtuais.slice();
+    if(soFavoritos) lista = lista.filter(function(w){ return favSet.has(String(w.id)); });
     if(filtroAutor) lista = lista.filter(function(w){ return (w.author||'Anónimo')===filtroAutor; });
     if(filtroGenero!=='Todos') lista = lista.filter(function(w){ return (w.genre||'Conto')===filtroGenero; });
+    if(busca){ var q=busca.toLowerCase(); lista = lista.filter(function(w){ return ((w.title||'')+' '+(w.author||'')+' '+(w.content||'')).toLowerCase().indexOf(q)>=0; }); }
     lista.sort(function(a,b){
       var d=(b.destaque?1:0)-(a.destaque?1:0); if(d) return d;
       if(ordenacao==='curtidos'){ var l=(b.likes||0)-(a.likes||0); if(l) return l; }
@@ -469,7 +531,7 @@
         '<div class="s-title">'+esc(w.title||'Sem título')+'</div>'+
         '<div class="s-preview">"'+esc(prev)+'…"</div>'+
         '<div class="s-author">por <a class="autor-link">'+esc(w.author||'Anónimo')+'</a></div>'+
-        '<div class="s-foot"><button class="like-btn'+(liked?' liked':'')+'" data-like="'+w.id+'"><span class="lk-heart">'+(liked?'♥':'♡')+'</span> <span class="lk-count">'+(w.likes||0)+'</span></button></div>';
+        '<div class="s-foot"><button class="like-btn'+(liked?' liked':'')+'" data-like="'+w.id+'"><span class="lk-heart">'+(liked?'♥':'♡')+'</span> <span class="lk-count">'+(w.likes||0)+'</span></button>'+(comentMap[String(w.id)]?'<span class="cmt-count">💬 '+comentMap[String(w.id)]+'</span>':'')+'</div>';
       card.addEventListener('click', function(){ abrirLeitor(w); });
       var lk = card.querySelector('.like-btn');
       lk.addEventListener('click', function(e){ e.stopPropagation(); curtir(w.id); });
@@ -516,6 +578,11 @@
     ra.addEventListener('click', function(){ els.reader.classList.remove('open'); document.body.style.overflow=''; filtrarAutor(w.author||'Anónimo'); });
     var html=(w.content||'').split(/\n\s*\n/).map(function(p){return '<p>'+esc(p).replace(/\n/g,'<br>')+'</p>';}).join('');
     document.getElementById('r-text').innerHTML = html;
+    aplicarFonte();
+    var rf=document.getElementById('r-fav'); var isF=favSet.has(String(w.id));
+    rf.classList.toggle('on',isF); rf.textContent=isF?'guardado':'guardar';
+    try{ window.speechSynthesis.cancel(); }catch(e){}
+    var ob=document.getElementById('r-ouvir'); ob.textContent='ouvir'; ob.classList.remove('on');
     document.getElementById('r-like').setAttribute('data-like', w.id);
     updateLikeUI(w.id);
     document.getElementById('r-share').textContent = 'partilhar';
@@ -536,6 +603,8 @@
     next.onclick = function(){ if(idx>=0 && idx<vistaAtual.length-1) abrirLeitor(vistaAtual[idx+1]); };
   }
   document.getElementById('fechar-reader').addEventListener('click', function(){
+    try{ window.speechSynthesis.cancel(); }catch(e){}
+    var ob=document.getElementById('r-ouvir'); if(ob){ ob.textContent='ouvir'; ob.classList.remove('on'); }
     els.reader.classList.remove('open'); document.body.style.overflow='';
   });
   document.getElementById('r-like').addEventListener('click', function(){ if(currentReaderId!=null) curtir(currentReaderId); });
@@ -713,6 +782,74 @@
   })();
   document.getElementById('sort-sel').addEventListener('change', function(){ ordenacao=this.value; aplicarVista(); });
   document.getElementById('autor-bar-todos').addEventListener('click', function(){ filtroAutor=null; aplicarVista(); });
+
+  // ===== Busca e favoritos =====
+  document.getElementById('busca').addEventListener('input', function(){ busca=this.value.trim(); aplicarVista(); });
+  document.getElementById('fav-toggle').addEventListener('click', function(){
+    soFavoritos=!soFavoritos; this.classList.toggle('on',soFavoritos); this.setAttribute('aria-pressed',soFavoritos?'true':'false'); aplicarVista();
+  });
+  document.getElementById('r-fav').addEventListener('click', function(){
+    if(currentReaderId==null) return; var key=String(currentReaderId);
+    if(favSet.has(key)){ favSet.delete(key); this.classList.remove('on'); this.textContent='guardar'; }
+    else { favSet.add(key); this.classList.add('on'); this.textContent='guardado'; }
+    salvarFavs(); if(soFavoritos) aplicarVista();
+  });
+
+  // ===== Ouvir (leitura por voz) =====
+  var falando=false;
+  document.getElementById('r-ouvir').addEventListener('click', function(){
+    var btn=this;
+    if(!('speechSynthesis' in window)){ btn.textContent='sem voz neste navegador'; return; }
+    if(falando){ window.speechSynthesis.cancel(); falando=false; btn.textContent='ouvir'; btn.classList.remove('on'); return; }
+    var txt=document.getElementById('r-text').textContent||''; if(!txt) return;
+    var u=new SpeechSynthesisUtterance(txt); u.lang='pt-BR'; u.rate=0.98;
+    u.onend=function(){ falando=false; btn.textContent='ouvir'; btn.classList.remove('on'); };
+    window.speechSynthesis.cancel(); window.speechSynthesis.speak(u);
+    falando=true; btn.textContent='parar'; btn.classList.add('on');
+  });
+
+  // ===== Tamanho da fonte =====
+  document.getElementById('fonte-menos').addEventListener('click', function(){ fonteLeitor=Math.max(15,fonteLeitor-1); aplicarFonte(); });
+  document.getElementById('fonte-mais').addEventListener('click', function(){ fonteLeitor=Math.min(30,fonteLeitor+1); aplicarFonte(); });
+
+  // ===== Sobre =====
+  var sobreModal=document.getElementById('sobre-modal');
+  document.getElementById('abrir-sobre').addEventListener('click', function(){ abrir(sobreModal); });
+  document.getElementById('sobre-ok').addEventListener('click', function(){ fechar(sobreModal); });
+  sobreModal.addEventListener('click', function(e){ if(e.target===sobreModal) fechar(sobreModal); });
+
+  // ===== Cartão de citação =====
+  var citarModal=document.getElementById('citar-modal'), citacaoTexto='', citacaoAutor='';
+  function desenharCitacao(){
+    var c=document.getElementById('citar-canvas'), ctx=c.getContext('2d'), W=c.width, H=c.height;
+    var dark=c.dataset.tema==='escuro';
+    ctx.fillStyle=dark?'#1c160f':'#f6efe1'; ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle=dark?'rgba(217,139,106,.5)':'rgba(143,45,40,.4)'; ctx.lineWidth=4; ctx.strokeRect(60,60,W-120,H-120);
+    ctx.textAlign='center';
+    ctx.fillStyle=dark?'#8c8068':'#928570'; ctx.font='80px Georgia, serif'; ctx.fillText('\u201C', W/2, 230);
+    ctx.fillStyle=dark?'#ece3d2':'#28211a'; ctx.font='italic 56px Georgia, serif';
+    var words=(citacaoTexto||'').split(/\s+/), lines=[], line='', maxW=W-260;
+    for(var i=0;i<words.length;i++){ var test=line?line+' '+words[i]:words[i]; if(ctx.measureText(test).width>maxW && line){ lines.push(line); line=words[i]; } else line=test; }
+    if(line) lines.push(line); lines=lines.slice(0,10);
+    var lh=80, startY=H/2-(lines.length*lh)/2+30;
+    lines.forEach(function(ln,i){ ctx.fillText(ln, W/2, startY+i*lh); });
+    ctx.fillStyle=dark?'#d98b6a':'#8f2d28'; ctx.font='italic 40px Georgia, serif';
+    ctx.fillText('— '+(citacaoAutor||'Anónimo'), W/2, startY+lines.length*lh+60);
+    ctx.fillStyle=dark?'#c4b8a1':'#5a4f3e'; ctx.font='44px Georgia, serif'; ctx.fillText('Penas & Pergaminhos', W/2, H-140);
+    ctx.fillStyle=dark?'#8c8068':'#928570'; ctx.font='italic 30px Georgia, serif'; ctx.fillText('histórias da taverna', W/2, H-94);
+  }
+  document.getElementById('r-citar').addEventListener('click', function(){
+    var sel=(window.getSelection && window.getSelection().toString().trim())||'';
+    var full=document.getElementById('r-text').textContent||'';
+    citacaoTexto = sel || full.slice(0,200).trim();
+    if(citacaoTexto.length>=200) citacaoTexto=citacaoTexto.slice(0,200).trim()+'…';
+    var ra=document.getElementById('r-autor'); citacaoAutor=(ra?ra.textContent:'')||'Anónimo';
+    var c=document.getElementById('citar-canvas'); c.dataset.tema=document.body.classList.contains('noite')?'escuro':'claro';
+    desenharCitacao(); abrir(citarModal);
+  });
+  document.getElementById('citar-tema').addEventListener('click', function(){ var c=document.getElementById('citar-canvas'); c.dataset.tema=c.dataset.tema==='escuro'?'claro':'escuro'; desenharCitacao(); });
+  document.getElementById('citar-baixar').addEventListener('click', function(){ var c=document.getElementById('citar-canvas'); var a=document.createElement('a'); a.download='citacao-penas-e-pergaminhos.png'; a.href=c.toDataURL('image/png'); a.click(); });
+  citarModal.addEventListener('click', function(e){ if(e.target===citarModal) fechar(citarModal); });
 
   carregar();
 </script>
