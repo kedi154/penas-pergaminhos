@@ -135,14 +135,14 @@
     <button id="toggle-noite" aria-label="Alternar modo noturno" title="Modo noturno" aria-pressed="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8z"/></svg>
     </button>
-    <a id="top-home" href="index.html" aria-label="Voltar ao mural" title="Voltar ao mural">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M4 5 a2 2 0 0 1 2-2 h6 v17 h-6 a2 2 0 0 1-2-2 z"/><path d="M20 5 a2 2 0 0 0-2-2 h-6 v17 h6 a2 2 0 0 0 2-2 z"/></svg>
-    </a>
     <a id="top-telegram" href="#" target="_blank" rel="noopener" aria-label="Telegram da Taverna" title="Telegram">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.9 4.3c-.2-.2-.5-.3-.9-.2L3.3 11c-.5.2-.5.9 0 1.1l4.5 1.6 1.7 5.4c.1.4.6.5.9.2l2.6-2.4 4.6 3.4c.4.3.9.1 1-.4L22 4.9c.1-.2 0-.5-.1-.6zM9.4 14.2l-.3 3.3-1-3.5 8.6-5.6-7.3 5.8z"/></svg>
     </a>
     <a id="top-instagram" href="#" target="_blank" rel="noopener" aria-label="Instagram da Taverna" title="Instagram">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1.1" fill="currentColor" stroke="none"/></svg>
+    </a>
+    <a id="top-home" href="index.html" aria-label="Voltar ao mural" title="Voltar ao mural">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M4 5 a2 2 0 0 1 2-2 h6 v17 h-6 a2 2 0 0 1-2-2 z"/><path d="M20 5 a2 2 0 0 0-2-2 h-6 v17 h6 a2 2 0 0 0 2-2 z"/></svg>
     </a>
   </nav>
 
@@ -165,7 +165,7 @@
       <div class="byline">taverna do leitor</div>
       <h1>Entre Páginas</h1>
       <div class="tagline">pequenos tesouros para quem lê</div>
-      <p class="nota">As compras são combinadas pelo Telegram ou WhatsApp — toque em comprar e fale com a gente.</p>
+      <p class="nota">Amor literário · Envio para todo o Brasil</p>
       <div class="confianca" id="confianca"></div>
       <div class="flourish"></div>
     </header>
@@ -214,8 +214,8 @@
   var TELEGRAM_LOJA = 'https://t.me/SEU_CONTATO';
   // ===== WhatsApp para compras: só números (país+DDD+número, sem +). Vazio = sem botão de WhatsApp =====
   var WHATSAPP_LOJA = '';
-  // ===== Linha de confiança (vazio = não mostra) =====
-  var CONFIANCA = 'feito à mão · envio para todo o Brasil';
+  // ===== Linha de confiança (vazio = não mostra; já está na nota do cabeçalho) =====
+  var CONFIANCA = '';
 
   // ===== Links da barra de ícones (troque pelos seus) =====
   var LINKS = {
@@ -250,7 +250,8 @@
     var box = document.getElementById('produtos');
     box.innerHTML = '<div class="vazia"><div class="big">A abrir a loja…</div></div>';
     try{
-      produtosAtuais = await supaGet('/produtos?ativo=eq.true&select=*&order=destaque.desc,ordem.asc,criado_em.desc');
+      var rows = await supaGet('/produtos?ativo=eq.true&select=*&order=ordem.asc,criado_em.desc');
+      produtosAtuais = rows.slice().sort(function(a,b){ return (b.destaque?1:0)-(a.destaque?1:0); });
       montarCats();
       aplicarVitrine();
     }catch(e){
