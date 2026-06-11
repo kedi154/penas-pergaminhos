@@ -79,6 +79,7 @@
   .reader.open{display:block;animation:fade .35s ease}
   @keyframes fade{from{opacity:0}to{opacity:1}}
   .reader-bar{position:sticky;top:0;background:rgba(246,239,225,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);padding:16px 0}
+  body.noite .reader-bar{background:rgba(31,26,19,.92)}
   .reader-bar .wrap{display:flex;align-items:center;justify-content:space-between}
   .back{background:none;border:none;cursor:pointer;color:var(--ink-soft);font-family:'Cormorant Garamond',serif;font-size:17px;letter-spacing:.04em;display:flex;align-items:center;gap:6px}
   .back:hover{color:var(--wax)}
@@ -90,7 +91,7 @@
   .reader-text p{margin-bottom:1.3em}
   .reader-end{text-align:center;margin-top:40px;color:var(--wax);font-size:24px}
 
-  .r-actions{display:flex;gap:12px;align-items:center;margin-top:34px;padding-top:24px;border-top:1px solid var(--line)}
+  .r-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:34px;padding-top:24px;border-top:1px solid var(--line)}
   .act{background:none;border:1px solid var(--line);border-radius:2px;padding:9px 18px;cursor:pointer;font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--ink-soft);display:inline-flex;align-items:center;gap:8px;transition:.2s}
   .act:hover{color:var(--wax);border-color:var(--wax)}
   .act.liked{color:var(--wax);border-color:var(--wax)}
@@ -126,17 +127,23 @@
   .autor-item{text-align:left;background:none;border:none;border-bottom:1px solid var(--line);padding:11px 2px;cursor:pointer;font-family:'Cormorant Garamond',serif;font-size:19px;color:var(--ink);display:flex;justify-content:space-between;gap:10px;align-items:baseline;transition:color .2s}
   .autor-item:hover{color:var(--wax)}
   .autor-item .ai-likes{color:var(--ink-faint);font-size:14px;font-style:italic;white-space:nowrap}
-  @media(max-width:560px){
+  @media(max-width:600px){
     .sheet{padding:34px 20px}
     .actions{flex-direction:column;align-items:stretch}
     .actions .btn{width:100%}
     .btn{padding:13px 22px}
-    .controls{gap:8px}
+    .controls{gap:8px;margin:2px 0 12px}
     .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:3px;width:100%}
     .chips::-webkit-scrollbar{display:none}
     .chip{flex:0 0 auto}
-    .controls-right{width:100%;gap:8px}
+    .controls-right{width:100%;gap:8px;flex-wrap:nowrap}
     .busca{flex:1;min-width:0}
+    .fav-toggle{padding:6px 12px;white-space:nowrap}
+    .fav-toggle .ft-label{display:none}
+    .sort-sel{padding:6px 8px;font-size:14px}
+    .r-actions{gap:8px;margin-top:24px;padding-top:18px}
+    .act{padding:8px 13px;font-size:15px}
+    .fonte-ctrl{margin-left:0}
   }
   .feedback{padding:12px 14px;border-radius:3px;margin-bottom:18px;font-size:17px;display:none;font-style:italic}
   .feedback.err{display:block;background:rgba(143,45,40,.1);color:var(--wax);border:1px solid rgba(143,45,40,.25)}
@@ -266,7 +273,7 @@
       <div class="chips" id="chips"></div>
       <div class="controls-right">
         <input class="busca" id="busca" type="search" placeholder="buscar…" aria-label="Buscar">
-        <button class="fav-toggle" id="fav-toggle" aria-pressed="false">★ guardados</button>
+        <button class="fav-toggle" id="fav-toggle" aria-pressed="false" title="Ver guardados">★ <span class="ft-label">guardados</span></button>
         <select class="sort-sel" id="sort-sel" aria-label="Ordenar">
           <option value="recentes">mais recentes</option>
           <option value="curtidos">mais curtidos</option>
@@ -410,7 +417,6 @@
       <h3 id="autor-nome"></h3>
       <p class="note" id="autor-stats"></p>
       <div class="autor-lista" id="autor-lista"></div>
-      <div class="actions"><button class="btn btn-ghost" id="autor-ver-mural">ver todos no mural</button></div>
     </div>
   </div>
 
@@ -553,7 +559,916 @@
       b.addEventListener('click', function(){ fechar(document.getElementById('autor-modal')); abrirLeitor(w); });
       box.appendChild(b);
     });
-    document.getElementById('autor-ver-mural').onclick=function(){ fechar(document.getElementById('autor-modal')); filtrarAutor(nome); };
+    abrir(document.getElementById('autor-modal'));
+  }
+
+  function render(lista){
+    els.scrolls.innerHTML = '';
+    if(!lista.length){
+      els.scrolls.innerHTML = '<div class="state"><div class="big">Nada por aqui ainda</div>Nenhum pergaminho com estes filtros.</div>';
+      return;
+    }
+    lista.forEach(function(w,i){
+      var card = document.createElement('div');
+      card.className='scroll'+(w.destaque?' is-destaque':'');
+      card.style.animationDelay=(i*0.06)+'s';
+      var prev=(w.content||'').trim().slice(0,150);
+      var liked=likedSet.has(String(w.id));
+      card.innerHTML =
+        (w.destaque?'<div class="destaque-badge">em destaque</div>':'')+
+        '<div class="s-meta"><span class="genre">'+esc(w.genre||'Conto')+'</span> · '+tempo(w.content)+' de leitura</div>'+
+        '<div class="s-title">'+esc(w.title||'Sem título')+'</div>'+
+        '<div class="s-preview">"'+esc(prev)+'…"</div>'+
+        '<div class="s-author">por <a class="autor-link">'+esc(w.author||'Anónimo')+'</a></div>'+
+        '<div class="s-foot"><button class="like-btn'+(liked?' liked':'')+'" data-like="'+w.id+'"><span class="lk-heart">'+(liked?'♥':'♡')+'</span> <span class="lk-count">'+(w.likes||0)+'</span></button>'+(comentMap[String(w.id)]?'<span class="cmt-count">💬 '+comentMap[String(w.id)]+'</span>':'')+'</div>';
+      card.addEventListener('click', function(){ abrirLeitor(w); });
+      var lk = card.querySelector('.like-btn');
+      lk.addEventListener('click', function(e){ e.stopPropagation(); curtir(w.id); });
+      var al = card.querySelector('.autor-link');
+      if(al) al.addEventListener('click', function(e){ e.stopPropagation(); abrirAutor(w.author||'Anónimo'); });
+      els.scrolls.appendChild(card);
+    });
+  }
+
+  async function curtir(id){
+    var key=String(id);
+    var t = textosAtuais.find(function(x){ return String(x.id)===key; });
+    if(likedSet.has(key)){
+      likedSet.delete(key);
+      if(t) t.likes = Math.max(0,(t.likes||0)-1);
+      salvarLikes(); updateLikeUI(id);
+      try{ await supaPost('/rpc/descurtir', { p_id: id }); }
+      catch(e){ console.error('Falha ao descurtir:', e); }
+    } else {
+      likedSet.add(key);
+      if(t) t.likes = (t.likes||0)+1;
+      salvarLikes(); updateLikeUI(id);
+      try{ await supaPost('/rpc/curtir', { p_id: id }); }
+      catch(e){ console.error('Falha ao curtir:', e); }
+    }
+  }
+  function updateLikeUI(id){
+    var t = textosAtuais.find(function(x){ return String(x.id)===String(id); });
+    var n = t ? (t.likes||0) : 0, liked = likedSet.has(String(id));
+    document.querySelectorAll('[data-like="'+id+'"]').forEach(function(el){
+      el.classList.toggle('liked', liked);
+      var h=el.querySelector('.lk-heart'); if(h) h.textContent = liked?'♥':'♡';
+      var c=el.querySelector('.lk-count'); if(c) c.textContent = n;
+    });
+  }
+
+  function abrirLeitor(w){
+    currentReaderId = w.id;
+    document.getElementById('r-genre').textContent = w.genre||'Conto';
+    document.getElementById('r-title').textContent = w.title||'Sem título';
+    var by=document.getElementById('r-by');
+    by.innerHTML='por <a class="autor-link" id="r-autor"></a> · '+tempo(w.content)+' de leitura';
+    var ra=document.getElementById('r-autor'); ra.textContent=w.author||'Anónimo';
+    ra.addEventListener('click', function(){ abrirAutor(w.author||'Anónimo'); });
+    var html=(w.content||'').split(/\n\s*\n/).map(function(p){return '<p>'+esc(p).replace(/\n/g,'<br>')+'</p>';}).join('');
+    document.getElementById('r-text').innerHTML = html;
+    aplicarFonte();
+    var rf=document.getElementById('r-fav'); var isF=favSet.has(String(w.id));
+    rf.classList.toggle('on',isF); rf.textContent=isF?'guardado':'guardar';
+    try{ window.speechSynthesis.cancel(); }catch(e){}
+    var ob=document.getElementById('r-ouvir'); ob.textContent='ouvir'; ob.classList.remove('on');
+    document.getElementById('r-like').setAttribute('data-like', w.id);
+    updateLikeUI(w.id);
+    document.getElementById('r-share').textContent = 'partilhar';
+    document.getElementById('verificar-area').classList.remove('open');
+    document.getElementById('verif-chave').value='';
+    var vr=document.getElementById('verif-result'); vr.textContent=''; vr.className='verif-result';
+    atualizarNav();
+    els.reader.classList.add('open'); els.reader.scrollTop=0; document.body.style.overflow='hidden';
+    carregarComentarios(w.id);
+  }
+  function atualizarNav(){
+    var idx = vistaAtual.findIndex(function(x){ return String(x.id)===String(currentReaderId); });
+    var prev=document.getElementById('r-prev'), next=document.getElementById('r-next');
+    if(!prev||!next) return;
+    prev.disabled = idx<=0;
+    next.disabled = idx<0 || idx>=vistaAtual.length-1;
+    prev.onclick = function(){ if(idx>0) abrirLeitor(vistaAtual[idx-1]); };
+    next.onclick = function(){ if(idx>=0 && idx<vistaAtual.length-1) abrirLeitor(vistaAtual[idx+1]); };
+  }
+  document.getElementById('fechar-reader').addEventListener('click', function(){
+    try{ window.speechSynthesis.cancel(); }catch(e){}
+    var ob=document.getElementById('r-ouvir'); if(ob){ ob.textContent='ouvir'; ob.classList.remove('on'); }
+    els.reader.classList.remove('open'); document.body.style.overflow='';
+  });
+  document.getElementById('r-like').addEventListener('click', function(){ if(currentReaderId!=null) curtir(currentReaderId); });
+  document.getElementById('r-share').addEventListener('click', function(){ if(currentReaderId!=null) compartilhar(currentReaderId); });
+
+  function compartilhar(id){
+    var btn = document.getElementById('r-share');
+    var url = location.origin + location.pathname + '?texto=' + id;
+    if(navigator.share){
+      navigator.share({ title:'Penas & Pergaminhos', url:url }).catch(function(){});
+    } else if(navigator.clipboard){
+      navigator.clipboard.writeText(url).then(function(){
+        btn.textContent='link copiado!'; setTimeout(function(){ btn.textContent='partilhar'; },1800);
+      }).catch(function(){ btn.textContent='copie: '+url; });
+    } else { btn.textContent=url; }
+  }
+
+  async function carregarComentarios(id){
+    var box = document.getElementById('c-list');
+    box.innerHTML = '<p class="c-empty">A carregar comentários…</p>';
+    try{
+      var rows = await supaGet('/comentarios?pergaminho_id=eq.'+id+'&select=*&order=criado_em.asc');
+      if(!rows.length){ box.innerHTML='<p class="c-empty">Seja o primeiro a comentar.</p>'; return; }
+      box.innerHTML = rows.map(function(c){
+        return '<div class="comment"><div class="ca">'+esc(c.autor)+'</div><div class="ct">'+esc(c.texto)+'</div></div>';
+      }).join('');
+    }catch(e){
+      console.error('Falha ao carregar comentários:', e);
+      box.innerHTML='<p class="c-empty">Não consegui carregar os comentários.</p>';
+    }
+  }
+  document.getElementById('c-send').addEventListener('click', async function(){
+    var id = currentReaderId; if(id==null) return;
+    var nome = document.getElementById('c-name').value.trim();
+    var txt = document.getElementById('c-text').value.trim();
+    if(!nome || !txt) return;
+    var btn = this; btn.disabled=true; btn.textContent='a enviar…';
+    try{
+      await supaPost('/comentarios', { pergaminho_id: id, autor: nome, texto: txt });
+      document.getElementById('c-text').value='';
+      carregarComentarios(id);
+    }catch(e){ console.error('Falha ao comentar:', e); }
+    finally{ btn.disabled=false; btn.textContent='Comentar'; }
+  });
+
+  function abrirDoLink(){
+    var p = new URLSearchParams(location.search).get('texto');
+    if(!p) return;
+    var w = textosAtuais.find(function(x){ return String(x.id)===String(p); });
+    if(w) abrirLeitor(w);
+  }
+
+  var f={autor:document.getElementById('f-autor'),titulo:document.getElementById('f-titulo'),
+         genero:document.getElementById('f-genero'),texto:document.getElementById('f-texto'),
+         count:document.getElementById('f-count')};
+  f.texto.addEventListener('input',function(){f.count.textContent=f.texto.value.length;});
+  function fb(m,t){els.fb.textContent=m;els.fb.className='feedback '+t;}
+  function abrir(m){m.classList.add('open');document.body.style.overflow='hidden';}
+  function fechar(m){m.classList.remove('open');document.body.style.overflow='';}
+  var avisoModal = document.getElementById('aviso-modal');
+
+  // ===== Rascunho (guardado neste navegador) =====
+  var RKEY='pp_rascunho';
+  function temConteudo(){ return !!(f.autor.value || f.titulo.value || f.texto.value); }
+  function salvarRascunho(silent){
+    try{
+      localStorage.setItem(RKEY, JSON.stringify({autor:f.autor.value,titulo:f.titulo.value,genero:f.genero.value,texto:f.texto.value}));
+      if(!silent) fb('Rascunho guardado neste navegador.','ok');
+    }catch(e){ if(!silent) fb('Este navegador não deixou guardar o rascunho.','err'); }
+  }
+  function lerRascunho(){ try{ var r=localStorage.getItem(RKEY); return r?JSON.parse(r):null; }catch(e){ return null; } }
+  function limparRascunho(){ try{ localStorage.removeItem(RKEY); }catch(e){} var n=document.getElementById('rascunho-nota'); if(n) n.style.display='none'; }
+  ['autor','titulo','texto'].forEach(function(k){ f[k].addEventListener('input', function(){ if(temConteudo()) salvarRascunho(true); }); });
+  f.genero.addEventListener('change', function(){ if(temConteudo()) salvarRascunho(true); });
+  document.getElementById('guardar-rascunho').addEventListener('click', function(){
+    if(!temConteudo()){ fb('Escreva algo antes de guardar o rascunho.','err'); return; }
+    salvarRascunho(false);
+    setTimeout(function(){ fechar(els.modal); }, 900);
+  });
+  document.getElementById('descartar-rascunho').addEventListener('click', function(e){
+    e.preventDefault(); limparRascunho();
+    f.titulo.value=''; f.texto.value=''; f.count.textContent='0';
+    fb('Rascunho descartado.','ok');
+  });
+
+  document.getElementById('abrir-publicar').addEventListener('click',function(){
+    fb('','');
+    var nota=document.getElementById('rascunho-nota'), r=lerRascunho();
+    if(r && (r.autor||r.titulo||r.texto)){
+      if(r.autor) f.autor.value=r.autor;
+      if(r.titulo) f.titulo.value=r.titulo;
+      if(r.genero) f.genero.value=r.genero;
+      if(r.texto) f.texto.value=r.texto;
+      f.count.textContent=f.texto.value.length;
+      if(nota) nota.style.display='block';
+    } else if(nota){ nota.style.display='none'; }
+    abrir(els.modal);
+  });
+  document.getElementById('publicar-fechar').addEventListener('click',function(){fechar(els.modal);});
+  els.modal.addEventListener('click',function(e){if(e.target===els.modal)fechar(els.modal);});
+
+  // ===== Envio com aviso de que não poderá ser alterado =====
+  document.getElementById('enviar').addEventListener('click', function(){
+    if(document.getElementById('f-hp').value){ fechar(els.modal); return; }
+    var autor=f.autor.value.trim(),titulo=f.titulo.value.trim(),texto=f.texto.value.trim();
+    if(!autor){fb('Diga como devemos assinar.','err');return;}
+    if(!titulo){fb('O pergaminho precisa de um título.','err');return;}
+    if(texto.length<50){fb('O texto precisa de pelo menos 50 caracteres.','err');return;}
+    fechar(els.modal); abrir(avisoModal);
+  });
+  document.getElementById('aviso-rever').addEventListener('click', function(){ fechar(avisoModal); abrir(els.modal); });
+  document.getElementById('aviso-confirmar').addEventListener('click', async function(){
+    var autor=f.autor.value.trim(),titulo=f.titulo.value.trim(),genero=f.genero.value,texto=f.texto.value.trim();
+    var btn=this;btn.disabled=true;btn.textContent='a selar…';
+    fechar(avisoModal);
+    var stamp=document.getElementById('selo-stamp'); stamp.classList.add('on');
+    try{
+      var chave=gerarChave();
+      var hash=await sha256hex(chave);
+      await Promise.all([
+        supaPost('/rpc/enviar_pergaminho', { p_autor:autor, p_titulo:titulo, p_genero:genero, p_conteudo:texto, p_chave_hash:hash }),
+        new Promise(function(r){ setTimeout(r, 820); })
+      ]);
+      limparRascunho();
+      f.titulo.value='';f.texto.value='';f.count.textContent='0';
+      stamp.classList.remove('on');
+      document.getElementById('chave-valor').textContent = chave;
+      abrir(document.getElementById('chave-modal'));
+    }catch(e){
+      console.error('Falha ao enviar:', e);
+      stamp.classList.remove('on');
+      abrir(els.modal);
+      fb('Não consegui enviar agora. Veja o console (F12).','err');
+    }finally{btn.disabled=false;btn.textContent='Selar mesmo assim';}
+  });
+
+  // ===== Chave de autoria =====
+  function gerarChave(){
+    var bytes=new Uint8Array(12); crypto.getRandomValues(bytes);
+    var chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789', s='';
+    for(var i=0;i<bytes.length;i++){ s+=chars[bytes[i]%chars.length]; if((i+1)%4===0 && i<bytes.length-1) s+='-'; }
+    return 'TAVERNA-'+s;
+  }
+  async function sha256hex(str){
+    var buf=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+  }
+  document.getElementById('chave-ok').addEventListener('click', function(){ fechar(document.getElementById('chave-modal')); });
+  document.getElementById('copiar-chave').addEventListener('click', function(){
+    var v=document.getElementById('chave-valor').textContent, b=this;
+    if(navigator.clipboard){ navigator.clipboard.writeText(v).then(function(){ b.textContent='copiado!'; setTimeout(function(){b.textContent='copiar';},1500); }); }
+  });
+  document.getElementById('abrir-verificar').addEventListener('click', function(){
+    document.getElementById('verificar-area').classList.toggle('open');
+  });
+  document.getElementById('verif-btn').addEventListener('click', async function(){
+    var chave=document.getElementById('verif-chave').value.trim(), res=document.getElementById('verif-result');
+    if(!chave || currentReaderId==null) return;
+    var b=this; b.disabled=true; b.textContent='a verificar…';
+    try{
+      var hash=await sha256hex(chave);
+      var ok=await supaPost('/rpc/verificar_autoria', { p_id: currentReaderId, p_chave_hash: hash }, 'return=representation');
+      if(ok===true){ res.textContent='✓ Confere — este pergaminho é seu.'; res.className='verif-result ok'; }
+      else { res.textContent='✗ Não confere com este pergaminho.'; res.className='verif-result no'; }
+    }catch(e){ console.error('Falha ao verificar:', e); res.textContent='Não consegui verificar agora. Veja o console (F12).'; res.className='verif-result no'; }
+    finally{ b.disabled=false; b.textContent='Verificar'; }
+  });
+
+  // ===== Modo noturno =====
+  (function(){
+    var b=document.getElementById('toggle-noite');
+    function setNoite(on){ document.body.classList.toggle('noite',on); b.setAttribute('aria-pressed',on?'true':'false'); try{localStorage.setItem('pp_noite',on?'1':'0');}catch(e){} }
+    b.addEventListener('click', function(){ setNoite(!document.body.classList.contains('noite')); });
+    try{ if(localStorage.getItem('pp_noite')==='1') setNoite(true); }catch(e){}
+  })();
+  document.getElementById('sort-sel').addEventListener('change', function(){ ordenacao=this.value; aplicarVista(); });
+  document.getElementById('autor-bar-todos').addEventListener('click', function(){ filtroAutor=null; aplicarVista(); });
+
+  // ===== Busca e favoritos =====
+  document.getElementById('busca').addEventListener('input', function(){ busca=this.value.trim(); aplicarVista(); });
+  document.getElementById('fav-toggle').addEventListener('click', function(){
+    soFavoritos=!soFavoritos; this.classList.toggle('on',soFavoritos); this.setAttribute('aria-pressed',soFavoritos?'true':'false'); aplicarVista();
+  });
+  document.getElementById('r-fav').addEventListener('click', function(){
+    if(currentReaderId==null) return; var key=String(currentReaderId);
+    if(favSet.has(key)){ favSet.delete(key); this.classList.remove('on'); this.textContent='guardar'; }
+    else { favSet.add(key); this.classList.add('on'); this.textContent='guardado'; }
+    salvarFavs(); if(soFavoritos) aplicarVista();
+  });
+
+  // ===== Ouvir (leitura por voz) =====
+  var falando=false;
+  document.getElementById('r-ouvir').addEventListener('click', function(){
+    var btn=this;
+    if(!('speechSynthesis' in window)){ btn.textContent='sem voz neste navegador'; return; }
+    if(falando){ window.speechSynthesis.cancel(); falando=false; btn.textContent='ouvir'; btn.classList.remove('on'); return; }
+    var txt=document.getElementById('r-text').textContent||''; if(!txt) return;
+    var u=new SpeechSynthesisUtterance(txt); u.lang='pt-BR'; u.rate=0.98;
+    u.onend=function(){ falando=false; btn.textContent='ouvir'; btn.classList.remove('on'); };
+    window.speechSynthesis.cancel(); window.speechSynthesis.speak(u);
+    falando=true; btn.textContent='parar'; btn.classList.add('on');
+  });
+
+  // ===== Tamanho da fonte =====
+  document.getElementById('fonte-menos').addEventListener('click', function(){ fonteLeitor=Math.max(15,fonteLeitor-1); aplicarFonte(); });
+  document.getElementById('fonte-mais').addEventListener('click', function(){ fonteLeitor=Math.min(30,fonteLeitor+1); aplicarFonte(); });
+
+  // ===== Sobre =====
+  var sobreModal=document.getElementById('sobre-modal');
+  document.getElementById('abrir-sobre').addEventListener('click', function(){ abrir(sobreModal); });
+  document.getElementById('sobre-ok').addEventListener('click', function(){ fechar(sobreModal); });
+  sobreModal.addEventListener('click', function(e){ if(e.target===sobreModal) fechar(sobreModal); });
+
+  // ===== Cartão de citação =====
+  var citarModal=document.getElementById('citar-modal'), citacaoTexto='', citacaoAutor='';
+  function desenharCitacao(){
+    var c=document.getElementById('citar-canvas'), ctx=c.getContext('2d'), W=c.width, H=c.height;
+    var dark=c.dataset.tema==='escuro';
+    ctx.fillStyle=dark?'#1c160f':'#f6efe1'; ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle=dark?'rgba(217,139,106,.5)':'rgba(143,45,40,.4)'; ctx.lineWidth=4; ctx.strokeRect(60,60,W-120,H-120);
+    ctx.textAlign='center';
+    ctx.fillStyle=dark?'#8c8068':'#928570'; ctx.font='80px Georgia, serif'; ctx.fillText('\u201C', W/2, 230);
+    ctx.fillStyle=dark?'#ece3d2':'#28211a'; ctx.font='italic 56px Georgia, serif';
+    var words=(citacaoTexto||'').split(/\s+/), lines=[], line='', maxW=W-260;
+    for(var i=0;i<words.length;i++){ var test=line?line+' '+words[i]:words[i]; if(ctx.measureText(test).width>maxW && line){ lines.push(line); line=words[i]; } else line=test; }
+    if(line) lines.push(line); lines=lines.slice(0,10);
+    var lh=80, startY=H/2-(lines.length*lh)/2+30;
+    lines.forEach(function(ln,i){ ctx.fillText(ln, W/2, startY+i*lh); });
+    ctx.fillStyle=dark?'#d98b6a':'#8f2d28'; ctx.font='italic 40px Georgia, serif';
+    ctx.fillText('— '+(citacaoAutor||'Anónimo'), W/2, startY+lines.length*lh+60);
+    ctx.fillStyle=dark?'#c4b8a1':'#5a4f3e'; ctx.font='44px Georgia, serif'; ctx.fillText('Penas & Pergaminhos', W/2, H-140);
+    ctx.fillStyle=dark?'#8c8068':'#928570'; ctx.font='italic 30px Georgia, serif'; ctx.fillText('histórias da taverna', W/2, H-94);
+  }
+  document.getElementById('r-citar').addEventListener('click', function(){
+    var sel=(window.getSelection && window.getSelection().toString().trim())||'';
+    var full=document.getElementById('r-text').textContent||'';
+    citacaoTexto = sel || full.slice(0,200).trim();
+    if(citacaoTexto.length>=200) citacaoTexto=citacaoTexto.slice(0,200).trim()+'…';
+    var ra=document.getElementById('r-autor'); citacaoAutor=(ra?ra.textContent:'')||'Anónimo';
+    var c=document.getElementById('citar-canvas'); c.dataset.tema=document.body.classList.contains('noite')?'escuro':'claro';
+    desenharCitacao(); abrir(citarModal);
+  });
+  document.getElementById('citar-tema').addEventListener('click', function(){ var c=document.getElementById('citar-canvas'); c.dataset.tema=c.dataset.tema==='escuro'?'claro':'escuro'; desenharCitacao(); });
+  document.getElementById('citar-baixar').addEventListener('click', function(){ var c=document.getElementById('citar-canvas'); var a=document.createElement('a'); a.download='citacao-penas-e-pergaminhos.png'; a.href=c.toDataURL('image/png'); a.click(); });
+  citarModal.addEventListener('click', function(e){ if(e.target===citarModal) fechar(citarModal); });
+
+  // ===== Caixa do autor =====
+  var autorModal=document.getElementById('autor-modal');
+  document.getElementById('autor-fechar').addEventListener('click', function(){ fechar(autorModal); });
+  autorModal.addEventListener('click', function(e){ if(e.target===autorModal) fechar(autorModal); });
+
+  carregar();
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Penas & Pergaminhos</title>
+<meta name="description" content="Histórias que a taverna não esquece — contos, versos e fragmentos da comunidade da Taverna do Leitor.">
+<meta name="theme-color" content="#8f2d28">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Penas & Pergaminhos">
+<meta property="og:title" content="Penas & Pergaminhos">
+<meta property="og:description" content="Histórias que a taverna não esquece.">
+<meta property="og:url" content="https://www.penasepergaminhos.com.br/">
+<meta property="og:image" content="https://www.penasepergaminhos.com.br/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Penas & Pergaminhos">
+<meta name="twitter:description" content="Histórias que a taverna não esquece.">
+<meta name="twitter:image" content="https://www.penasepergaminhos.com.br/og.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f6efe1;--paper-2:#efe6d2;--ink:#28211a;--ink-soft:#5a4f3e;--ink-faint:#928570;
+    --wax:#8f2d28;--wax-deep:#6f201c;--line:rgba(90,79,62,.16);--gold:#9a7b3f;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--paper);color:var(--ink);font-family:'EB Garamond',Georgia,serif;
+    font-size:19px;line-height:1.75;min-height:100vh;
+    background-image:radial-gradient(circle at 20% 8%, rgba(154,123,63,.05), transparent 45%),
+      radial-gradient(circle at 82% 88%, rgba(143,45,40,.045), transparent 42%);}
+  .wrap{max-width:720px;margin:0 auto;padding:0 26px}
+  ::selection{background:rgba(143,45,40,.18)}
+
+  header{text-align:center;padding:64px 0 30px}
+  .seal{width:168px;height:168px;margin:0 auto 26px;display:block;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+  .seal:hover{transform:rotate(-4deg) scale(1.03)}
+  header h1{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(42px,9vw,68px);line-height:1;letter-spacing:.01em;color:var(--ink)}
+  header h1 .amp{color:var(--wax);font-style:italic;font-weight:500}
+  .byline{font-family:'EB Garamond',serif;font-style:italic;font-size:14px;letter-spacing:.16em;color:var(--ink-faint);margin-top:9px;text-transform:lowercase}
+  .tagline{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(20px,4vw,26px);color:var(--wax);margin-top:10px;letter-spacing:.02em}
+  .intro{max-width:500px;margin:26px auto 0;color:var(--ink-soft);line-height:1.8}
+  .flourish{margin:34px auto 0;width:60px;height:1px;background:var(--line);position:relative}
+  .flourish::after{content:"❧";position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--paper);padding:0 10px;color:var(--ink-faint);font-size:16px}
+
+  .cta-row{text-align:center;margin:40px 0 56px}
+  .btn{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:18px;letter-spacing:.06em;cursor:pointer;border:none;border-radius:2px;padding:13px 32px;transition:.22s transform,.22s box-shadow,.22s background,.22s color}
+  .btn-primary{background:var(--wax);color:var(--paper);box-shadow:0 7px 20px rgba(143,45,40,.26)}
+  .btn-primary:hover{background:var(--wax-deep);transform:translateY(-2px);box-shadow:0 11px 26px rgba(143,45,40,.32)}
+  .btn-ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--line)}
+  .btn-ghost:hover{background:rgba(90,79,62,.06);color:var(--ink)}
+
+  .shelf-head{text-align:center;font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:.32em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px}
+  .scrolls{padding-bottom:60px}
+  .scroll{border-top:1px solid var(--line);padding:32px 4px;cursor:pointer;opacity:0;transform:translateY(12px);animation:rise .6s ease forwards}
+  @keyframes rise{to{opacity:1;transform:none}}
+  .scroll:hover .s-title{color:var(--wax)}
+  .s-meta{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:16px;color:var(--ink-faint);margin-bottom:7px}
+  .s-meta .genre{color:var(--wax);font-style:normal;font-weight:600;letter-spacing:.02em}
+  .s-title{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:30px;line-height:1.2;color:var(--ink);transition:color .2s;margin-bottom:9px}
+  .s-preview{color:var(--ink-soft);font-style:italic}
+  .s-author{margin-top:12px;color:var(--ink-faint);font-size:17px}
+  .s-author b{color:var(--ink-soft);font-weight:600;font-style:normal}
+  .s-foot{margin-top:14px}
+  .like-btn{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-family:'Cormorant Garamond',serif;font-size:17px;display:inline-flex;align-items:center;gap:6px;padding:0}
+  .like-btn:hover,.like-btn.liked{color:var(--wax)}
+  .like-btn .lk-heart{font-size:19px;line-height:1}
+
+  .state{text-align:center;padding:64px 12px;color:var(--ink-faint);font-style:italic}
+  .state .big{font-family:'Cormorant Garamond',serif;font-style:normal;font-size:24px;color:var(--ink-soft);margin-bottom:8px}
+
+  .reader{position:fixed;inset:0;z-index:95;background:var(--paper);overflow-y:auto;display:none}
+  .reader.open{display:block;animation:fade .35s ease}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .reader-bar{position:sticky;top:0;background:rgba(246,239,225,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);padding:16px 0}
+  body.noite .reader-bar{background:rgba(31,26,19,.92)}
+  .reader-bar .wrap{display:flex;align-items:center;justify-content:space-between}
+  .back{background:none;border:none;cursor:pointer;color:var(--ink-soft);font-family:'Cormorant Garamond',serif;font-size:17px;letter-spacing:.04em;display:flex;align-items:center;gap:6px}
+  .back:hover{color:var(--wax)}
+  .reader-body{padding:54px 0 110px}
+  .reader-body .gt{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;color:var(--wax)}
+  .reader-body h2{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(32px,6vw,46px);line-height:1.15;margin:8px 0 8px;color:var(--ink)}
+  .reader-body .by{color:var(--ink-faint);font-style:italic;margin-bottom:38px;padding-bottom:26px;border-bottom:1px solid var(--line)}
+  .reader-text{font-size:21px;line-height:1.9;color:var(--ink)}
+  .reader-text p{margin-bottom:1.3em}
+  .reader-end{text-align:center;margin-top:40px;color:var(--wax);font-size:24px}
+
+  .r-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:34px;padding-top:24px;border-top:1px solid var(--line)}
+  .act{background:none;border:1px solid var(--line);border-radius:2px;padding:9px 18px;cursor:pointer;font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--ink-soft);display:inline-flex;align-items:center;gap:8px;transition:.2s}
+  .act:hover{color:var(--wax);border-color:var(--wax)}
+  .act.liked{color:var(--wax);border-color:var(--wax)}
+  .act .lk-heart{font-size:18px;line-height:1}
+
+  .comments{margin-top:42px}
+  .c-head{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:25px;color:var(--ink);margin-bottom:16px}
+  .comment{border-top:1px solid var(--line);padding:16px 0}
+  .comment .ca{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--ink-faint);font-size:16px;margin-bottom:3px}
+  .comment .ct{color:var(--ink)}
+  .c-empty{color:var(--ink-faint);font-style:italic}
+  .c-form{margin-top:22px;display:flex;flex-direction:column;gap:10px}
+  .c-input{width:100%;background:rgba(255,255,255,.45);border:1px solid var(--line);border-radius:3px;padding:11px 14px;font-family:'EB Garamond',serif;font-size:17px;color:var(--ink)}
+  .c-input:focus{outline:none;border-color:var(--wax);background:#fff}
+  .c-form textarea{min-height:96px;resize:vertical;line-height:1.6}
+  .c-form .btn{align-self:flex-end}
+
+  .modal{position:fixed;inset:0;z-index:96;display:none;align-items:flex-start;justify-content:center;background:rgba(40,33,26,.5);overflow-y:auto;padding:42px 16px}
+  .modal.open{display:flex;animation:fade .25s ease}
+  .sheet{position:relative;background:var(--paper);border:1px solid var(--line);border-radius:4px;width:100%;max-width:540px;padding:38px 34px;box-shadow:0 26px 64px rgba(40,33,26,.4);animation:rise .35s ease forwards}
+  .sheet h3{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:30px;color:var(--ink)}
+  .sheet .note{color:var(--ink-soft);font-style:italic;margin:4px 0 24px}
+  .field{margin-bottom:18px}
+  .field label{display:block;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;color:var(--ink-faint);margin-bottom:6px}
+  .field input,.field select,.field textarea{width:100%;background:rgba(255,255,255,.45);border:1px solid var(--line);border-radius:3px;padding:12px 14px;font-family:'EB Garamond',serif;font-size:18px;color:var(--ink)}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--wax);background:#fff}
+  .field textarea{min-height:210px;resize:vertical;line-height:1.7}
+  .field .count{text-align:right;font-size:14px;color:var(--ink-faint);margin-top:4px;font-style:italic}
+  .actions{display:flex;gap:12px;justify-content:flex-end;margin-top:6px;flex-wrap:wrap}
+  .sheet-close{position:absolute;top:10px;right:12px;background:none;border:none;font-size:28px;line-height:1;color:var(--ink-faint);cursor:pointer;padding:2px 8px;transition:color .2s}
+  .sheet-close:hover{color:var(--wax)}
+  .autor-lista{display:flex;flex-direction:column;margin:8px 0 6px;max-height:50vh;overflow-y:auto}
+  .autor-item{text-align:left;background:none;border:none;border-bottom:1px solid var(--line);padding:11px 2px;cursor:pointer;font-family:'Cormorant Garamond',serif;font-size:19px;color:var(--ink);display:flex;justify-content:space-between;gap:10px;align-items:baseline;transition:color .2s}
+  .autor-item:hover{color:var(--wax)}
+  .autor-item .ai-likes{color:var(--ink-faint);font-size:14px;font-style:italic;white-space:nowrap}
+  @media(max-width:600px){
+    .sheet{padding:34px 20px}
+    .actions{flex-direction:column;align-items:stretch}
+    .actions .btn{width:100%}
+    .btn{padding:13px 22px}
+    .controls{gap:8px;margin:2px 0 12px}
+    .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:3px;width:100%}
+    .chips::-webkit-scrollbar{display:none}
+    .chip{flex:0 0 auto}
+    .controls-right{width:100%;gap:8px;flex-wrap:nowrap}
+    .busca{flex:1;min-width:0}
+    .fav-toggle{padding:6px 12px;white-space:nowrap}
+    .fav-toggle .ft-label{display:none}
+    .sort-sel{padding:6px 8px;font-size:14px}
+    .r-actions{gap:8px;margin-top:24px;padding-top:18px}
+    .act{padding:8px 13px;font-size:15px}
+    .fonte-ctrl{margin-left:0}
+  }
+  .feedback{padding:12px 14px;border-radius:3px;margin-bottom:18px;font-size:17px;display:none;font-style:italic}
+  .feedback.err{display:block;background:rgba(143,45,40,.1);color:var(--wax);border:1px solid rgba(143,45,40,.25)}
+  .feedback.ok{display:block;background:rgba(154,123,63,.12);color:var(--gold);border:1px solid rgba(154,123,63,.3)}
+
+  footer{padding:40px 0 56px;border-top:1px solid var(--line);text-align:center}
+  .social{display:flex;gap:22px;justify-content:center;margin-bottom:16px}
+  .social a{display:inline-flex;align-items:center;gap:7px;color:var(--ink-soft);text-decoration:none;font-style:italic;font-size:16px;transition:color .2s}
+  .social a:hover{color:var(--wax)}
+  .social svg{width:20px;height:20px}
+  .foot-note{color:var(--ink-faint);font-size:16px;font-style:italic}
+  .topnav{position:fixed;top:16px;right:18px;z-index:40;display:flex;gap:14px;align-items:center;
+    background:rgba(246,239,225,.72);backdrop-filter:blur(5px);padding:8px 13px;border-radius:30px;border:1px solid var(--line)}
+  .topnav a{display:inline-flex;color:var(--ink-soft);transition:color .2s,transform .2s}
+  .topnav a:hover{color:var(--wax);transform:translateY(-1px)}
+  .topnav svg{width:22px;height:22px;display:block}
+  .chave-box{font-family:'Courier New',monospace;font-size:21px;letter-spacing:1px;color:var(--ink);
+    background:var(--paper-2);border:1px dashed var(--wax);border-radius:4px;padding:14px 16px;text-align:center;word-break:break-all;margin:6px 0 4px}
+  .chave-msg{color:var(--ink-soft);font-style:italic;line-height:1.75;font-size:16px;margin:16px 0 6px}
+  .verificar-area{margin-top:14px;display:none;flex-direction:column;gap:10px}
+  .verificar-area.open{display:flex}
+  .verificar-area input{background:rgba(255,255,255,.45);border:1px solid var(--line);border-radius:3px;padding:10px 13px;font-family:'Courier New',monospace;font-size:15px;color:var(--ink)}
+  .verificar-area input:focus{outline:none;border-color:var(--wax);background:#fff}
+  .verif-result{font-style:italic;font-size:16px;min-height:1px}
+  .verif-result.ok{color:var(--gold)}
+  .verif-result.no{color:var(--wax)}
+  .rascunho-nota{font-size:14px;color:var(--ink-faint);font-style:italic;margin:-2px 0 12px}
+  .rascunho-nota a{color:var(--wax)}
+  .aviso-box{background:rgba(143,45,40,.07);border:1px solid rgba(143,45,40,.25);border-left:3px solid var(--wax);border-radius:4px;padding:15px 17px;margin:6px 0 4px}
+  .aviso-box p{font-style:italic;color:var(--ink-soft);line-height:1.7}
+  .aviso-box .aviso-grave{font-style:normal;color:var(--ink);margin-top:10px}
+  .topnav button{background:none;border:none;padding:0;cursor:pointer;color:var(--ink-soft);display:inline-flex;transition:color .2s,transform .2s}
+  .topnav button:hover{color:var(--wax);transform:translateY(-1px)}
+  .topnav button svg{width:22px;height:22px;display:block}
+  body.noite{--paper:#1f1a13;--paper-2:#2a2318;--ink:#ece3d2;--ink-soft:#c4b8a1;--ink-faint:#8c8068;--wax:#d98b6a;--wax-deep:#c2704f;--line:rgba(236,227,210,.14);--gold:#caa86a}
+  body.noite .topnav{background:rgba(31,26,19,.72)}
+  body.noite .c-input,
+  body.noite .field input, body.noite .field select, body.noite .field textarea,
+  body.noite .verificar-area input{background:rgba(255,255,255,.06);color:var(--ink)}
+  body.noite .c-input::placeholder,
+  body.noite .field input::placeholder, body.noite .field textarea::placeholder,
+  body.noite .verificar-area input::placeholder{color:rgba(236,227,210,.4)}
+  body.noite .c-input:focus,
+  body.noite .field input:focus, body.noite .field select:focus, body.noite .field textarea:focus,
+  body.noite .verificar-area input:focus{background:rgba(255,255,255,.1)}
+  #r-text > p:first-of-type::first-letter{font-family:'Cormorant Garamond',serif;float:left;font-size:64px;line-height:.78;padding:8px 12px 0 0;color:var(--wax);font-weight:600}
+  .controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin:4px 0 18px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{font-family:'EB Garamond',serif;font-size:15px;padding:5px 13px;border:1px solid var(--line);border-radius:30px;background:transparent;color:var(--ink-soft);cursor:pointer;transition:.2s}
+  .chip:hover{border-color:var(--wax);color:var(--wax)}
+  .chip.on{background:var(--wax);border-color:var(--wax);color:var(--paper)}
+  .sort-sel{font-family:'EB Garamond',serif;font-size:15px;color:var(--ink-soft);background:transparent;border:1px solid var(--line);border-radius:4px;padding:6px 10px;cursor:pointer}
+  .autor-bar{display:none;align-items:center;justify-content:space-between;gap:12px;margin:0 0 16px;padding:10px 16px;background:rgba(143,45,40,.06);border:1px solid var(--line);border-radius:6px;font-style:italic;color:var(--ink-soft)}
+  .autor-bar.on{display:flex}
+  .autor-bar a{color:var(--wax);cursor:pointer}
+  .autor-link{cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;color:inherit}
+  .autor-link:hover{color:var(--wax)}
+  .scroll{position:relative}
+  .scroll.is-destaque{border-color:rgba(143,45,40,.4)}
+  .destaque-badge{position:absolute;top:0;right:0;background:var(--wax);color:var(--paper);font-family:'Cormorant Garamond',serif;font-size:13px;letter-spacing:.05em;padding:3px 11px;border-bottom-left-radius:8px}
+  .r-nav{display:flex;justify-content:space-between;gap:12px;margin-top:28px;padding-top:18px;border-top:1px solid var(--line)}
+  .r-nav button{background:transparent;border:none;color:var(--ink-soft);font-family:'Cormorant Garamond',serif;font-size:18px;cursor:pointer;transition:color .2s}
+  .r-nav button:hover:not(:disabled){color:var(--wax)}
+  .r-nav button:disabled{opacity:.32;cursor:default}
+  .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+  .stamp-ov{position:fixed;inset:0;z-index:97;background:rgba(40,33,26,.55);display:none;align-items:center;justify-content:center}
+  .stamp-ov.on{display:flex}
+  .stamp-ov svg{width:150px;height:150px;animation:carimbo .8s ease}
+  @keyframes carimbo{0%{transform:scale(2.6) rotate(-10deg);opacity:0}55%{transform:scale(.9) rotate(0);opacity:1}72%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
+  .controls-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .busca{font-family:'EB Garamond',serif;font-size:15px;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:30px;padding:6px 14px;min-width:150px}
+  .busca:focus{outline:none;border-color:var(--wax)}
+  .fav-toggle{font-family:'EB Garamond',serif;font-size:15px;padding:5px 13px;border:1px solid var(--line);border-radius:30px;background:transparent;color:var(--ink-soft);cursor:pointer;transition:.2s;white-space:nowrap}
+  .fav-toggle:hover{border-color:var(--wax);color:var(--wax)}
+  .fav-toggle.on{background:var(--wax);border-color:var(--wax);color:var(--paper)}
+  .s-foot .cmt-count{color:var(--ink-faint);font-size:15px;font-style:italic;margin-left:12px}
+  .act.on{color:var(--wax)}
+  .fonte-ctrl{display:inline-flex;gap:4px;margin-left:auto}
+  body.noite .busca::placeholder{color:rgba(236,227,210,.4)}
+</style>
+</head>
+<body>
+
+  <nav class="topnav" aria-label="Atalhos">
+    <button id="toggle-noite" aria-label="Alternar modo noturno" title="Modo noturno" aria-pressed="false">
+      <svg class="ic-noite" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8z"/></svg>
+    </button>
+    <a id="top-telegram" href="#" target="_blank" rel="noopener" aria-label="Telegram da Taverna" title="Telegram">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.9 4.3c-.2-.2-.5-.3-.9-.2L3.3 11c-.5.2-.5.9 0 1.1l4.5 1.6 1.7 5.4c.1.4.6.5.9.2l2.6-2.4 4.6 3.4c.4.3.9.1 1-.4L22 4.9c.1-.2 0-.5-.1-.6zM9.4 14.2l-.3 3.3-1-3.5 8.6-5.6-7.3 5.8z"/></svg>
+    </a>
+    <a id="top-instagram" href="#" target="_blank" rel="noopener" aria-label="Instagram da Taverna" title="Instagram">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1.1" fill="currentColor" stroke="none"/></svg>
+    </a>
+    <a id="top-loja" href="#" aria-label="Loja da Taverna" title="Loja">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M5 8 h14 l-1 12 h-12 z"/><path d="M9 8 V6 a3 3 0 0 1 6 0 v2"/></svg>
+    </a>
+  </nav>
+
+  <div class="wrap">
+    <header>
+      <svg class="seal" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-label="Selo de cera">
+        <defs>
+          <radialGradient id="wax" cx="38%" cy="32%" r="72%"><stop offset="0%" stop-color="#c2564b"/><stop offset="48%" stop-color="#a23a32"/><stop offset="100%" stop-color="#6c1e1a"/></radialGradient>
+          <g id="emblem">
+            <path d="M122 56 C 108 70,92 90,80 110 L74 122 L86 116 C106 104,124 86,138 70 C134 64,128 59,122 56 Z"/>
+            <path d="M120 60 L132 64 L122 72 Z"/><path d="M112 70 L125 73 L114 82 Z"/><path d="M103 81 L116 84 L105 93 Z"/>
+            <path d="M80 110 L73 124 L78 121 L83 113 Z"/><circle cx="71" cy="129" r="3.4"/>
+            <path d="M66 140 C84 150,116 150,138 138 C120 152,86 156,66 145 Z"/>
+          </g>
+        </defs>
+        <path fill="url(#wax)" d="M100 18 C128 16,150 30,168 52 C184 72,186 104,176 130 C166 156,138 176,104 178 C70 180,40 166,26 138 C13 112,16 78,34 54 C50 32,72 20,100 18 Z"/>
+        <circle cx="100" cy="98" r="66" fill="none" stroke="rgba(70,20,16,.45)" stroke-width="2"/>
+        <use href="#emblem" fill="rgba(70,20,16,.55)" transform="translate(1.1,1.4)"/><use href="#emblem" fill="#8e2c25"/><use href="#emblem" fill="rgba(255,220,210,.30)" transform="translate(-0.8,-1)"/>
+      </svg>
+
+      <h1>Penas <span class="amp">&amp;</span> Pergaminhos</h1>
+      <div class="byline">by Taverna do Leitor</div>
+      <div class="tagline">histórias que a taverna não esquece</div>
+      <p class="intro">Aqui repousam histórias escritas à mão e à alma — contos, versos, fragmentos. Cada uma traz uma marca única de quem ousou escrevê-la. Deixe a sua no livro dos dias da taverna.</p>
+      <div class="flourish"></div>
+    </header>
+
+    <div class="cta-row"><button class="btn btn-primary" id="abrir-publicar">Confiar o seu texto</button></div>
+
+    <div class="shelf-head">Selados até agora</div>
+    <div class="controls">
+      <div class="chips" id="chips"></div>
+      <div class="controls-right">
+        <input class="busca" id="busca" type="search" placeholder="buscar…" aria-label="Buscar">
+        <button class="fav-toggle" id="fav-toggle" aria-pressed="false" title="Ver guardados">★ <span class="ft-label">guardados</span></button>
+        <select class="sort-sel" id="sort-sel" aria-label="Ordenar">
+          <option value="recentes">mais recentes</option>
+          <option value="curtidos">mais curtidos</option>
+        </select>
+      </div>
+    </div>
+    <div class="autor-bar" id="autor-bar">
+      <span>a mostrar pergaminhos de <b id="autor-bar-nome"></b></span>
+      <a id="autor-bar-todos">ver todos</a>
+    </div>
+    <div class="scrolls" id="scrolls"><div class="state"><div class="big">A aquecer a cera…</div></div></div>
+
+    <footer>
+      <div class="social">
+        <a id="a-telegram" href="#" target="_blank" rel="noopener" aria-label="Telegram da Taverna">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.9 4.3c-.2-.2-.5-.3-.9-.2L3.3 11c-.5.2-.5.9 0 1.1l4.5 1.6 1.7 5.4c.1.4.6.5.9.2l2.6-2.4 4.6 3.4c.4.3.9.1 1-.4L22 4.9c.1-.2 0-.5-.1-.6zM9.4 14.2l-.3 3.3-1-3.5 8.6-5.6-7.3 5.8z"/></svg>
+          Telegram
+        </a>
+        <a id="a-instagram" href="#" target="_blank" rel="noopener" aria-label="Instagram da Taverna">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1.1" fill="currentColor" stroke="none"/></svg>
+          Instagram
+        </a>
+      </div>
+      <div class="foot-note" id="contagem"></div>
+      <div class="foot-note">Cada pergaminho é lido antes de ser selado. · <a id="abrir-sobre" style="cursor:pointer;color:var(--wax)">sobre a taverna</a></div>
+    </footer>
+  </div>
+
+  <div class="reader" id="reader">
+    <div class="reader-bar"><div class="wrap">
+      <button class="back" id="fechar-reader">‹ voltar ao mural</button>
+      <span style="font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--ink-faint)">Penas &amp; Pergaminhos</span>
+    </div></div>
+    <div class="wrap reader-body">
+      <span class="gt" id="r-genre"></span>
+      <h2 id="r-title"></h2>
+      <p class="by" id="r-by"></p>
+      <div class="reader-text" id="r-text"></div>
+      <div class="reader-end">❦</div>
+      <div class="r-actions">
+        <button class="act" id="r-like" data-like=""><span class="lk-heart">♡</span> <span class="lk-count">0</span></button>
+        <button class="act" id="r-share">partilhar</button>
+        <button class="act" id="r-fav">guardar</button>
+        <button class="act" id="r-ouvir">ouvir</button>
+        <button class="act" id="r-citar">criar cartão</button>
+        <button class="act" id="abrir-verificar">provar autoria</button>
+        <span class="fonte-ctrl"><button class="act" id="fonte-menos" title="Diminuir fonte">A−</button><button class="act" id="fonte-mais" title="Aumentar fonte">A+</button></span>
+      </div>
+      <div class="verificar-area" id="verificar-area">
+        <input id="verif-chave" placeholder="cole aqui a sua chave de autoria">
+        <button class="btn btn-primary" id="verif-btn" style="align-self:flex-start">Verificar</button>
+        <div class="verif-result" id="verif-result"></div>
+      </div>
+      <div class="r-nav">
+        <button id="r-prev">‹ anterior</button>
+        <button id="r-next">próximo ›</button>
+      </div>
+      <div class="comments">
+        <div class="c-head">Comentários</div>
+        <div id="c-list"></div>
+        <div class="c-form">
+          <input class="c-input" id="c-name" placeholder="o seu nome" maxlength="40">
+          <textarea class="c-input" id="c-text" placeholder="deixe um comentário…"></textarea>
+          <button class="btn btn-primary" id="c-send">Comentar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="sheet">
+      <button class="sheet-close" id="publicar-fechar" aria-label="Fechar">×</button>
+      <h3>Confiar um pergaminho</h3>
+      <p class="note">Escreva à vontade. O taberneiro lê cada texto antes de fixar no mural.</p>
+      <div class="feedback" id="fb"></div>
+      <div class="hp" aria-hidden="true"><label>Deixe este campo vazio<input id="f-hp" tabindex="-1" autocomplete="off"></label></div>
+      <div class="field"><label>Como assina</label><input id="f-autor" placeholder="nome ou pseudónimo" maxlength="40"></div>
+      <div class="field"><label>Título</label><input id="f-titulo" placeholder="o título do seu texto" maxlength="120"></div>
+      <div class="field"><label>Género</label>
+        <select id="f-genero"><option>Conto</option><option>Poesia</option><option>Crónica</option><option>Ensaio</option><option>Fragmento</option><option>Outro</option></select>
+      </div>
+      <div class="field"><label>O texto</label><textarea id="f-texto" placeholder="Era uma vez…"></textarea><div class="count"><span id="f-count">0</span> caracteres</div></div>
+      <div class="rascunho-nota" id="rascunho-nota" style="display:none">Rascunho restaurado deste navegador. <a href="#" id="descartar-rascunho">descartar</a></div>
+      <div class="actions">
+        <button class="btn btn-ghost" id="guardar-rascunho">guardar rascunho</button>
+        <button class="btn btn-primary" id="enviar">Selar e enviar o texto</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="aviso-modal">
+    <div class="sheet">
+      <h3>Antes de selar</h3>
+      <div class="aviso-box">
+        <p>Uma vez selado, o pergaminho entra para o livro dos dias da taverna — e nem o próprio punho que o escreveu poderá reescrevê-lo.</p>
+        <p class="aviso-grave">Ao confirmar, o texto será enviado como está e <strong>não poderá mais ser alterado</strong>. Reveja com calma.</p>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" id="aviso-rever">Rever o texto</button>
+        <button class="btn btn-primary" id="aviso-confirmar">Selar mesmo assim</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="chave-modal">
+    <div class="sheet">
+      <h3>A sua chave de autoria</h3>
+      <p class="note">Guarde-a num lugar seguro — é a prova de que este pergaminho é seu. Ela não será mostrada de novo.</p>
+      <div class="chave-box" id="chave-valor"></div>
+      <div style="text-align:right;margin-bottom:4px"><button class="act" id="copiar-chave" style="font-size:14px;padding:6px 12px">copiar</button></div>
+      <p class="chave-msg">Dizem que, numa velha estalagem à beira da estrada — o Pónei Saltitante —, mais de um viajante distraído perdeu o que era seu para um vulto encapuzado que surgiu da penumbra exigindo o que não lhe cabia. Se um estranho de capa lhe pedir esta chave, não a entregue por ouro nem por juramento. Apenas o Taberneiro da Taverna do Leitor pode zelar por ela.</p>
+      <div class="actions">
+        <button class="btn btn-primary" id="chave-ok">Já guardei a chave</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="sobre-modal">
+    <div class="sheet">
+      <h3>A taverna</h3>
+      <p class="note" style="font-size:17px;line-height:1.85;color:var(--ink-soft)">Penas &amp; Pergaminhos é o mural de histórias da Taverna do Leitor — um canto para guardar o que se escreve à mão e à alma. Aqui não há nome a provar nem conta a criar: você chega, deixa o seu conto, verso ou fragmento, e o taberneiro o sela no livro dos dias. Cada texto fica marcado por uma chave só sua. Escreva sem medo — a taverna não esquece.</p>
+      <div class="actions"><button class="btn btn-primary" id="sobre-ok">Fechar</button></div>
+    </div>
+  </div>
+
+  <div class="modal" id="citar-modal">
+    <div class="sheet" style="max-width:560px">
+      <h3>Cartão de citação</h3>
+      <p class="note">Selecione um trecho do texto antes de abrir, ou usamos o começo. Baixe e partilhe onde quiser.</p>
+      <div style="text-align:center"><canvas id="citar-canvas" width="1080" height="1350" style="width:100%;max-width:340px;border:1px solid var(--line);border-radius:6px"></canvas></div>
+      <div class="actions">
+        <button class="btn btn-ghost" id="citar-tema">alternar fundo</button>
+        <button class="btn btn-primary" id="citar-baixar">Baixar imagem</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="autor-modal">
+    <div class="sheet" style="max-width:460px">
+      <button class="sheet-close" id="autor-fechar" aria-label="Fechar">×</button>
+      <h3 id="autor-nome"></h3>
+      <p class="note" id="autor-stats"></p>
+      <div class="autor-lista" id="autor-lista"></div>
+    </div>
+  </div>
+
+  <div class="stamp-ov" id="selo-stamp">
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <radialGradient id="wax2" cx="38%" cy="32%" r="72%"><stop offset="0%" stop-color="#c2564b"/><stop offset="48%" stop-color="#a23a32"/><stop offset="100%" stop-color="#6c1e1a"/></radialGradient>
+        <g id="emblem2">
+          <path d="M122 56 C 108 70,92 90,80 110 L74 122 L86 116 C106 104,124 86,138 70 C134 64,128 59,122 56 Z"/>
+          <path d="M120 60 L132 64 L122 72 Z"/><path d="M112 70 L125 73 L114 82 Z"/><path d="M103 81 L116 84 L105 93 Z"/>
+          <path d="M80 110 L73 124 L78 121 L83 113 Z"/><circle cx="71" cy="129" r="3.4"/>
+          <path d="M66 140 C84 150,116 150,138 138 C120 152,86 156,66 145 Z"/>
+        </g>
+      </defs>
+      <path fill="url(#wax2)" d="M100 18 C128 16,150 30,168 52 C184 72,186 104,176 130 C166 156,138 176,104 178 C70 180,40 166,26 138 C13 112,16 78,34 54 C50 32,72 20,100 18 Z"/>
+      <circle cx="100" cy="98" r="66" fill="none" stroke="rgba(70,20,16,.45)" stroke-width="2"/>
+      <use href="#emblem2" fill="rgba(70,20,16,.55)" transform="translate(1.1,1.4)"/><use href="#emblem2" fill="#8e2c25"/><use href="#emblem2" fill="rgba(255,220,210,.30)" transform="translate(-0.8,-1)"/>
+    </svg>
+  </div>
+
+<script>
+  // ===== Configuração do Supabase =====
+  var SUPABASE_URL = 'https://mowrcqwxtmjuqtxbesfg.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_gSMSa-F4C1FHkEpz1QHN3w_pIQ3epsc';
+  var REST = SUPABASE_URL + '/rest/v1';
+  var HEADERS = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' };
+
+  // ===== Links sociais (preencha com os seus) =====
+  var LINKS = {
+    telegram: 'https://t.me/SEU_GRUPO',
+    instagram: 'https://instagram.com/SEU_PERFIL',
+    loja: 'loja.html'
+  };
+
+  var els = {
+    scrolls: document.getElementById('scrolls'),
+    reader: document.getElementById('reader'),
+    modal: document.getElementById('modal'),
+    fb: document.getElementById('fb')
+  };
+  var textosAtuais = [];
+  var vistaAtual = [];
+  var filtroGenero = 'Todos';
+  var ordenacao = 'recentes';
+  var filtroAutor = null;
+  var busca = '';
+  var soFavoritos = false;
+  var comentMap = {};
+  var likedSet = new Set();
+  try{ (JSON.parse(localStorage.getItem('pp_likes')||'[]')||[]).forEach(function(x){ likedSet.add(String(x)); }); }catch(e){}
+  function salvarLikes(){ try{ localStorage.setItem('pp_likes', JSON.stringify(Array.from(likedSet))); }catch(e){} }
+  var favSet = new Set();
+  try{ (JSON.parse(localStorage.getItem('pp_favs')||'[]')||[]).forEach(function(x){ favSet.add(String(x)); }); }catch(e){}
+  function salvarFavs(){ try{ localStorage.setItem('pp_favs', JSON.stringify(Array.from(favSet))); }catch(e){} }
+  var fonteLeitor = 19;
+  try{ var fl=parseInt(localStorage.getItem('pp_fonte'),10); if(fl>=15 && fl<=30) fonteLeitor=fl; }catch(e){}
+  function aplicarFonte(){ var t=document.getElementById('r-text'); if(t) t.style.fontSize=fonteLeitor+'px'; try{localStorage.setItem('pp_fonte',String(fonteLeitor));}catch(e){} }
+  var currentReaderId = null;
+
+  function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tempo(t){var n=(t||'').trim().split(/\s+/).length;return Math.max(1,Math.round(n/200))+' min';}
+  function mapRow(r){return {id:r.id,title:r.titulo,author:r.autor,genre:r.genero,content:r.conteudo,likes:r.curtidas||0,destaque:!!r.destaque};}
+
+  async function supaGet(path){
+    var res = await fetch(REST + path, { headers: HEADERS });
+    if(!res.ok) throw new Error('HTTP ' + res.status + ' ' + (await res.text()));
+    return res.json();
+  }
+  async function supaPost(path, body, prefer){
+    var h = Object.assign({}, HEADERS);
+    h['Prefer'] = prefer || 'return=minimal';
+    var res = await fetch(REST + path, { method:'POST', headers:h, body:JSON.stringify(body) });
+    if(!res.ok) throw new Error('HTTP ' + res.status + ' ' + (await res.text()));
+    var txt = await res.text();
+    return txt ? JSON.parse(txt) : null;
+  }
+
+  document.getElementById('a-telegram').href = LINKS.telegram;
+  document.getElementById('a-instagram').href = LINKS.instagram;
+  document.getElementById('top-telegram').href = LINKS.telegram;
+  document.getElementById('top-instagram').href = LINKS.instagram;
+  document.getElementById('top-loja').href = LINKS.loja;
+
+  async function carregar(){
+    try{
+      var rows = await supaGet('/pergaminhos?status=eq.aprovado&select=*&order=criado_em.desc');
+      textosAtuais = rows.map(mapRow);
+      try{ var cs=await supaGet('/comentarios?select=pergaminho_id'); comentMap={}; cs.forEach(function(c){ var k=String(c.pergaminho_id); comentMap[k]=(comentMap[k]||0)+1; }); }catch(e){ comentMap={}; }
+      var n=textosAtuais.length;
+      document.getElementById('contagem').textContent = n? (n + (n===1?' pergaminho selado':' pergaminhos selados')) : '';
+      montarChips();
+      aplicarVista();
+      abrirDoLink();
+    }catch(e){
+      console.error('Falha ao carregar:', e);
+      els.scrolls.innerHTML = '<div class="state"><div class="big">O mural está trancado</div>Não consegui falar com a taverna. Veja o console (F12).</div>';
+    }
+  }
+
+  function aplicarVista(){
+    var lista = textosAtuais.slice();
+    if(soFavoritos) lista = lista.filter(function(w){ return favSet.has(String(w.id)); });
+    if(filtroAutor) lista = lista.filter(function(w){ return (w.author||'Anónimo')===filtroAutor; });
+    if(filtroGenero!=='Todos') lista = lista.filter(function(w){ return (w.genre||'Conto')===filtroGenero; });
+    if(busca){ var q=busca.toLowerCase(); lista = lista.filter(function(w){ return ((w.title||'')+' '+(w.author||'')+' '+(w.content||'')).toLowerCase().indexOf(q)>=0; }); }
+    lista.sort(function(a,b){
+      var d=(b.destaque?1:0)-(a.destaque?1:0); if(d) return d;
+      if(ordenacao==='curtidos'){ var l=(b.likes||0)-(a.likes||0); if(l) return l; }
+      return (b.id||0)-(a.id||0);
+    });
+    vistaAtual = lista;
+    render(lista);
+    var ab=document.getElementById('autor-bar');
+    if(filtroAutor){ document.getElementById('autor-bar-nome').textContent=filtroAutor; ab.classList.add('on'); }
+    else ab.classList.remove('on');
+  }
+  function montarChips(){
+    var box=document.getElementById('chips'); if(!box) return;
+    var generos=['Todos','Conto','Poesia','Crónica','Ensaio','Fragmento','Outro'];
+    box.innerHTML='';
+    generos.forEach(function(g){
+      var b=document.createElement('button');
+      b.className='chip'+(g===filtroGenero?' on':'');
+      b.textContent=g;
+      b.addEventListener('click', function(){ filtroGenero=g; montarChips(); aplicarVista(); });
+      box.appendChild(b);
+    });
+  }
+  function filtrarAutor(nome){ filtroAutor=nome; aplicarVista(); var sh=document.querySelector('.shelf-head'); if(sh) sh.scrollIntoView({behavior:'smooth',block:'start'}); }
+  function abrirAutor(nome){
+    var list = textosAtuais.filter(function(w){ return (w.author||'Anónimo')===nome; });
+    var likes = list.reduce(function(a,w){ return a+(w.likes||0); },0);
+    document.getElementById('autor-nome').textContent = nome;
+    var n=list.length;
+    document.getElementById('autor-stats').textContent = n+(n===1?' pergaminho':' pergaminhos')+' · '+likes+(likes===1?' curtida':' curtidas');
+    var box=document.getElementById('autor-lista'); box.innerHTML='';
+    list.forEach(function(w){
+      var b=document.createElement('button'); b.className='autor-item';
+      b.innerHTML='<span>'+esc(w.title||'Sem título')+'</span><span class="ai-likes">♥ '+(w.likes||0)+'</span>';
+      b.addEventListener('click', function(){ fechar(document.getElementById('autor-modal')); abrirLeitor(w); });
+      box.appendChild(b);
+    });
     abrir(document.getElementById('autor-modal'));
   }
 
