@@ -231,6 +231,9 @@
   .act.on{color:var(--wax)}
   .act-icon{border:none;background:none;padding:8px 10px}
   .act-icon:hover{border-color:transparent;background:none}
+  .act-text{border:none;background:none;padding:9px 6px}
+  .act-text:hover{border-color:transparent;background:none;text-decoration:underline;text-underline-offset:4px}
+  .fav-star{font-size:19px;line-height:1}
   .fonte-ctrl{display:inline-flex;gap:4px}
   body.noite .busca::placeholder{color:rgba(236,227,210,.4)}
 </style>
@@ -328,11 +331,11 @@
       <div class="reader-end">❦</div>
       <div class="r-actions">
         <button class="act act-icon" id="r-like" data-like=""><span class="lk-heart">♡</span> <span class="lk-count">0</span></button>
-        <button class="act" id="r-share">compartilhar</button>
-        <button class="act" id="r-fav">guardar</button>
+        <button class="act act-icon" id="r-fav" title="Guardar" aria-label="Guardar"><span class="fav-star">☆</span></button>
+        <button class="act act-icon" id="r-share" title="Compartilhar" aria-label="Compartilhar"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="M8.4 10.7 15.6 6.3M8.4 13.3 15.6 17.7"/></svg></button>
         <button class="act act-icon" id="r-ouvir" title="Ouvir" aria-label="Ouvir"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9v6h4l5 4V5L9 9H5z"/><path d="M17 9a3.5 3.5 0 0 1 0 6"/></svg></button>
-        <button class="act" id="r-citar">criar cartão</button>
-        <button class="act" id="abrir-verificar">provar autoria</button>
+        <button class="act act-text" id="r-citar">criar cartão</button>
+        <button class="act act-text" id="abrir-verificar">provar autoria</button>
         <span class="fonte-ctrl"><button class="act" id="fonte-menos" title="Diminuir fonte">A−</button><button class="act" id="fonte-mais" title="Aumentar fonte">A+</button></span>
       </div>
       <div class="verificar-area" id="verificar-area">
@@ -669,12 +672,12 @@
     document.getElementById('r-text').innerHTML = html;
     aplicarFonte();
     var rf=document.getElementById('r-fav'); var isF=favSet.has(String(w.id));
-    rf.classList.toggle('on',isF); rf.textContent=isF?'guardado':'guardar';
+    rf.classList.toggle('on',isF); rf.querySelector('.fav-star').textContent=isF?'★':'☆'; rf.title=isF?'Guardado':'Guardar';
     try{ window.speechSynthesis.cancel(); }catch(e){}
     var ob=document.getElementById('r-ouvir'); ob.innerHTML=iconeOuvir; ob.title='Ouvir'; ob.classList.remove('on');
     document.getElementById('r-like').setAttribute('data-like', w.id);
     updateLikeUI(w.id);
-    document.getElementById('r-share').textContent = 'compartilhar';
+    var rs=document.getElementById('r-share'); rs.title='Compartilhar'; rs.classList.remove('on');
     document.getElementById('verificar-area').classList.remove('open');
     document.getElementById('verif-chave').value='';
     var vr=document.getElementById('verif-result'); vr.textContent=''; vr.className='verif-result';
@@ -708,9 +711,9 @@
       navigator.share({ title:titulo, text:'“'+titulo+'” — na taverna Penas & Pergaminhos', url:url }).catch(function(){});
     } else if(navigator.clipboard){
       navigator.clipboard.writeText(url).then(function(){
-        btn.textContent='link copiado!'; setTimeout(function(){ btn.textContent='compartilhar'; },1800);
-      }).catch(function(){ btn.textContent='copie: '+url; });
-    } else { btn.textContent=url; }
+        btn.title='link copiado!'; btn.classList.add('on'); setTimeout(function(){ btn.title='Compartilhar'; btn.classList.remove('on'); },1800);
+      }).catch(function(){ btn.title='copie: '+url; });
+    } else { btn.title=url; }
   }
 
   async function carregarComentarios(id){
@@ -881,8 +884,9 @@
   });
   document.getElementById('r-fav').addEventListener('click', function(){
     if(currentReaderId==null) return; var key=String(currentReaderId);
-    if(favSet.has(key)){ favSet.delete(key); this.classList.remove('on'); this.textContent='guardar'; }
-    else { favSet.add(key); this.classList.add('on'); this.textContent='guardado'; }
+    var star=this.querySelector('.fav-star');
+    if(favSet.has(key)){ favSet.delete(key); this.classList.remove('on'); if(star) star.textContent='☆'; this.title='Guardar'; }
+    else { favSet.add(key); this.classList.add('on'); if(star) star.textContent='★'; this.title='Guardado'; }
     salvarFavs(); if(soFavoritos) aplicarVista();
   });
 
