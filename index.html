@@ -145,6 +145,68 @@
   body.tem-tema header{padding-top:26px}
   body.noite .tema-mes{background:rgba(154,123,63,.10);border-bottom-color:rgba(154,123,63,.35)}
   #instalar-btn{margin-top:6px}
+  .fab-escrever{position:fixed;right:18px;bottom:20px;z-index:35;width:54px;height:54px;border-radius:50%;background:var(--wax);color:var(--paper);border:none;box-shadow:0 6px 18px rgba(143,45,40,.4);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s,background .2s}
+  .fab-escrever:hover{transform:translateY(-2px);background:#7a2521}
+  .fab-escrever svg{width:24px;height:24px}
+  .ao-acaso{display:block;margin:0 auto 16px;background:none;border:none;cursor:pointer;font-family:'EB Garamond',serif;font-style:italic;font-size:15px;color:var(--gold)}
+  .ao-acaso:hover{color:var(--wax);text-decoration:underline;text-underline-offset:3px}
+  .sparks{margin:2px 0 14px;text-align:center}
+  .sparks-toggle{background:none;border:none;cursor:pointer;font-family:'EB Garamond',serif;font-style:italic;font-size:14px;color:var(--gold)}
+  .sparks-toggle:hover{color:var(--wax)}
+  .sparks-box{margin-top:10px;padding:14px 16px;border:1px dashed rgba(154,123,63,.5);border-radius:6px;background:rgba(154,123,63,.05);display:none}
+  .sparks-box.open{display:block}
+  .sparks-frase{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;color:var(--ink);line-height:1.4;margin-bottom:10px}
+  .sparks-acoes{display:flex;gap:16px;justify-content:center}
+  .sparks-acoes button{background:none;border:none;cursor:pointer;font-family:'EB Garamond',serif;font-size:14px;color:var(--gold)}
+  .sparks-acoes button:hover{color:var(--wax)}
+  .micro-hint{font-family:'EB Garamond',serif;font-style:italic;font-size:13px;color:var(--ink-faint);margin-top:4px}
+  .chave-festa{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;color:var(--wax);line-height:1.5;margin-bottom:12px}
+  .chips{flex:1 1 100%;min-width:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:3px}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:0 0 auto}
+  .controls-right{flex:1 1 100%;flex-wrap:wrap}
+  .busca{flex:1 1 150px;min-width:0}
+  .read-progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:100;background:transparent;pointer-events:none}
+  .read-progress-fill{display:block;height:100%;width:0;background:var(--wax)}
+  .leia-tambem{margin:28px 0 0;border-top:1px solid var(--line);padding-top:20px}
+  .leia-tambem[hidden]{display:none}
+  .lt-head{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:16px;color:var(--ink-faint);margin-bottom:10px;text-align:center}
+  .lt-item{display:block;width:100%;text-align:left;background:none;border:none;border-bottom:1px solid var(--line);cursor:pointer;padding:11px 0}
+  .lt-item:last-child{border-bottom:none}
+  .lt-titulo{font-family:'Cormorant Garamond',serif;font-size:19px;color:var(--ink);line-height:1.2}
+  .lt-meta{font-family:'EB Garamond',serif;font-style:italic;font-size:13px;color:var(--ink-faint);margin-top:2px}
+  .lt-item:hover .lt-titulo{color:var(--wax)}
+  :focus-visible{outline:2px solid var(--wax);outline-offset:2px;border-radius:2px}
+  @media (prefers-reduced-motion: reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
+  .coletanea{position:fixed;inset:0;z-index:95;background:var(--paper);overflow-y:auto;display:none}
+  .coletanea.open{display:block}
+  .col-body{padding:40px 30px 110px}
+  .col-tema-item{display:block;width:100%;text-align:left;background:none;border:1px solid var(--line);border-radius:8px;cursor:pointer;padding:18px 20px;margin-bottom:14px;transition:border-color .2s}
+  .col-tema-item:hover{border-color:var(--wax)}
+  .col-tema-nome{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:600;font-size:24px;color:var(--wax);line-height:1.2;display:block}
+  .col-tema-meta{font-family:'EB Garamond',serif;font-size:14px;color:var(--ink-faint);margin-top:4px;display:block}
+  .col-vazia{text-align:center;font-family:'EB Garamond',serif;font-style:italic;color:var(--ink-faint);padding:40px 0;line-height:1.8}
+  .col-acoes{display:flex;gap:16px;align-items:center;margin-bottom:26px;flex-wrap:wrap}
+  .col-voltar-lista{background:none;border:none;cursor:pointer;font-family:'EB Garamond',serif;color:var(--gold);font-size:15px}
+  .col-voltar-lista:hover{color:var(--wax)}
+  .col-print-btn{background:var(--wax);color:var(--paper);border:none;border-radius:6px;padding:9px 18px;cursor:pointer;font-family:'EB Garamond',serif;font-size:15px}
+  .col-titulo-tema{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(28px,5vw,42px);color:var(--ink);text-align:center;margin-bottom:6px}
+  .col-sub{text-align:center;font-family:'EB Garamond',serif;font-style:italic;color:var(--ink-faint);margin-bottom:36px}
+  .col-text{margin-bottom:40px;padding-bottom:34px;border-bottom:1px solid var(--line)}
+  .col-text:last-child{border-bottom:none}
+  .col-text h3{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:26px;color:var(--ink);margin-bottom:2px}
+  .col-by{font-family:'EB Garamond',serif;font-style:italic;color:var(--ink-faint);margin-bottom:14px}
+  .col-corpo{font-family:'EB Garamond',serif;font-size:18px;line-height:1.85;color:var(--ink)}
+  .col-corpo p{margin-bottom:14px}
+  @media print{
+    body{background:#fff !important}
+    body *{visibility:hidden !important}
+    #col-anthology, #col-anthology *{visibility:visible !important}
+    .coletanea{position:static !important;display:block !important;overflow:visible !important}
+    #col-anthology{position:absolute;left:0;top:0;width:100%;padding:0 6%}
+    .col-acoes{display:none !important}
+    .col-text{border-bottom:none}
+  }
   @media(max-width:600px){
     .sheet{padding:34px 20px}
     .actions{flex-direction:column;align-items:stretch}
@@ -246,7 +308,8 @@
   .fav-star{font-size:19px;line-height:1}
   .fonte-ctrl{display:inline-flex;gap:4px}
   body.noite .busca::placeholder{color:rgba(236,227,210,.4)}
-</style>
+</style>  <!-- Estatística simples e privada (GoatCounter, sem cookies). Crie uma conta grátis em goatcounter.com e troque SEUCODIGO pelo seu código. -->
+  <script data-goatcounter="https://SEUCODIGO.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
 
@@ -302,6 +365,7 @@
     <section class="destaque-hero" id="destaque-hero" hidden></section>
 
     <div class="shelf-head">Selados até agora</div>
+    <button class="ao-acaso" id="ao-acaso">✦ ler um pergaminho ao acaso</button>
     <div class="controls">
       <div class="chips" id="chips"></div>
       <div class="controls-right">
@@ -331,12 +395,13 @@
         </a>
       </div>
       <div class="foot-note" id="contagem"></div>
-      <div class="foot-note">Cada pergaminho é lido antes de ser selado. · <a id="abrir-sobre" style="cursor:pointer;color:var(--wax)">sobre a taverna</a></div>
+      <div class="foot-note">Cada pergaminho é lido antes de ser selado. · <a id="abrir-sobre" style="cursor:pointer;color:var(--wax)">sobre a taverna</a> · <a id="abrir-coletaneas" style="cursor:pointer;color:var(--wax)">coletâneas</a> · <a id="meus-link" style="display:none;cursor:pointer;color:var(--wax)">os meus pergaminhos</a></div>
       <button class="btn btn-ghost" id="instalar-btn" hidden>instalar na tela inicial</button>
     </footer>
   </div>
 
   <div class="reader" id="reader">
+    <div class="read-progress"><span class="read-progress-fill" id="r-progress"></span></div>
     <div class="reader-bar"><div class="wrap">
       <button class="back" id="fechar-reader">‹ voltar ao mural</button>
       <span style="font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--ink-faint)">Penas &amp; Pergaminhos</span>
@@ -354,7 +419,7 @@
         <button class="act act-icon" id="r-ouvir" title="Ouvir" aria-label="Ouvir"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9v6h4l5 4V5L9 9H5z"/><path d="M17 9a3.5 3.5 0 0 1 0 6"/></svg></button>
         <button class="act act-text" id="r-citar">criar cartão</button>
         <button class="act act-text" id="abrir-verificar">provar autoria</button>
-        <span class="fonte-ctrl"><button class="act" id="fonte-menos" title="Diminuir fonte">A−</button><button class="act" id="fonte-mais" title="Aumentar fonte">A+</button></span>
+        <span class="fonte-ctrl"><button class="act" id="fonte-menos" title="Diminuir fonte">A−</button><button class="act" id="fonte-mais" title="Aumentar fonte">A+</button><button class="act" id="entrelinha" title="Espaçamento entre linhas" aria-label="Espaçamento entre linhas">↕</button></span>
       </div>
       <div class="verificar-area" id="verificar-area">
         <input id="verif-chave" placeholder="cole aqui a sua chave de autoria">
@@ -365,6 +430,7 @@
         <button id="r-prev">‹ anterior</button>
         <button id="r-next">próximo ›</button>
       </div>
+      <div class="leia-tambem" id="leia-tambem" hidden></div>
       <div class="comments">
         <div class="c-head">Comentários</div>
         <div id="c-list"></div>
@@ -374,6 +440,17 @@
           <button class="btn btn-primary" id="c-send">Comentar</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <div class="coletanea" id="coletanea">
+    <div class="reader-bar"><div class="wrap">
+      <button class="back" id="coletanea-voltar">‹ voltar</button>
+      <span style="font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--ink-faint)">Coletâneas da taverna</span>
+    </div></div>
+    <div class="wrap col-body">
+      <div id="col-lista"></div>
+      <div id="col-anthology" hidden></div>
     </div>
   </div>
 
@@ -389,7 +466,14 @@
       <div class="field"><label>Género</label>
         <select id="f-genero"><option>Conto</option><option>Poesia</option><option>Crónica</option><option>Ensaio</option><option>Fragmento</option><option>Outro</option></select>
       </div>
-      <div class="field"><label>O texto</label><textarea id="f-texto" placeholder="Era uma vez…"></textarea><div class="count"><span id="f-count">0</span> caracteres</div></div>
+      <div class="field"><label>O texto</label><textarea id="f-texto" placeholder="Era uma vez…"></textarea><div class="count"><span id="f-count">0</span> caracteres</div><div class="micro-hint">Pode ser uma frase ou uma página — micro-contos também são bem-vindos.</div></div>
+      <div class="sparks">
+        <button type="button" class="sparks-toggle" id="sparks-toggle">✦ sem ideia? comece por aqui</button>
+        <div class="sparks-box" id="sparks-box">
+          <div class="sparks-frase" id="sparks-frase"></div>
+          <div class="sparks-acoes"><button type="button" id="sparks-outra">outra ideia</button><button type="button" id="sparks-usar">usar este começo</button></div>
+        </div>
+      </div>
       <div class="rascunho-nota" id="rascunho-nota" style="display:none">Rascunho restaurado deste navegador. <a href="#" id="descartar-rascunho">descartar</a></div>
       <div class="actions">
         <button class="btn btn-ghost" id="guardar-rascunho">guardar rascunho</button>
@@ -415,9 +499,11 @@
   <div class="modal" id="chave-modal">
     <div class="sheet">
       <h3>A sua chave de autoria</h3>
+      <p class="chave-festa" id="chave-festa" style="display:none"></p>
       <p class="note">Guarde-a num lugar seguro — é a prova de que este pergaminho é seu. Ela não será mostrada de novo.</p>
       <div class="chave-box" id="chave-valor"></div>
       <div style="text-align:right;margin-bottom:4px"><button class="act" id="copiar-chave" style="font-size:14px;padding:6px 12px">copiar</button></div>
+      <p class="note" id="chave-seguir" style="display:none;margin-bottom:10px"></p>
       <p class="chave-msg">Dizem que, numa velha estalagem à beira da estrada — o Pónei Saltitante —, mais de um viajante distraído perdeu o que era seu para um vulto encapuzado que surgiu da penumbra exigindo o que não lhe cabia. Se um estranho de capa lhe pedir esta chave, não a entregue por ouro nem por juramento. Apenas o Taberneiro da Taverna do Leitor pode zelar por ela.</p>
       <div class="actions">
         <button class="btn btn-primary" id="chave-ok">Já guardei a chave</button>
@@ -432,6 +518,16 @@
       <div class="actions"><button class="btn btn-primary" id="sobre-ok">Fechar</button></div>
     </div>
   </div>
+
+  <div class="modal" id="bemvindo-modal">
+    <div class="sheet">
+      <h3>Bem-vindo à taverna</h3>
+      <p class="note" style="font-size:17px;line-height:1.85;color:var(--ink-soft)">Aqui você deixa o que escreve — um conto, um verso, um fragmento — sem criar conta e, se quiser, sem dizer o seu nome. O taberneiro lê cada texto com cuidado antes de selá-lo no mural. Não há nota a tirar nem regra a decorar: escreva sem medo, e a taverna guarda.</p>
+      <div class="actions"><button class="btn btn-primary" id="bemvindo-ok">Entrar na taverna</button></div>
+    </div>
+  </div>
+
+  <button class="fab-escrever" id="fab-escrever" title="Escrever" aria-label="Escrever um texto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.2 4.8a5.5 5.5 0 0 0-7.8 0L4 13.2V20h6.8l8.4-8.4a5.5 5.5 0 0 0 0-7.8z"/><path d="M16 8 8 16"/><path d="M4 20l5-5"/></svg></button>
 
   <div class="modal" id="citar-modal">
     <div class="sheet" style="max-width:560px">
@@ -476,6 +572,9 @@
   var SUPABASE_URL = 'https://mowrcqwxtmjuqtxbesfg.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_gSMSa-F4C1FHkEpz1QHN3w_pIQ3epsc';
   var REST = SUPABASE_URL + '/rest/v1';
+  // Mude para true DEPOIS de publicar a Edge Function "partilha" no Supabase (ver instruções).
+  var OG_DINAMICO = false;
+  var temaAtivo = null;
   var HEADERS = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' };
 
   // ===== Links sociais (preencha com os seus) =====
@@ -508,13 +607,16 @@
   var fonteLeitor = 19;
   try{ var fl=parseInt(localStorage.getItem('pp_fonte'),10); if(fl>=15 && fl<=30) fonteLeitor=fl; }catch(e){}
   function aplicarFonte(){ var t=document.getElementById('r-text'); if(t) t.style.fontSize=fonteLeitor+'px'; try{localStorage.setItem('pp_fonte',String(fonteLeitor));}catch(e){} }
+  var ENTRELINHAS=[1.7,1.9,2.15], entreIdx=1;
+  try{ var ei=parseInt(localStorage.getItem('pp_entrelinha'),10); if(ei>=0 && ei<ENTRELINHAS.length) entreIdx=ei; }catch(e){}
+  function aplicarEntrelinha(){ var t=document.getElementById('r-text'); if(t) t.style.lineHeight=ENTRELINHAS[entreIdx]; try{localStorage.setItem('pp_entrelinha',String(entreIdx));}catch(e){} }
   var currentReaderId = null;
   var iconeOuvir='<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9v6h4l5 4V5L9 9H5z"/><path d="M17 9a3.5 3.5 0 0 1 0 6"/></svg>';
   var iconeParar='<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
 
   function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
   function tempo(t){var n=(t||'').trim().split(/\s+/).length;return Math.max(1,Math.round(n/200))+' min';}
-  function mapRow(r){return {id:r.id,title:r.titulo,author:r.autor,genre:r.genero,content:r.conteudo,likes:r.curtidas||0,destaque:!!r.destaque,leituras:r.leituras||0};}
+  function mapRow(r){return {id:r.id,title:r.titulo,author:r.autor,genre:r.genero,content:r.conteudo,likes:r.curtidas||0,destaque:!!r.destaque,leituras:r.leituras||0,tema:r.tema||''};}
 
   function montarDestaque(){
     var hero=document.getElementById('destaque-hero');
@@ -557,12 +659,13 @@
     var sec=document.getElementById('tema-mes');
     try{
       var rows=await supaGet('/tema_mes?ativo=eq.true&select=*&order=criado_em.desc&limit=1');
-      if(!rows || !rows.length || !rows[0].tema){ sec.hidden=true; document.body.classList.remove('tem-tema'); return; }
+      if(!rows || !rows.length || !rows[0].tema){ sec.hidden=true; document.body.classList.remove('tem-tema'); temaAtivo=null; return; }
       var t=rows[0];
+      temaAtivo=t.tema;
       document.getElementById('tm-tema').textContent='“'+t.tema+'”';
       if(t.prazo){ iniciarTimer(t.prazo); } else { document.getElementById('tm-timer').textContent=''; }
       sec.hidden=false; document.body.classList.add('tem-tema');
-    }catch(e){ sec.hidden=true; document.body.classList.remove('tem-tema'); }
+    }catch(e){ sec.hidden=true; document.body.classList.remove('tem-tema'); temaAtivo=null; }
   }
 
   async function supaGet(path){
@@ -715,6 +818,9 @@
     var html=(w.content||'').split(/\n\s*\n/).map(function(p){return '<p>'+esc(p).replace(/\n/g,'<br>')+'</p>';}).join('');
     document.getElementById('r-text').innerHTML = html;
     aplicarFonte();
+    aplicarEntrelinha();
+    montarLeiaTambem(w);
+    var pg=document.getElementById('r-progress'); if(pg) pg.style.width='0%';
     var rf=document.getElementById('r-fav'); var isF=favSet.has(String(w.id));
     rf.classList.toggle('on',isF); rf.querySelector('.fav-star').textContent=isF?'★':'☆'; rf.title=isF?'Guardado':'Guardar';
     try{ window.speechSynthesis.cancel(); }catch(e){}
@@ -738,6 +844,28 @@
     prev.onclick = function(){ if(idx>0) abrirLeitor(vistaAtual[idx-1]); };
     next.onclick = function(){ if(idx>=0 && idx<vistaAtual.length-1) abrirLeitor(vistaAtual[idx+1]); };
   }
+  function montarLeiaTambem(w){
+    var box=document.getElementById('leia-tambem'); if(!box) return;
+    var outros=textosAtuais.filter(function(x){ return String(x.id)!==String(w.id); });
+    var mesmoGenero=outros.filter(function(x){ return x.genre===w.genre; });
+    var mesmoAutor=outros.filter(function(x){ return x.author===w.author; });
+    var pool=mesmoGenero.length?mesmoGenero:(mesmoAutor.length?mesmoAutor:outros);
+    if(!pool.length){ box.hidden=true; box.innerHTML=''; return; }
+    pool=pool.slice();
+    for(var i=pool.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)), t=pool[i]; pool[i]=pool[j]; pool[j]=t; }
+    var h='<div class="lt-head">se gostou deste, leia também</div>';
+    pool.slice(0,3).forEach(function(x){
+      h+='<button class="lt-item" data-lt="'+x.id+'"><span class="lt-titulo">'+esc(x.title||'Sem título')+'</span><span class="lt-meta">'+esc(x.genre||'Conto')+' · por '+esc(x.author||'Anónimo')+'</span></button>';
+    });
+    box.innerHTML=h;
+    box.querySelectorAll('.lt-item').forEach(function(b){
+      b.addEventListener('click', function(){
+        var alvo=textosAtuais.find(function(x){ return String(x.id)===String(b.getAttribute('data-lt')); });
+        if(alvo) abrirLeitor(alvo);
+      });
+    });
+    box.hidden=false;
+  }
   document.getElementById('fechar-reader').addEventListener('click', function(){
     try{ window.speechSynthesis.cancel(); }catch(e){}
     var ob=document.getElementById('r-ouvir'); if(ob){ ob.innerHTML=iconeOuvir; ob.title='Ouvir'; ob.classList.remove('on'); }
@@ -750,7 +878,7 @@
     var btn = document.getElementById('r-share');
     var w = textosAtuais.find(function(x){ return String(x.id)===String(id); });
     var titulo = w ? (w.title||'Sem título') : 'Penas & Pergaminhos';
-    var url = location.origin + location.pathname + '?texto=' + id;
+    var url = OG_DINAMICO ? (SUPABASE_URL + '/functions/v1/partilha?id=' + id) : (location.origin + location.pathname + '?texto=' + id);
     if(navigator.share){
       navigator.share({ title:titulo, text:'“'+titulo+'” — na taverna Penas & Pergaminhos', url:url }).catch(function(){});
     } else if(navigator.clipboard){
@@ -839,6 +967,10 @@
       f.count.textContent=f.texto.value.length;
       if(nota) nota.style.display='block';
     } else if(nota){ nota.style.display='none'; }
+    try{
+      var na=localStorage.getItem('pp_autor'); if(na && !f.autor.value.trim()) f.autor.value=na;
+      var ng=localStorage.getItem('pp_genero'); if(ng && (!r || !r.genero)) f.genero.value=ng;
+    }catch(e){}
     abrir(els.modal);
   });
   document.getElementById('publicar-fechar').addEventListener('click',function(){fechar(els.modal);});
@@ -850,7 +982,7 @@
     var autor=f.autor.value.trim(),titulo=f.titulo.value.trim(),texto=f.texto.value.trim();
     if(!autor){fb('Diga como devemos assinar.','err');return;}
     if(!titulo){fb('O pergaminho precisa de um título.','err');return;}
-    if(texto.length<50){fb('O texto precisa de pelo menos 50 caracteres.','err');return;}
+    if(texto.length<20){fb('Escreva ao menos uma frase.','err');return;}
     fechar(els.modal); abrir(avisoModal);
   });
   document.getElementById('aviso-rever').addEventListener('click', function(){ fechar(avisoModal); abrir(els.modal); });
@@ -863,13 +995,22 @@
       var chave=gerarChave();
       var hash=await sha256hex(chave);
       await Promise.all([
-        supaPost('/rpc/enviar_pergaminho', { p_autor:autor, p_titulo:titulo, p_genero:genero, p_conteudo:texto, p_chave_hash:hash }),
+        supaPost('/rpc/enviar_pergaminho', { p_autor:autor, p_titulo:titulo, p_genero:genero, p_conteudo:texto, p_chave_hash:hash, p_tema: temaAtivo||null }),
         new Promise(function(r){ setTimeout(r, 820); })
       ]);
       limparRascunho();
+      try{ localStorage.setItem('pp_autor',autor); localStorage.setItem('pp_genero',genero); }catch(e){}
+      atualizarMeusLink();
       f.titulo.value='';f.texto.value='';f.count.textContent='0';
       stamp.classList.remove('on');
       document.getElementById('chave-valor').textContent = chave;
+      var primeiro=false; try{ primeiro=!localStorage.getItem('pp_enviou'); }catch(e){}
+      var festa=document.getElementById('chave-festa');
+      if(primeiro){ festa.textContent='✦ Este é o seu primeiro pergaminho na taverna. Que seja o primeiro de muitos — seja bem-vindo(a) à mesa.'; festa.style.display='block'; try{ localStorage.setItem('pp_enviou','1'); }catch(e){} }
+      else { festa.style.display='none'; }
+      var seguir=document.getElementById('chave-seguir');
+      seguir.innerHTML='Quando for aprovado, o seu texto aparece no mural assinado por <b>'+esc(autor)+'</b>. Toque no nome (ou em "os meus pergaminhos", no rodapé) para acompanhar curtidas e comentários.';
+      seguir.style.display='block';
       abrir(document.getElementById('chave-modal'));
     }catch(e){
       console.error('Falha ao enviar:', e);
@@ -950,6 +1091,18 @@
   // ===== Tamanho da fonte =====
   document.getElementById('fonte-menos').addEventListener('click', function(){ fonteLeitor=Math.max(15,fonteLeitor-1); aplicarFonte(); });
   document.getElementById('fonte-mais').addEventListener('click', function(){ fonteLeitor=Math.min(30,fonteLeitor+1); aplicarFonte(); });
+  document.getElementById('entrelinha').addEventListener('click', function(){ entreIdx=(entreIdx+1)%ENTRELINHAS.length; aplicarEntrelinha(); });
+  els.reader.addEventListener('scroll', function(){
+    var fill=document.getElementById('r-progress'); if(!fill) return;
+    var max=els.reader.scrollHeight-els.reader.clientHeight;
+    fill.style.width=(max>0?Math.min(100,Math.max(0,els.reader.scrollTop/max*100)):0)+'%';
+  }, {passive:true});
+  document.addEventListener('keydown', function(e){
+    if(!els.reader.classList.contains('open')) return;
+    if(e.key==='Escape'){ document.getElementById('fechar-reader').click(); }
+    else if(e.key==='ArrowLeft'){ navReader(-1); }
+    else if(e.key==='ArrowRight'){ navReader(1); }
+  });
 
   // ===== Sobre =====
   var sobreModal=document.getElementById('sobre-modal');
@@ -1005,6 +1158,111 @@
   });
   window.addEventListener('appinstalled', function(){ if(instalarBtn) instalarBtn.hidden=true; });
   if('serviceWorker' in navigator){ window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
+
+  // ===== Novos recursos: estímulos, FAB, ao acaso, deslizar, acompanhar, boas-vindas =====
+  var ESTIMULOS=[
+    "Comece por uma porta que ninguém deveria ter aberto.",
+    "Escreva sobre algo que você perdeu e nunca procurou de volta.",
+    "“A última vez que a vi, ela…”",
+    "Conte um segredo que uma casa guarda.",
+    "Descreva o cheiro de um lugar da sua infância.",
+    "Alguém recebe uma carta com vinte anos de atraso.",
+    "“Eu não devia estar aqui, mas…”",
+    "Escreva o que o silêncio entre duas pessoas está dizendo.",
+    "Um objeto comum que carrega uma história inteira.",
+    "A cidade amanheceu diferente, e só você reparou.",
+    "Escreva uma despedida que nunca foi dita.",
+    "“Dizem que, naquela estrada…”",
+    "O que acontece na taverna depois que todos vão embora.",
+    "Conte uma noite inteira em três frases.",
+    "Comece pela última linha de uma história e volte ao início."
+  ];
+  (function(){
+    var toggle=document.getElementById('sparks-toggle'), box=document.getElementById('sparks-box'), frase=document.getElementById('sparks-frase');
+    if(!toggle) return;
+    function nova(){ frase.textContent=ESTIMULOS[Math.floor(Math.random()*ESTIMULOS.length)]; }
+    toggle.addEventListener('click', function(){ if(box.classList.toggle('open')) nova(); });
+    document.getElementById('sparks-outra').addEventListener('click', nova);
+    document.getElementById('sparks-usar').addEventListener('click', function(){
+      var t=document.getElementById('f-texto');
+      if(!t.value.trim()){ t.value=frase.textContent.replace(/^[“"]|[”"]$/g,'')+'\n\n'; t.dispatchEvent(new Event('input')); }
+      t.focus(); box.classList.remove('open');
+    });
+  })();
+
+  var fab=document.getElementById('fab-escrever');
+  if(fab) fab.addEventListener('click', function(){ document.getElementById('abrir-publicar').click(); });
+
+  var aoAcaso=document.getElementById('ao-acaso');
+  if(aoAcaso) aoAcaso.addEventListener('click', function(){
+    if(!textosAtuais.length) return;
+    abrirLeitor(textosAtuais[Math.floor(Math.random()*textosAtuais.length)]);
+  });
+
+  function navReader(dir){
+    var idx=vistaAtual.findIndex(function(x){ return String(x.id)===String(currentReaderId); });
+    if(idx<0) return; var ni=idx+dir;
+    if(ni>=0 && ni<vistaAtual.length) abrirLeitor(vistaAtual[ni]);
+  }
+  (function(){
+    var x0=0,y0=0,t0=0;
+    els.reader.addEventListener('touchstart', function(e){ var t=e.changedTouches[0]; x0=t.clientX; y0=t.clientY; t0=Date.now(); }, {passive:true});
+    els.reader.addEventListener('touchend', function(e){
+      var t=e.changedTouches[0], dx=t.clientX-x0, dy=t.clientY-y0;
+      if(Date.now()-t0<600 && Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)*1.6){ navReader(dx<0?1:-1); }
+    }, {passive:true});
+  })();
+
+  function atualizarMeusLink(){
+    var el=document.getElementById('meus-link'); if(!el) return;
+    var nome=''; try{ nome=localStorage.getItem('pp_autor')||''; }catch(e){}
+    if(nome){ el.style.display='inline'; el.onclick=function(){ abrirAutor(nome); }; } else { el.style.display='none'; }
+  }
+  atualizarMeusLink();
+
+  (function(){
+    var visto=false; try{ visto=!!localStorage.getItem('pp_visto'); }catch(e){}
+    var bm=document.getElementById('bemvindo-modal');
+    if(!visto && bm){ setTimeout(function(){ abrir(bm); }, 500); }
+    var ok=document.getElementById('bemvindo-ok');
+    if(ok) ok.addEventListener('click', function(){ fechar(bm); try{ localStorage.setItem('pp_visto','1'); }catch(e){} });
+  })();
+
+  function abrirColetaneas(){
+    var ov=document.getElementById('coletanea'), lista=document.getElementById('col-lista');
+    document.getElementById('col-anthology').hidden=true; lista.hidden=false;
+    var mapa={};
+    textosAtuais.forEach(function(w){ var tm=(w.tema||'').trim(); if(tm){ (mapa[tm]=mapa[tm]||[]).push(w); } });
+    var temas=Object.keys(mapa);
+    if(!temas.length){
+      lista.innerHTML='<div class="col-vazia">Ainda não há coletâneas.<br>Quando um tema do mês reunir textos, eles aparecem aqui.</div>';
+    } else {
+      var h='';
+      temas.forEach(function(tm){ var n=mapa[tm].length;
+        h+='<button class="col-tema-item" data-tema="'+esc(tm)+'"><span class="col-tema-nome">“'+esc(tm)+'”</span><span class="col-tema-meta">'+n+(n===1?' pergaminho':' pergaminhos')+'</span></button>';
+      });
+      lista.innerHTML=h;
+      lista.querySelectorAll('.col-tema-item').forEach(function(b){ b.addEventListener('click', function(){ renderAnthology(b.getAttribute('data-tema')); }); });
+    }
+    ov.classList.add('open'); ov.scrollTop=0; document.body.style.overflow='hidden';
+  }
+  function renderAnthology(tema){
+    var textos=textosAtuais.filter(function(w){ return (w.tema||'').trim()===tema; });
+    var box=document.getElementById('col-anthology');
+    var h='<div class="col-acoes"><button class="col-voltar-lista" id="col-voltar-lista">‹ todas as coletâneas</button><button class="col-print-btn" id="col-print">baixar / imprimir (PDF)</button></div>';
+    h+='<div class="col-titulo-tema">“'+esc(tema)+'”</div><div class="col-sub">coletânea da taverna · '+textos.length+(textos.length===1?' pergaminho':' pergaminhos')+'</div>';
+    textos.forEach(function(w){
+      var corpo=(w.content||'').split(/\n\s*\n/).map(function(p){return '<p>'+esc(p).replace(/\n/g,'<br>')+'</p>';}).join('');
+      h+='<div class="col-text"><h3>'+esc(w.title||'Sem título')+'</h3><div class="col-by">por '+esc(w.author||'Anónimo')+'</div><div class="col-corpo">'+corpo+'</div></div>';
+    });
+    box.innerHTML=h;
+    document.getElementById('col-lista').hidden=true; box.hidden=false;
+    document.getElementById('coletanea').scrollTop=0;
+    document.getElementById('col-voltar-lista').addEventListener('click', abrirColetaneas);
+    document.getElementById('col-print').addEventListener('click', function(){ window.print(); });
+  }
+  document.getElementById('abrir-coletaneas').addEventListener('click', abrirColetaneas);
+  document.getElementById('coletanea-voltar').addEventListener('click', function(){ document.getElementById('coletanea').classList.remove('open'); document.body.style.overflow=''; });
 
   carregar();
   carregarTema();
