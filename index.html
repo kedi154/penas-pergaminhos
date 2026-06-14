@@ -134,6 +134,16 @@
   .dh-title{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(28px,5vw,40px);line-height:1.12;color:var(--ink);margin-bottom:12px}
   .dh-excerpt{font-family:'EB Garamond',serif;font-style:italic;font-size:18px;line-height:1.7;color:var(--ink-soft);max-width:560px;margin:0 auto 16px}
   .dh-by{font-style:italic;color:var(--ink-faint);margin-bottom:18px}
+  .tema-mes{margin:0 0 34px;padding:30px 28px;border:1px solid var(--line);border-radius:8px;background:linear-gradient(160deg,rgba(154,123,63,.09),rgba(143,45,40,.06));text-align:center}
+  .tema-mes[hidden]{display:none}
+  .tm-eyebrow{font-family:'EB Garamond',serif;font-style:italic;font-size:15px;letter-spacing:.03em;color:var(--ink-faint);margin-bottom:8px}
+  .tm-tema{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(26px,5.5vw,40px);line-height:1.15;color:var(--wax);margin-bottom:18px}
+  .tm-prazo{font-family:'EB Garamond',serif;font-style:italic;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:10px}
+  .tm-timer{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+  .tm-u{display:flex;flex-direction:column;align-items:center;min-width:52px}
+  .tm-u b{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:32px;line-height:1;color:var(--ink)}
+  .tm-u i{font-family:'EB Garamond',serif;font-style:normal;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin-top:5px}
+  .tm-encerrado{font-family:'EB Garamond',serif;font-style:italic;color:var(--ink-soft);font-size:16px}
   #instalar-btn{margin-top:6px}
   @media(max-width:600px){
     .sheet{padding:34px 20px}
@@ -280,6 +290,13 @@
     </header>
 
     <div class="cta-row"><button class="btn btn-primary" id="abrir-publicar">Confiar o seu texto</button></div>
+
+    <section class="tema-mes" id="tema-mes" hidden>
+      <div class="tm-eyebrow">Na taverna, o tema da escrita do mês é</div>
+      <h2 class="tm-tema" id="tm-tema"></h2>
+      <div class="tm-prazo" id="tm-prazo"></div>
+      <div class="tm-timer" id="tm-timer"></div>
+    </section>
 
     <section class="destaque-hero" id="destaque-hero" hidden></section>
 
@@ -519,6 +536,35 @@
     w.leituras=(w.leituras||0)+1;
     var el=document.getElementById('r-leituras'); if(el) el.textContent=w.leituras+(w.leituras===1?' leitura':' leituras');
     supaPost('/rpc/registrar_leitura',{ p_id:w.id }).catch(function(e){ console.error('Falha ao registrar leitura:',e); });
+  }
+
+  var temaTimer=null;
+  function iniciarTimer(prazo){
+    var alvo=new Date(prazo).getTime();
+    var prazoEl=document.getElementById('tm-prazo'), el=document.getElementById('tm-timer');
+    if(isNaN(alvo)){ prazoEl.textContent=''; el.textContent=''; return; }
+    function par(n){ return n<10?'0'+n:''+n; }
+    function unidade(n,l){ return '<span class="tm-u"><b>'+par(n)+'</b><i>'+l+'</i></span>'; }
+    function tick(){
+      var diff=alvo-Date.now();
+      if(diff<=0){ prazoEl.textContent=''; el.innerHTML='<span class="tm-encerrado">As publicações deste tema foram encerradas.</span>'; if(temaTimer) clearInterval(temaTimer); return; }
+      var d=Math.floor(diff/864e5), h=Math.floor(diff%864e5/36e5), m=Math.floor(diff%36e5/6e4), s=Math.floor(diff%6e4/1e3);
+      prazoEl.textContent='as publicações encerram em';
+      el.innerHTML=unidade(d,'dias')+unidade(h,'horas')+unidade(m,'min')+unidade(s,'seg');
+    }
+    tick(); if(temaTimer) clearInterval(temaTimer); temaTimer=setInterval(tick,1000);
+  }
+  async function carregarTema(){
+    var sec=document.getElementById('tema-mes');
+    try{
+      var rows=await supaGet('/tema_mes?ativo=eq.true&select=*&order=criado_em.desc&limit=1');
+      if(!rows || !rows.length || !rows[0].tema){ sec.hidden=true; return; }
+      var t=rows[0];
+      document.getElementById('tm-tema').textContent='“'+t.tema+'”';
+      if(t.prazo){ iniciarTimer(t.prazo); }
+      else { document.getElementById('tm-prazo').textContent=''; document.getElementById('tm-timer').textContent=''; }
+      sec.hidden=false;
+    }catch(e){ sec.hidden=true; }
   }
 
   async function supaGet(path){
@@ -963,6 +1009,7 @@
   if('serviceWorker' in navigator){ window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
 
   carregar();
+  carregarTema();
 </script>
 </body>
 </html>
