@@ -355,12 +355,12 @@
 
       <h1>Penas <span class="amp">&amp;</span> Pergaminhos</h1>
       <div class="byline">by Taverna do Leitor</div>
-      <div class="tagline">histórias que a taverna não esquece</div>
+      <div class="tagline" data-cfg="tagline">histórias que a taverna não esquece</div>
       <p class="intro">Aqui repousam histórias escritas à mão e à alma — contos, versos, fragmentos. Cada uma traz uma marca única de quem ousou escrevê-la. Deixe a sua no livro dos dias da taverna.</p>
       <div class="flourish"></div>
     </header>
 
-    <div class="cta-row"><button class="btn btn-primary" id="abrir-publicar">Confiar o seu texto</button></div>
+    <div class="cta-row"><button class="btn btn-primary" id="abrir-publicar" data-cfg="cta">Confiar o seu texto</button></div>
 
     <section class="destaque-hero" id="destaque-hero" hidden></section>
 
@@ -395,7 +395,7 @@
         </a>
       </div>
       <div class="foot-note" id="contagem"></div>
-      <div class="foot-note">Cada pergaminho é lido antes de ser selado. · <a id="abrir-sobre" style="cursor:pointer;color:var(--wax)">sobre a taverna</a> · <a id="abrir-coletaneas" style="cursor:pointer;color:var(--wax)">coletâneas</a> · <a id="meus-link" style="display:none;cursor:pointer;color:var(--wax)">os meus pergaminhos</a></div>
+      <div class="foot-note"><span data-cfg="rodape">Cada pergaminho é lido antes de ser selado.</span> · <a id="abrir-sobre" style="cursor:pointer;color:var(--wax)">sobre a taverna</a> · <a id="abrir-coletaneas" style="cursor:pointer;color:var(--wax)">coletâneas</a> · <a id="meus-link" style="display:none;cursor:pointer;color:var(--wax)">os meus pergaminhos</a></div>
       <button class="btn btn-ghost" id="instalar-btn" hidden>instalar na tela inicial</button>
     </footer>
   </div>
@@ -514,7 +514,7 @@
   <div class="modal" id="sobre-modal">
     <div class="sheet">
       <h3>A taverna</h3>
-      <p class="note" style="font-size:17px;line-height:1.85;color:var(--ink-soft)">Penas &amp; Pergaminhos é o mural de histórias da Taverna do Leitor — um canto para guardar o que se escreve à mão e à alma. Aqui não há nome a provar nem conta a criar: você chega, deixa o seu conto, verso ou fragmento, e o taberneiro o sela no livro dos dias. Cada texto fica marcado por uma chave só sua. Escreva sem medo — a taverna não esquece.</p>
+      <p class="note" data-cfg="sobre" style="font-size:17px;line-height:1.85;color:var(--ink-soft)">Penas &amp; Pergaminhos é o mural de histórias da Taverna do Leitor — um canto para guardar o que se escreve à mão e à alma. Aqui não há nome a provar nem conta a criar: você chega, deixa o seu conto, verso ou fragmento, e o taberneiro o sela no livro dos dias. Cada texto fica marcado por uma chave só sua. Escreva sem medo — a taverna não esquece.</p>
       <div class="actions"><button class="btn btn-primary" id="sobre-ok">Fechar</button></div>
     </div>
   </div>
@@ -522,7 +522,7 @@
   <div class="modal" id="bemvindo-modal">
     <div class="sheet">
       <h3>Bem-vindo à taverna</h3>
-      <p class="note" style="font-size:17px;line-height:1.85;color:var(--ink-soft)">Aqui você deixa o que escreve — um conto, um verso, um fragmento — sem criar conta e, se quiser, sem dizer o seu nome. O taberneiro lê cada texto com cuidado antes de selá-lo no mural. Não há nota a tirar nem regra a decorar: escreva sem medo, e a taverna guarda.</p>
+      <p class="note" data-cfg="boasvindas" style="font-size:17px;line-height:1.85;color:var(--ink-soft)">Aqui você deixa o que escreve — um conto, um verso, um fragmento — sem criar conta e, se quiser, sem dizer o seu nome. O taberneiro lê cada texto com cuidado antes de selá-lo no mural. Não há nota a tirar nem regra a decorar: escreva sem medo, e a taverna guarda.</p>
       <div class="actions"><button class="btn btn-primary" id="bemvindo-ok">Entrar na taverna</button></div>
     </div>
   </div>
@@ -1264,6 +1264,18 @@
   document.getElementById('abrir-coletaneas').addEventListener('click', abrirColetaneas);
   document.getElementById('coletanea-voltar').addEventListener('click', function(){ document.getElementById('coletanea').classList.remove('open'); document.body.style.overflow=''; });
 
+  async function aplicarTextosSite(){
+    try{
+      var rows=await supaGet('/site_config?select=chave,valor');
+      if(!rows || !rows.length) return;
+      var mapa={}; rows.forEach(function(r){ mapa[r.chave]=r.valor; });
+      document.querySelectorAll('[data-cfg]').forEach(function(el){
+        var v=mapa[el.getAttribute('data-cfg')];
+        if(v!=null && String(v).trim()!=='') el.textContent=v;
+      });
+    }catch(e){ /* mantém os textos padrão do HTML */ }
+  }
+  aplicarTextosSite();
   carregar();
   carregarTema();
 </script>

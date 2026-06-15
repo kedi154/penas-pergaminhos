@@ -64,6 +64,15 @@
   .b-danger{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px;text-decoration:underline;text-underline-offset:3px}
   .b-danger:hover{color:var(--wax)}
   .tema-input{border:1px solid var(--line);border-radius:7px;padding:8px 11px;font-family:inherit;font-size:14px;background:var(--paper);color:var(--ink);min-width:160px}
+  .campo{display:block;margin-bottom:12px}
+  .campo>span{display:block;font-size:14px;color:var(--ink-faint);margin-bottom:4px}
+  .campo input,.campo textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:7px;background:var(--paper);font-family:inherit;font-size:16px;color:var(--ink)}
+  .campo textarea{min-height:88px;resize:vertical;line-height:1.6}
+  .campo input:focus,.campo textarea:focus{outline:2px solid var(--wax);outline-offset:1px;border-color:var(--wax)}
+  .linha{display:flex;gap:12px;flex-wrap:wrap}
+  .linha .campo{flex:1;min-width:130px}
+  .check{display:inline-flex;align-items:center;gap:7px;font-size:15px;color:var(--ink-soft);margin:0 16px 10px 0;cursor:pointer}
+  .check input{width:17px;height:17px;accent-color:var(--wax)}
 
   .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:11px 20px;border-radius:8px;font-size:15px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:60}
   .toast.show{opacity:1}
@@ -90,6 +99,10 @@
         <div class="tabs">
           <button class="tab active" data-aba="pendentes">Pendentes <span id="badge-pend"></span></button>
           <button class="tab" data-aba="aprovados">Aprovados</button>
+          <button class="tab" data-aba="produtos">Loja</button>
+          <button class="tab" data-aba="depoimentos">Depoimentos</button>
+          <button class="tab" data-aba="tema">Tema do mês</button>
+          <button class="tab" data-aba="textos">Textos</button>
         </div>
         <button class="sair" id="sair">sair</button>
       </div>
@@ -106,6 +119,39 @@
         <h2>No mural</h2>
         <p class="sub">destacar, etiquetar com um tema ou remover</p>
         <div id="lista-aprovados"><div class="carregando">A abrir o livro…</div></div>
+      </section>
+
+      <section class="secao" id="aba-produtos" style="display:none">
+        <h2>Loja · produtos</h2>
+        <p class="sub">criar, editar e remover as peças da loja</p>
+        <button class="btn" id="novo-produto" style="margin-bottom:18px">+ novo produto</button>
+        <div id="lista-produtos"><div class="carregando">A abrir a loja…</div></div>
+      </section>
+
+      <section class="secao" id="aba-depoimentos" style="display:none">
+        <h2>Depoimentos</h2>
+        <p class="sub">o que dizem — aparecem na loja quando ativos</p>
+        <button class="btn" id="novo-depoimento" style="margin-bottom:18px">+ novo depoimento</button>
+        <div id="lista-depoimentos"><div class="carregando">A carregar…</div></div>
+      </section>
+
+      <section class="secao" id="aba-tema" style="display:none">
+        <h2>Tema do mês</h2>
+        <p class="sub">o tema ativo aparece na faixa do topo do site; salvar um novo desativa os outros</p>
+        <div class="item" id="form-tema">
+          <label class="campo"><span>Tema</span><input id="tema-tema" placeholder="ex.: cartas que nunca foram enviadas"></label>
+          <label class="campo"><span>Prazo (encerra em)</span><input id="tema-prazo" type="datetime-local"></label>
+          <label class="check"><input type="checkbox" id="tema-ativo" checked> ativo (aparecer no site)</label>
+          <div class="acoes"><button class="b-ok" id="tema-salvar">Salvar tema</button><span id="tema-editando" class="item-meta" style="margin:0"></span></div>
+        </div>
+        <h3 style="font-family:'Cormorant Garamond',serif;font-weight:600;margin:28px 0 10px">Temas anteriores</h3>
+        <div id="lista-temas"><div class="carregando">A carregar…</div></div>
+      </section>
+
+      <section class="secao" id="aba-textos" style="display:none">
+        <h2>Textos do site</h2>
+        <p class="sub">edite as frases das páginas; salvam direto, sem re-subir arquivo</p>
+        <div id="lista-textos"><div class="carregando">A carregar…</div></div>
       </section>
     </div>
   </div>
@@ -164,14 +210,14 @@
   }
 
   // ===== Abas =====
+  var LOADERS={ pendentes:carregarPendentes, aprovados:carregarAprovados, produtos:carregarProdutos, depoimentos:carregarDepoimentos, tema:carregarTemas, textos:carregarTextos };
   document.querySelectorAll('.tab').forEach(function(t){
     t.addEventListener('click', function(){
       document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
       t.classList.add('active');
       var aba=t.getAttribute('data-aba');
-      document.getElementById('aba-pendentes').style.display = aba==='pendentes'?'':'none';
-      document.getElementById('aba-aprovados').style.display = aba==='aprovados'?'':'none';
-      if(aba==='pendentes') carregarPendentes(); else carregarAprovados();
+      Object.keys(LOADERS).forEach(function(n){ var s=document.getElementById('aba-'+n); if(s) s.style.display = n===aba?'':'none'; });
+      var fn=LOADERS[aba]; if(fn) fn();
     });
   });
 
@@ -257,6 +303,144 @@
       try{ await chamar('remover',{id:p.id}); el.style.opacity='0'; setTimeout(function(){ el.remove(); },250); toast('Removido.'); }catch(err){ tratarErro(err); }
     });
     return el;
+  }
+
+  // ===== Helpers de salvar/remover linha (produtos, depoimentos) =====
+  async function salvarLinha(el, tabela, id, dados){
+    var btns=el.querySelectorAll('button'); btns.forEach(function(b){ b.disabled=true; });
+    try{
+      await chamar('tabela_salvar', { tabela:tabela, id:id||undefined, dados:dados });
+      toast('Salvo.');
+      if(tabela==='produtos') carregarProdutos(); else if(tabela==='depoimentos') carregarDepoimentos();
+    }catch(err){ btns.forEach(function(b){ b.disabled=false; }); tratarErro(err); }
+  }
+  async function removerLinha(el, tabela, id){
+    if(!id){ el.remove(); return; }
+    if(!confirm('Remover para sempre? Esta ação não pode ser desfeita.')) return;
+    try{ await chamar('tabela_remover', { tabela:tabela, id:id }); el.style.opacity='0'; setTimeout(function(){ el.remove(); },250); toast('Removido.'); }
+    catch(err){ tratarErro(err); }
+  }
+  function val(el,f){ var e=el.querySelector('[data-f="'+f+'"]'); return e?e.value:''; }
+  function chk(el,f){ var e=el.querySelector('[data-f="'+f+'"]'); return e?e.checked:false; }
+
+  // ===== Produtos =====
+  async function carregarProdutos(){
+    var box=document.getElementById('lista-produtos'); box.innerHTML='<div class="carregando">A abrir a loja…</div>';
+    try{ var rows=await chamar('tabela_listar',{tabela:'produtos'});
+      box.innerHTML=''; if(!rows.length){ box.innerHTML='<div class="vazia">Nenhum produto ainda.</div>'; return; }
+      rows.forEach(function(p){ box.appendChild(cardProduto(p)); });
+    }catch(err){ tratarErro(err, box); }
+  }
+  document.getElementById('novo-produto').addEventListener('click', function(){
+    var box=document.getElementById('lista-produtos'); var v=box.querySelector('.vazia'); if(v) v.remove();
+    box.insertBefore(cardProduto({}), box.firstChild);
+  });
+  function cardProduto(p){
+    var el=document.createElement('div'); el.className='item';
+    el.innerHTML=
+      '<label class="campo"><span>Descrição</span><textarea data-f="descricao">'+esc(p.descricao||'')+'</textarea></label>'+
+      '<div class="linha"><label class="campo"><span>Preço</span><input data-f="preco" value="'+esc(p.preco||'')+'"></label>'+
+        '<label class="campo"><span>Categoria</span><input data-f="categoria" value="'+esc(p.categoria||'')+'"></label>'+
+        '<label class="campo"><span>Ordem</span><input data-f="ordem" type="number" value="'+(p.ordem!=null?p.ordem:0)+'"></label></div>'+
+      '<label class="campo"><span>Link de compra (Telegram/loja)</span><input data-f="link" value="'+esc(p.link||'')+'"></label>'+
+      '<label class="campo"><span>Fotos (uma URL por linha)</span><textarea data-f="fotos">'+esc(p.fotos||p.foto||'')+'</textarea></label>'+
+      '<div style="margin-bottom:12px"><label class="check"><input type="checkbox" data-f="ativo" '+(p.ativo===false?'':'checked')+'> ativo</label>'+
+        '<label class="check"><input type="checkbox" data-f="destaque" '+(p.destaque?'checked':'')+'> destaque</label>'+
+        '<label class="check"><input type="checkbox" data-f="esgotado" '+(p.esgotado?'checked':'')+'> esgotado</label></div>'+
+      '<div class="acoes"><button class="b-ok">Salvar</button><button class="b-danger">remover</button></div>';
+    el.querySelector('.b-ok').addEventListener('click', function(){
+      salvarLinha(el,'produtos',p.id,{ descricao:val(el,'descricao'), preco:val(el,'preco'), categoria:val(el,'categoria')||null, ordem:parseInt(val(el,'ordem'),10)||0, link:val(el,'link')||null, fotos:val(el,'fotos')||null, ativo:chk(el,'ativo'), destaque:chk(el,'destaque'), esgotado:chk(el,'esgotado') });
+    });
+    el.querySelector('.b-danger').addEventListener('click', function(){ removerLinha(el,'produtos',p.id); });
+    return el;
+  }
+
+  // ===== Depoimentos =====
+  async function carregarDepoimentos(){
+    var box=document.getElementById('lista-depoimentos'); box.innerHTML='<div class="carregando">A carregar…</div>';
+    try{ var rows=await chamar('tabela_listar',{tabela:'depoimentos'});
+      box.innerHTML=''; if(!rows.length){ box.innerHTML='<div class="vazia">Nenhum depoimento ainda.</div>'; return; }
+      rows.forEach(function(d){ box.appendChild(cardDepo(d)); });
+    }catch(err){ tratarErro(err, box); }
+  }
+  document.getElementById('novo-depoimento').addEventListener('click', function(){
+    var box=document.getElementById('lista-depoimentos'); var v=box.querySelector('.vazia'); if(v) v.remove();
+    box.insertBefore(cardDepo({}), box.firstChild);
+  });
+  function cardDepo(d){
+    var el=document.createElement('div'); el.className='item';
+    el.innerHTML=
+      '<label class="campo"><span>Texto</span><textarea data-f="texto">'+esc(d.texto||'')+'</textarea></label>'+
+      '<div class="linha"><label class="campo"><span>Nome (quem disse)</span><input data-f="nome" value="'+esc(d.nome||'')+'"></label>'+
+        '<label class="campo"><span>Ordem</span><input data-f="ordem" type="number" value="'+(d.ordem!=null?d.ordem:0)+'"></label></div>'+
+      '<div style="margin-bottom:12px"><label class="check"><input type="checkbox" data-f="ativo" '+(d.ativo===false?'':'checked')+'> ativo</label></div>'+
+      '<div class="acoes"><button class="b-ok">Salvar</button><button class="b-danger">remover</button></div>';
+    el.querySelector('.b-ok').addEventListener('click', function(){
+      salvarLinha(el,'depoimentos',d.id,{ texto:val(el,'texto'), nome:val(el,'nome')||null, ordem:parseInt(val(el,'ordem'),10)||0, ativo:chk(el,'ativo') });
+    });
+    el.querySelector('.b-danger').addEventListener('click', function(){ removerLinha(el,'depoimentos',d.id); });
+    return el;
+  }
+
+  // ===== Tema do mês =====
+  var temaEditId=null;
+  function isoParaInput(iso){ try{ var d=new Date(iso); return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16); }catch(e){ return ''; } }
+  function limparFormTema(){ temaEditId=null; document.getElementById('tema-tema').value=''; document.getElementById('tema-prazo').value=''; document.getElementById('tema-ativo').checked=true; document.getElementById('tema-editando').textContent=''; }
+  document.getElementById('tema-salvar').addEventListener('click', async function(){
+    var tema=document.getElementById('tema-tema').value.trim();
+    var prazoRaw=document.getElementById('tema-prazo').value;
+    var dados={ tema:tema||null, prazo: prazoRaw? new Date(prazoRaw).toISOString() : null, ativo: document.getElementById('tema-ativo').checked };
+    try{ await chamar('tabela_salvar',{ tabela:'tema_mes', id:temaEditId||undefined, dados:dados }); toast('Tema salvo.'); limparFormTema(); carregarTemas(); }
+    catch(err){ tratarErro(err); }
+  });
+  async function carregarTemas(){
+    var box=document.getElementById('lista-temas'); box.innerHTML='<div class="carregando">A carregar…</div>';
+    try{ var rows=await chamar('tabela_listar',{tabela:'tema_mes'});
+      box.innerHTML=''; if(!rows.length){ box.innerHTML='<div class="vazia">Nenhum tema ainda.</div>'; return; }
+      rows.forEach(function(t){
+        var el=document.createElement('div'); el.className='item';
+        el.innerHTML='<div class="item-top"><span class="item-titulo">'+esc(t.tema||'(sem tema)')+'</span>'+(t.ativo?'<span class="pill">ativo</span>':'')+'</div>'+
+          '<div class="item-meta">'+(t.prazo?('encerra '+quando(t.prazo)):'sem prazo')+'</div>'+
+          '<div class="acoes"><button class="b-ghost" data-role="editar">editar</button><button class="b-danger" data-role="rem">remover</button></div>';
+        el.querySelector('[data-role="editar"]').addEventListener('click', function(){
+          temaEditId=t.id; document.getElementById('tema-tema').value=t.tema||''; document.getElementById('tema-prazo').value=t.prazo?isoParaInput(t.prazo):''; document.getElementById('tema-ativo').checked=!!t.ativo; document.getElementById('tema-editando').textContent='(editando)'; document.getElementById('form-tema').scrollIntoView({behavior:'smooth'});
+        });
+        el.querySelector('[data-role="rem"]').addEventListener('click', function(){ removerLinha(el,'tema_mes',t.id); });
+        box.appendChild(el);
+      });
+    }catch(err){ tratarErro(err, box); }
+  }
+
+  // ===== Textos do site =====
+  var TEXTOS_DEF=[
+    {chave:'tagline', rotulo:'Site · slogan (abaixo do título)', multi:false},
+    {chave:'cta', rotulo:'Site · botão principal ("Confiar o seu texto")', multi:false},
+    {chave:'sobre', rotulo:'Site · texto "sobre a taverna"', multi:true},
+    {chave:'boasvindas', rotulo:'Site · texto de boas-vindas (1ª visita)', multi:true},
+    {chave:'rodape', rotulo:'Site · nota do rodapé', multi:false},
+    {chave:'loja_lema', rotulo:'Loja · lema', multi:false},
+    {chave:'loja_nota', rotulo:'Loja · nota (impressão 3D / envio)', multi:false},
+    {chave:'loja_passo1', rotulo:'Loja · "como funciona" passo 1', multi:true},
+    {chave:'loja_passo2', rotulo:'Loja · "como funciona" passo 2', multi:true},
+    {chave:'loja_passo3', rotulo:'Loja · "como funciona" passo 3', multi:true}
+  ];
+  async function carregarTextos(){
+    var box=document.getElementById('lista-textos'); box.innerHTML='<div class="carregando">A carregar…</div>';
+    try{
+      var rows=await chamar('config_listar'); var mapa={}; (rows||[]).forEach(function(r){ mapa[r.chave]=r.valor; });
+      box.innerHTML='';
+      TEXTOS_DEF.forEach(function(def){
+        var el=document.createElement('div'); el.className='item';
+        var atual=mapa[def.chave]!=null?mapa[def.chave]:'';
+        var campo=def.multi?'<textarea data-f="valor">'+esc(atual)+'</textarea>':'<input data-f="valor" value="'+esc(atual)+'">';
+        el.innerHTML='<label class="campo"><span>'+esc(def.rotulo)+'</span>'+campo+'</label><div class="acoes"><button class="b-ok">Salvar</button></div>';
+        el.querySelector('.b-ok').addEventListener('click', async function(){
+          try{ await chamar('config_salvar',{ chave:def.chave, valor: el.querySelector('[data-f="valor"]').value }); toast('Salvo.'); }
+          catch(err){ tratarErro(err); }
+        });
+        box.appendChild(el);
+      });
+    }catch(err){ tratarErro(err, box); }
   }
 
   function tratarErro(err, box){

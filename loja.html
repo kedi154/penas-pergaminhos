@@ -191,8 +191,8 @@
       </svg>
       <div class="byline">taverna do leitor</div>
       <h1>Entre Páginas</h1>
-      <div class="tagline">pequenos tesouros para quem lê</div>
-      <p class="nota">Peças feitas em impressão 3D e acabamento manual · Envio para todo o Brasil</p>
+      <div class="tagline" data-cfg="loja_lema">pequenos tesouros para quem lê</div>
+      <p class="nota" data-cfg="loja_nota">Peças feitas em impressão 3D e acabamento manual · Envio para todo o Brasil</p>
       <div class="confianca" id="confianca"></div>
       <div class="flourish"></div>
     </header>
@@ -203,9 +203,9 @@
     <section class="como-comprar">
       <h3>Como funciona</h3>
       <div class="passos">
-        <div class="passo"><span class="num">1</span><br>Escolha o seu tesouro e toque em <b>Comprar</b>.</div>
-        <div class="passo"><span class="num">2</span><br>A conversa abre no Telegram ou WhatsApp, já com o item.</div>
-        <div class="passo"><span class="num">3</span><br>Combinamos o envio e o pagamento, e está feito.</div>
+        <div class="passo"><span class="num">1</span><br><span data-cfg="loja_passo1">Escolha o seu tesouro e toque em <b>Comprar</b>.</span></div>
+        <div class="passo"><span class="num">2</span><br><span data-cfg="loja_passo2">A conversa abre no Telegram ou WhatsApp, já com o item.</span></div>
+        <div class="passo"><span class="num">3</span><br><span data-cfg="loja_passo3">Combinamos o envio e o pagamento, e está feito.</span></div>
       </div>
     </section>
 
@@ -463,6 +463,18 @@
     try{ if(localStorage.getItem('pp_noite')==='1') setNoite(true); }catch(e){}
   })();
 
+  async function aplicarTextosSite(){
+    try{
+      var rows=await supaGet('/site_config?select=chave,valor');
+      if(!rows || !rows.length) return;
+      var mapa={}; rows.forEach(function(r){ mapa[r.chave]=r.valor; });
+      document.querySelectorAll('[data-cfg]').forEach(function(el){
+        var v=mapa[el.getAttribute('data-cfg')];
+        if(v!=null && String(v).trim()!=='') el.textContent=v;
+      });
+    }catch(e){ /* mantém os textos padrão do HTML */ }
+  }
+  aplicarTextosSite();
   carregar();
 </script>
 </body>
