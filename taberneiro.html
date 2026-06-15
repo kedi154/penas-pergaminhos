@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Painel do Taberneiro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=EB+Garamond:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f6efe1; --card:#fbf6ea; --ink:#28211a; --ink-soft:#5a4f3e; --ink-faint:#8a7d68;
+    --wax:#8f2d28; --wax-deep:#7a2521; --gold:#9a7b3f; --line:rgba(40,33,26,.16); --ok:#3f6b43;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'EB Garamond',serif;font-size:17px;line-height:1.6}
+  .wrap{max-width:780px;margin:0 auto;padding:0 22px}
+  a{color:var(--wax)}
+  button{font-family:inherit}
+
+  /* ===== Login ===== */
+  .login{position:fixed;inset:0;background:var(--paper);display:flex;align-items:center;justify-content:center;padding:24px;z-index:50}
+  .login.hidden{display:none}
+  .login-card{width:100%;max-width:380px;text-align:center}
+  .login-card h1{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:34px;margin:0 0 6px;color:var(--ink)}
+  .login-card p{font-style:italic;color:var(--ink-faint);margin:0 0 22px}
+  .login-card input{width:100%;padding:13px 15px;border:1px solid var(--line);border-radius:7px;background:var(--card);font-family:inherit;font-size:17px;color:var(--ink);margin-bottom:12px}
+  .login-card input:focus{outline:2px solid var(--wax);outline-offset:1px;border-color:var(--wax)}
+  .btn{background:var(--wax);color:var(--paper);border:none;border-radius:7px;padding:12px 22px;font-size:16px;cursor:pointer;transition:background .2s}
+  .btn:hover{background:var(--wax-deep)}
+  .btn-block{width:100%}
+  .login-erro{color:var(--wax);font-style:italic;min-height:22px;margin-top:8px}
+
+  /* ===== App ===== */
+  .app{display:none}
+  .app.on{display:block}
+  .topbar{position:sticky;top:0;z-index:10;background:rgba(246,239,225,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+  .topbar .wrap{display:flex;align-items:center;gap:16px;padding-top:14px;padding-bottom:14px}
+  .brand{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:24px;color:var(--ink);margin-right:auto}
+  .tabs{display:flex;gap:6px}
+  .tab{background:none;border:1px solid var(--line);border-radius:20px;padding:7px 16px;cursor:pointer;font-size:15px;color:var(--ink-soft)}
+  .tab.active{background:var(--wax);color:var(--paper);border-color:var(--wax)}
+  .sair{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:15px;text-decoration:underline;text-underline-offset:3px}
+
+  .secao{padding:26px 0 80px}
+  .secao h2{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:26px;margin:0 0 4px}
+  .secao .sub{font-style:italic;color:var(--ink-faint);margin:0 0 22px}
+  .vazia{text-align:center;font-style:italic;color:var(--ink-faint);padding:50px 0}
+  .carregando{text-align:center;color:var(--ink-faint);padding:40px 0}
+
+  .item{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:20px 22px;margin-bottom:16px}
+  .item-top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+  .item-titulo{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:23px;color:var(--ink);line-height:1.2}
+  .item-meta{font-style:italic;color:var(--ink-faint);font-size:14px;margin-bottom:14px}
+  .pill{display:inline-block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);border:1px solid var(--line);border-radius:20px;padding:2px 9px}
+  .corpo{white-space:pre-wrap;font-size:17px;line-height:1.8;color:var(--ink);max-height:300px;overflow:auto;border-left:2px solid var(--line);padding:2px 0 2px 16px;margin-bottom:16px}
+  .acoes{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .b-ok{background:var(--ok);color:#fff;border:none;border-radius:7px;padding:9px 18px;cursor:pointer;font-size:15px}
+  .b-no{background:none;color:var(--wax);border:1px solid var(--wax);border-radius:7px;padding:9px 18px;cursor:pointer;font-size:15px}
+  .b-ghost{background:none;border:1px solid var(--line);border-radius:7px;padding:8px 14px;cursor:pointer;font-size:14px;color:var(--ink-soft)}
+  .b-ghost:hover{border-color:var(--wax);color:var(--wax)}
+  .b-ghost.on{background:var(--gold);color:#fff;border-color:var(--gold)}
+  .b-danger{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px;text-decoration:underline;text-underline-offset:3px}
+  .b-danger:hover{color:var(--wax)}
+  .tema-input{border:1px solid var(--line);border-radius:7px;padding:8px 11px;font-family:inherit;font-size:14px;background:var(--paper);color:var(--ink);min-width:160px}
+
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:11px 20px;border-radius:8px;font-size:15px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:60}
+  .toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div class="login" id="login">
+    <div class="login-card">
+      <h1>Painel do Taberneiro</h1>
+      <p>só para os olhos do dono da taverna</p>
+      <input type="password" id="senha" placeholder="senha" autocomplete="current-password">
+      <button class="btn btn-block" id="entrar">Entrar</button>
+      <div class="login-erro" id="login-erro"></div>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div class="app" id="app">
+    <div class="topbar">
+      <div class="wrap">
+        <span class="brand">Taverna · painel</span>
+        <div class="tabs">
+          <button class="tab active" data-aba="pendentes">Pendentes <span id="badge-pend"></span></button>
+          <button class="tab" data-aba="aprovados">Aprovados</button>
+        </div>
+        <button class="sair" id="sair">sair</button>
+      </div>
+    </div>
+
+    <div class="wrap">
+      <section class="secao" id="aba-pendentes">
+        <h2>Pergaminhos à espera</h2>
+        <p class="sub">leia e decida — aprovar coloca no mural; recusar guarda fora da vista</p>
+        <div id="lista-pendentes"><div class="carregando">A abrir o livro…</div></div>
+      </section>
+
+      <section class="secao" id="aba-aprovados" style="display:none">
+        <h2>No mural</h2>
+        <p class="sub">destacar, etiquetar com um tema ou remover</p>
+        <div id="lista-aprovados"><div class="carregando">A abrir o livro…</div></div>
+      </section>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+  // Endereço da Edge Function "painel" (porteiro). Ajuste se o ref do projeto mudar.
+  var PAINEL_URL = 'https://mowrcqwxtmjuqtxbesfg.supabase.co/functions/v1/painel';
+
+  var senhaAtual = '';
+  try{ senhaAtual = sessionStorage.getItem('tab_senha') || ''; }catch(e){}
+
+  var elLogin=document.getElementById('login'), elApp=document.getElementById('app');
+  var elErro=document.getElementById('login-erro'), elToast=document.getElementById('toast');
+
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function toast(m){ elToast.textContent=m; elToast.classList.add('show'); setTimeout(function(){ elToast.classList.remove('show'); },2200); }
+
+  async function chamar(acao, extra){
+    var payload = Object.assign({ senha: senhaAtual, acao: acao }, extra||{});
+    var res = await fetch(PAINEL_URL, { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(payload) });
+    if(res.status === 401){ throw { senhaInvalida:true }; }
+    var data = await res.json().catch(function(){ return {}; });
+    if(!res.ok){ throw new Error(data && data.erro ? data.erro : ('HTTP '+res.status)); }
+    return data;
+  }
+
+  function entrarApp(){
+    elLogin.classList.add('hidden');
+    elApp.classList.add('on');
+    carregarPendentes();
+  }
+  function sair(){
+    senhaAtual=''; try{ sessionStorage.removeItem('tab_senha'); }catch(e){}
+    elApp.classList.remove('on'); elLogin.classList.remove('hidden');
+    document.getElementById('senha').value='';
+  }
+
+  document.getElementById('entrar').addEventListener('click', tentarEntrar);
+  document.getElementById('senha').addEventListener('keydown', function(e){ if(e.key==='Enter') tentarEntrar(); });
+  document.getElementById('sair').addEventListener('click', sair);
+
+  async function tentarEntrar(){
+    var s=document.getElementById('senha').value.trim();
+    if(!s){ elErro.textContent='Digite a senha.'; return; }
+    elErro.textContent='A conferir…'; senhaAtual=s;
+    try{
+      await chamar('listar_pendentes');
+      try{ sessionStorage.setItem('tab_senha', s); }catch(e){}
+      elErro.textContent=''; entrarApp();
+    }catch(err){
+      senhaAtual='';
+      elErro.textContent = err && err.senhaInvalida ? 'Senha incorreta.' : ('Erro: '+(err && err.message || 'tente de novo'));
+    }
+  }
+
+  // ===== Abas =====
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
+      t.classList.add('active');
+      var aba=t.getAttribute('data-aba');
+      document.getElementById('aba-pendentes').style.display = aba==='pendentes'?'':'none';
+      document.getElementById('aba-aprovados').style.display = aba==='aprovados'?'':'none';
+      if(aba==='pendentes') carregarPendentes(); else carregarAprovados();
+    });
+  });
+
+  function quando(iso){
+    try{ var d=new Date(iso); return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }catch(e){ return ''; }
+  }
+
+  // ===== Pendentes =====
+  async function carregarPendentes(){
+    var box=document.getElementById('lista-pendentes');
+    box.innerHTML='<div class="carregando">A abrir o livro…</div>';
+    try{
+      var rows=await chamar('listar_pendentes');
+      document.getElementById('badge-pend').textContent = rows.length ? '('+rows.length+')' : '';
+      if(!rows.length){ box.innerHTML='<div class="vazia">Nada à espera. A taverna está em dia. ✦</div>'; return; }
+      box.innerHTML='';
+      rows.forEach(function(p){ box.appendChild(cardPendente(p)); });
+    }catch(err){ tratarErro(err, box); }
+  }
+
+  function cardPendente(p){
+    var el=document.createElement('div'); el.className='item';
+    el.innerHTML =
+      '<div class="item-top"><span class="item-titulo">'+esc(p.titulo||'Sem título')+'</span>'+(p.genero?'<span class="pill">'+esc(p.genero)+'</span>':'')+(p.tema?'<span class="pill">tema: '+esc(p.tema)+'</span>':'')+'</div>'+
+      '<div class="item-meta">por '+esc(p.autor||'Anónimo')+' · '+quando(p.criado_em)+'</div>'+
+      '<div class="corpo">'+esc(p.conteudo||'')+'</div>'+
+      '<div class="acoes"><button class="b-ok">Aprovar e selar</button><button class="b-no">Recusar</button></div>';
+    el.querySelector('.b-ok').addEventListener('click', function(){ decidir(el, p.id, 'aprovar', 'Selado no mural.'); });
+    el.querySelector('.b-no').addEventListener('click', function(){ decidir(el, p.id, 'recusar', 'Recusado.'); });
+    return el;
+  }
+
+  async function decidir(el, id, acao, msg){
+    var btns=el.querySelectorAll('button'); btns.forEach(function(b){ b.disabled=true; });
+    try{
+      await chamar(acao, { id:id });
+      el.style.transition='opacity .25s'; el.style.opacity='0';
+      setTimeout(function(){ el.remove();
+        var rest=document.querySelectorAll('#lista-pendentes .item').length;
+        document.getElementById('badge-pend').textContent = rest ? '('+rest+')' : '';
+        if(!rest) document.getElementById('lista-pendentes').innerHTML='<div class="vazia">Nada à espera. A taverna está em dia. ✦</div>';
+      },250);
+      toast(msg);
+    }catch(err){ btns.forEach(function(b){ b.disabled=false; }); tratarErro(err); }
+  }
+
+  // ===== Aprovados =====
+  async function carregarAprovados(){
+    var box=document.getElementById('lista-aprovados');
+    box.innerHTML='<div class="carregando">A abrir o livro…</div>';
+    try{
+      var rows=await chamar('listar_aprovados');
+      if(!rows.length){ box.innerHTML='<div class="vazia">Ainda não há pergaminhos no mural.</div>'; return; }
+      box.innerHTML='';
+      rows.forEach(function(p){ box.appendChild(cardAprovado(p)); });
+    }catch(err){ tratarErro(err, box); }
+  }
+
+  function cardAprovado(p){
+    var el=document.createElement('div'); el.className='item';
+    el.innerHTML =
+      '<div class="item-top"><span class="item-titulo">'+esc(p.titulo||'Sem título')+'</span>'+(p.genero?'<span class="pill">'+esc(p.genero)+'</span>':'')+'</div>'+
+      '<div class="item-meta">por '+esc(p.autor||'Anónimo')+' · ♥ '+(p.curtidas||0)+' · '+(p.leituras||0)+' leituras · '+quando(p.criado_em)+'</div>'+
+      '<div class="acoes">'+
+        '<button class="b-ghost'+(p.destaque?' on':'')+'" data-role="destaque">'+(p.destaque?'★ em destaque':'☆ destacar')+'</button>'+
+        '<input class="tema-input" placeholder="etiquetar com tema…" value="'+esc(p.tema||'')+'">'+
+        '<button class="b-ghost" data-role="tema">salvar tema</button>'+
+        '<button class="b-danger" data-role="remover">remover</button>'+
+      '</div>';
+    var bDest=el.querySelector('[data-role="destaque"]');
+    bDest.addEventListener('click', async function(){
+      bDest.disabled=true;
+      try{ var novo=!p.destaque; await chamar('destaque',{id:p.id,valor:novo}); p.destaque=novo;
+        bDest.classList.toggle('on',novo); bDest.textContent=novo?'★ em destaque':'☆ destacar'; toast(novo?'Em destaque.':'Destaque removido.');
+      }catch(err){ tratarErro(err); } bDest.disabled=false;
+    });
+    el.querySelector('[data-role="tema"]').addEventListener('click', async function(){
+      var v=el.querySelector('.tema-input').value.trim();
+      try{ await chamar('definir_tema',{id:p.id,tema:v}); p.tema=v; toast(v?'Tema salvo.':'Tema removido.'); }catch(err){ tratarErro(err); }
+    });
+    el.querySelector('[data-role="remover"]').addEventListener('click', async function(){
+      if(!confirm('Remover este pergaminho para sempre? Esta ação não pode ser desfeita.')) return;
+      try{ await chamar('remover',{id:p.id}); el.style.opacity='0'; setTimeout(function(){ el.remove(); },250); toast('Removido.'); }catch(err){ tratarErro(err); }
+    });
+    return el;
+  }
+
+  function tratarErro(err, box){
+    if(err && err.senhaInvalida){ toast('Sessão expirou — entre de novo.'); sair(); return; }
+    var m='Erro: '+(err && err.message || 'tente de novo');
+    if(box) box.innerHTML='<div class="vazia">'+esc(m)+'</div>'; else toast(m);
+  }
+
+  // auto-login se a senha já está na sessão
+  if(senhaAtual){
+    chamar('listar_pendentes').then(function(){ entrarApp(); }).catch(function(){ sair(); });
+  }
+</script>
+</body>
+</html>
