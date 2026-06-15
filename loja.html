@@ -107,6 +107,14 @@
   .tg-link{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:6px;background:transparent;border:1px solid var(--line);color:var(--ink-soft);text-decoration:none;transition:.2s}
   .tg-link:hover{color:var(--wax);border-color:var(--wax)}
   .tg-link svg{width:20px;height:20px}
+  .mkt-area{margin-top:14px}
+  .mkt-label{font-size:13px;color:var(--ink-soft);text-align:center;margin:0 0 10px;font-style:italic}
+  .mkt-row{display:flex;gap:10px}
+  .mkt-btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 10px;border-radius:7px;text-decoration:none;font-weight:600;font-size:14px;border:none;cursor:pointer;transition:filter .2s,transform .2s}
+  .mkt-btn:hover{filter:brightness(1.05);transform:translateY(-1px)}
+  .mkt-btn svg{width:17px;height:17px}
+  .mkt-ml{background:#FFE600;color:#2D3277}
+  .mkt-shopee{background:#EE4D2D;color:#fff}
   .lb-nav{position:fixed;top:50%;transform:translateY(-50%);background:rgba(246,239,225,.16);color:#fff;border:none;font-size:38px;line-height:1;width:52px;height:52px;border-radius:50%;cursor:pointer;display:none;z-index:81}
   .lb-nav.show{display:block}
   .lb-prev{left:18px}.lb-next{right:18px}
@@ -282,6 +290,7 @@
   var carrinhoSVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.3"/><circle cx="18" cy="20" r="1.3"/><path d="M3 4 h2 l2.2 11 h11 l1.8-8 h-15"/></svg>';
   var telegramSVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.9 4.3c-.2-.2-.5-.3-.9-.2L3.3 11c-.5.2-.5.9 0 1.1l4.5 1.6 1.7 5.4c.1.4.6.5.9.2l2.6-2.4 4.6 3.4c.4.3.9.1 1-.4L22 4.9c.1-.2 0-.5-.1-.6zM9.4 14.2l-.3 3.3-1-3.5 8.6-5.6-7.3 5.8z"/></svg>';
   var whatsappSVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15l-1.4 5 5.1-1.3A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8 8 0 1 1 12 20zm4.5-5.9c-.2-.1-1.4-.7-1.7-.8s-.4-.1-.5.1-.6.8-.8 1-.3.2-.5.1a6.6 6.6 0 0 1-3.3-2.9c-.2-.4.2-.4.6-1.2.1-.2 0-.3 0-.5l-.7-1.7c-.2-.5-.4-.4-.5-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-1 2.2c0 1.3 1 2.6 1.1 2.7s1.9 2.9 4.6 4c1.7.7 2.3.8 3.1.6.5-.1 1.4-.6 1.6-1.1s.2-1 .1-1.1z"/></svg>';
+  var shareSVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.4"/><circle cx="6" cy="12" r="2.4"/><circle cx="18" cy="19" r="2.4"/><path d="M8.1 10.9 15.9 6.4M8.1 13.1 15.9 17.6"/></svg>';
 
   if(CONFIANCA){ document.getElementById('confianca').textContent = CONFIANCA; } else { document.getElementById('confianca').style.display='none'; }
 
@@ -294,8 +303,24 @@
     return res.json();
   }
 
+  var DEMO_PRODUTOS = [
+    { id:'demo-a', descricao:'Produto teste A — com marketplaces', preco:'999', destaque:true, ativo:true, categoria:'Demonstração', criado_em:new Date().toISOString(),
+      link:'https://t.me/SEU_CONTATO', link_mercadolivre:'https://www.mercadolivre.com.br/', link_shopee:'https://shopee.com.br/' },
+    { id:'demo-b', descricao:'Produto teste B — só Telegram', preco:'49,90', ativo:true, categoria:'Demonstração', criado_em:new Date().toISOString(),
+      link:'https://t.me/SEU_CONTATO' }
+  ];
+
   async function carregar(){
     var box = document.getElementById('produtos');
+    if(new URLSearchParams(location.search).get('demo')==='1'){
+      var aviso=document.createElement('div');
+      aviso.textContent='Modo de demonstração · produtos fictícios. Toque num card para ver o modal e os botões. Tire o "?demo=1" da URL para a loja real.';
+      aviso.style.cssText='background:var(--wax);color:var(--paper);text-align:center;padding:9px 14px;font-family:'+"'EB Garamond',serif"+';font-size:13px;line-height:1.4';
+      document.body.insertBefore(aviso, document.body.firstChild);
+      produtosAtuais = DEMO_PRODUTOS.slice();
+      montarCats(); aplicarVitrine();
+      return;
+    }
     box.innerHTML = '<div class="vazia"><div class="big">A abrir a loja…</div></div>';
     try{
       var rows = await supaGet('/produtos?ativo=eq.true&select=*&order=ordem.asc,criado_em.desc');
@@ -342,6 +367,17 @@
     if(waLink) return '<div class="acoes"><a class="comprar" href="'+waLink+'" target="_blank" rel="noopener" aria-label="Comprar pelo WhatsApp">'+whatsappSVG+' Comprar</a>'
         + '<a class="tg-link" href="'+tgLink+'" target="_blank" rel="noopener" title="Comprar pelo Telegram" aria-label="Comprar pelo Telegram">'+telegramSVG+'</a></div>';
     return '<a class="comprar" href="'+tgLink+'" target="_blank" rel="noopener" aria-label="Comprar pelo Telegram">'+carrinhoSVG+' Comprar</a>';
+  }
+
+  function marketplacesHTML(p){
+    if(p.esgotado) return '';
+    var out='';
+    if(p.link_mercadolivre && String(p.link_mercadolivre).trim())
+      out+='<a class="mkt-btn mkt-ml" href="'+esc(p.link_mercadolivre)+'" target="_blank" rel="noopener" aria-label="Comprar no Mercado Livre">'+carrinhoSVG+' Mercado Livre</a>';
+    if(p.link_shopee && String(p.link_shopee).trim())
+      out+='<a class="mkt-btn mkt-shopee" href="'+esc(p.link_shopee)+'" target="_blank" rel="noopener" aria-label="Comprar na Shopee">'+carrinhoSVG+' Shopee</a>';
+    if(!out) return '';
+    return '<div class="mkt-area"><p class="mkt-label">também à venda em</p><div class="mkt-row">'+out+'</div></div>';
   }
 
   function render(lista){
@@ -417,7 +453,7 @@
     pmMostrar();
     document.getElementById('pm-preco').textContent=p.preco||'';
     document.getElementById('pm-desc').textContent=p.descricao||'';
-    document.getElementById('pm-acoes').innerHTML=acoesHTML(p);
+    document.getElementById('pm-acoes').innerHTML=acoesHTML(p)+marketplacesHTML(p);
     abrirModal(produtoModal);
   }
   document.getElementById('pm-prev').addEventListener('click', function(){ pmNav(-1); });
