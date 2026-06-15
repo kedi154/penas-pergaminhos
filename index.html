@@ -1273,6 +1273,9 @@
         var v=mapa[el.getAttribute('data-cfg')];
         if(v!=null && String(v).trim()!=='') el.textContent=v;
       });
+      var setHref=function(id,v){ var e=document.getElementById(id); if(e && v && String(v).trim()!=='') e.href=v; };
+      setHref('top-telegram', mapa.link_telegram); setHref('a-telegram', mapa.link_telegram);
+      setHref('top-instagram', mapa.link_instagram); setHref('a-instagram', mapa.link_instagram);
     }catch(e){ /* mantém os textos padrão do HTML */ }
   }
   aplicarTextosSite();
