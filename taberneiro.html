@@ -391,13 +391,15 @@
         '<label class="campo"><span>Categoria</span><input data-f="categoria" value="'+esc(p.categoria||'')+'"></label>'+
         '<label class="campo"><span>Ordem</span><input data-f="ordem" type="number" value="'+(p.ordem!=null?p.ordem:0)+'"></label></div>'+
       '<label class="campo"><span>Link de compra (Telegram/loja)</span><input data-f="link" value="'+esc(p.link||'')+'"></label>'+
+      '<div class="linha"><label class="campo"><span>Link Mercado Livre (opcional)</span><input data-f="link_mercadolivre" value="'+esc(p.link_mercadolivre||'')+'"></label>'+
+        '<label class="campo"><span>Link Shopee (opcional)</span><input data-f="link_shopee" value="'+esc(p.link_shopee||'')+'"></label></div>'+
       '<label class="campo"><span>Fotos (uma URL por linha)</span><textarea data-f="fotos">'+esc(p.fotos||p.foto||'')+'</textarea></label>'+
       '<div style="margin-bottom:12px"><label class="check"><input type="checkbox" data-f="ativo" '+(p.ativo===false?'':'checked')+'> ativo</label>'+
         '<label class="check"><input type="checkbox" data-f="destaque" '+(p.destaque?'checked':'')+'> destaque</label>'+
         '<label class="check"><input type="checkbox" data-f="esgotado" '+(p.esgotado?'checked':'')+'> esgotado</label></div>'+
       '<div class="acoes"><button class="b-ok">Salvar</button><button class="b-danger">remover</button></div>';
     el.querySelector('.b-ok').addEventListener('click', function(){
-      salvarLinha(el,'produtos',p.id,{ descricao:val(el,'descricao'), preco:val(el,'preco'), categoria:val(el,'categoria')||null, ordem:parseInt(val(el,'ordem'),10)||0, link:val(el,'link')||null, fotos:val(el,'fotos')||null, ativo:chk(el,'ativo'), destaque:chk(el,'destaque'), esgotado:chk(el,'esgotado') });
+      salvarLinha(el,'produtos',p.id,{ descricao:val(el,'descricao'), preco:val(el,'preco'), categoria:val(el,'categoria')||null, ordem:parseInt(val(el,'ordem'),10)||0, link:val(el,'link')||null, link_mercadolivre:val(el,'link_mercadolivre')||null, link_shopee:val(el,'link_shopee')||null, fotos:val(el,'fotos')||null, ativo:chk(el,'ativo'), destaque:chk(el,'destaque'), esgotado:chk(el,'esgotado') });
     });
     el.querySelector('.b-danger').addEventListener('click', function(){ removerLinha(el,'produtos',p.id); });
     return el;
