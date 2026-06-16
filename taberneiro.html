@@ -465,6 +465,7 @@
   var TEXTOS_DEF=[
     {chave:'link_telegram', rotulo:'Links · Telegram (URL do grupo/canal — usado no site e na loja)', multi:false},
     {chave:'link_instagram', rotulo:'Links · Instagram (URL do perfil — usado no site e na loja)', multi:false},
+    {chave:'generos', rotulo:'Mural · géneros do site (um por linha)', multi:true},
     {chave:'tagline', rotulo:'Site · slogan (abaixo do título)', multi:false},
     {chave:'cta', rotulo:'Site · botão principal ("Confiar o seu texto")', multi:false},
     {chave:'sobre', rotulo:'Site · texto "sobre a taverna"', multi:true},
@@ -484,6 +485,7 @@
       TEXTOS_DEF.forEach(function(def){
         var el=document.createElement('div'); el.className='item';
         var atual=mapa[def.chave]!=null?mapa[def.chave]:'';
+        if(def.chave==='generos' && !String(atual).trim()) atual='Conto\nPoesia\nCrónica\nEnsaio\nFragmento\nOutro';
         var campo=def.multi?'<textarea data-f="valor">'+esc(atual)+'</textarea>':'<input data-f="valor" value="'+esc(atual)+'">';
         el.innerHTML='<label class="campo"><span>'+esc(def.rotulo)+'</span>'+campo+'</label><div class="acoes"><button class="b-ok">Salvar</button></div>';
         el.querySelector('.b-ok').addEventListener('click', async function(){
