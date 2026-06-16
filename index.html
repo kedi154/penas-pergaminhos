@@ -207,6 +207,10 @@
     .col-acoes{display:none !important}
     .col-text{border-bottom:none}
   }
+  .tema-opt{margin-top:-2px}
+  .tema-check{display:flex;align-items:flex-start;gap:9px;cursor:pointer;font-family:'EB Garamond',serif;font-size:15px;color:var(--ink-soft);line-height:1.4}
+  .tema-check input{margin-top:3px;width:17px;height:17px;accent-color:var(--wax);flex:none}
+  .tema-check em{font-style:italic;color:var(--wax)}
   @media(max-width:600px){
     .sheet{padding:34px 20px}
     .actions{flex-direction:column;align-items:stretch}
@@ -367,9 +371,9 @@
     <div class="shelf-head">Selados até agora</div>
     <button class="ao-acaso" id="ao-acaso">✦ ler um pergaminho ao acaso</button>
     <div class="controls">
-      <div class="chips" id="chips"></div>
       <div class="controls-right">
         <input class="busca" id="busca" type="search" placeholder="buscar…" aria-label="Buscar">
+        <select class="sort-sel" id="genero-sel" aria-label="Género"></select>
         <button class="fav-toggle" id="fav-toggle" aria-pressed="false" title="Ver guardados">★ <span class="ft-label">guardados</span></button>
         <select class="sort-sel" id="sort-sel" aria-label="Ordenar">
           <option value="recentes">mais recentes</option>
@@ -465,6 +469,9 @@
       <div class="field"><label>Título</label><input id="f-titulo" placeholder="o título do seu texto" maxlength="120"></div>
       <div class="field"><label>Género</label>
         <select id="f-genero"><option>Conto</option><option>Poesia</option><option>Crónica</option><option>Ensaio</option><option>Fragmento</option><option>Outro</option></select>
+      </div>
+      <div class="field tema-opt" id="tema-opt" hidden>
+        <label class="tema-check"><input type="checkbox" id="f-tema-on" checked> <span>Este texto entra no tema do mês: <em id="tema-opt-nome"></em></span></label>
       </div>
       <div class="field"><label>O texto</label><textarea id="f-texto" placeholder="Era uma vez…"></textarea><div class="count"><span id="f-count">0</span> caracteres</div><div class="micro-hint">Pode ser uma frase ou uma página — micro-contos também são bem-vindos.</div></div>
       <div class="sparks">
@@ -575,6 +582,8 @@
   // Mude para true DEPOIS de publicar a Edge Function "partilha" no Supabase (ver instruções).
   var OG_DINAMICO = false;
   var temaAtivo = null;
+  var GENEROS_DEFAULT = ['Conto','Poesia','Crónica','Ensaio','Fragmento','Outro'];
+  var GENEROS = GENEROS_DEFAULT.slice();
   var HEADERS = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' };
 
   // ===== Links sociais (preencha com os seus) =====
@@ -696,7 +705,7 @@
       var n=textosAtuais.length;
       document.getElementById('contagem').textContent = n? (n + (n===1?' pergaminho selado':' pergaminhos selados')) : '';
       montarDestaque();
-      montarChips();
+      aplicarGeneros();
       aplicarVista();
       abrirDoLink();
     }catch(e){
@@ -722,17 +731,18 @@
     if(filtroAutor){ document.getElementById('autor-bar-nome').textContent=filtroAutor; ab.classList.add('on'); }
     else ab.classList.remove('on');
   }
-  function montarChips(){
-    var box=document.getElementById('chips'); if(!box) return;
-    var generos=['Todos','Conto','Poesia','Crónica','Ensaio','Fragmento','Outro'];
-    box.innerHTML='';
-    generos.forEach(function(g){
-      var b=document.createElement('button');
-      b.className='chip'+(g===filtroGenero?' on':'');
-      b.textContent=g;
-      b.addEventListener('click', function(){ filtroGenero=g; montarChips(); aplicarVista(); });
-      box.appendChild(b);
-    });
+  function montarGeneroSel(){
+    var sel=document.getElementById('genero-sel'); if(!sel) return;
+    sel.innerHTML='';
+    var todos=document.createElement('option'); todos.value='Todos'; todos.textContent='todos os géneros'; sel.appendChild(todos);
+    GENEROS.forEach(function(g){ var o=document.createElement('option'); o.value=g; o.textContent=g; sel.appendChild(o); });
+    sel.value = (filtroGenero==='Todos' || GENEROS.indexOf(filtroGenero)>=0) ? filtroGenero : 'Todos';
+    filtroGenero = sel.value;
+  }
+  function aplicarGeneros(){
+    var fg=document.getElementById('f-genero');
+    if(fg){ var cur=fg.value; fg.innerHTML=''; GENEROS.forEach(function(g){ var o=document.createElement('option'); o.value=g; o.textContent=g; fg.appendChild(o); }); if(GENEROS.indexOf(cur)>=0) fg.value=cur; }
+    montarGeneroSel();
   }
   function filtrarAutor(nome){ filtroAutor=nome; aplicarVista(); var sh=document.querySelector('.shelf-head'); if(sh) sh.scrollIntoView({behavior:'smooth',block:'start'}); }
   function abrirAutor(nome){
@@ -971,6 +981,11 @@
       var na=localStorage.getItem('pp_autor'); if(na && !f.autor.value.trim()) f.autor.value=na;
       var ng=localStorage.getItem('pp_genero'); if(ng && (!r || !r.genero)) f.genero.value=ng;
     }catch(e){}
+    var topt=document.getElementById('tema-opt');
+    if(topt){
+      if(temaAtivo){ document.getElementById('tema-opt-nome').textContent='“'+temaAtivo+'”'; document.getElementById('f-tema-on').checked=true; topt.hidden=false; }
+      else topt.hidden=true;
+    }
     abrir(els.modal);
   });
   document.getElementById('publicar-fechar').addEventListener('click',function(){fechar(els.modal);});
@@ -988,6 +1003,8 @@
   document.getElementById('aviso-rever').addEventListener('click', function(){ fechar(avisoModal); abrir(els.modal); });
   document.getElementById('aviso-confirmar').addEventListener('click', async function(){
     var autor=f.autor.value.trim(),titulo=f.titulo.value.trim(),genero=f.genero.value,texto=f.texto.value.trim();
+    var temaOn=document.getElementById('f-tema-on');
+    var pTema=(temaAtivo && temaOn && temaOn.checked) ? temaAtivo : null;
     var btn=this;btn.disabled=true;btn.textContent='a selar…';
     fechar(avisoModal);
     var stamp=document.getElementById('selo-stamp'); stamp.classList.add('on');
@@ -995,7 +1012,7 @@
       var chave=gerarChave();
       var hash=await sha256hex(chave);
       await Promise.all([
-        supaPost('/rpc/enviar_pergaminho', { p_autor:autor, p_titulo:titulo, p_genero:genero, p_conteudo:texto, p_chave_hash:hash, p_tema: temaAtivo||null }),
+        supaPost('/rpc/enviar_pergaminho', { p_autor:autor, p_titulo:titulo, p_genero:genero, p_conteudo:texto, p_chave_hash:hash, p_tema: pTema }),
         new Promise(function(r){ setTimeout(r, 820); })
       ]);
       limparRascunho();
@@ -1060,6 +1077,7 @@
     try{ if(localStorage.getItem('pp_noite')==='1') setNoite(true); }catch(e){}
   })();
   document.getElementById('sort-sel').addEventListener('change', function(){ ordenacao=this.value; aplicarVista(); });
+  document.getElementById('genero-sel').addEventListener('change', function(){ filtroGenero=this.value; aplicarVista(); });
   document.getElementById('autor-bar-todos').addEventListener('click', function(){ filtroAutor=null; aplicarVista(); });
 
   // ===== Busca e favoritos =====
@@ -1276,6 +1294,10 @@
       var setHref=function(id,v){ var e=document.getElementById(id); if(e && v && String(v).trim()!=='') e.href=v; };
       setHref('top-telegram', mapa.link_telegram); setHref('a-telegram', mapa.link_telegram);
       setHref('top-instagram', mapa.link_instagram); setHref('a-instagram', mapa.link_instagram);
+      if(mapa.generos && String(mapa.generos).trim()){
+        var gs=String(mapa.generos).split(/\r?\n/).map(function(s){ return s.trim(); }).filter(Boolean);
+        if(gs.length){ GENEROS=gs; aplicarGeneros(); }
+      }
     }catch(e){ /* mantém os textos padrão do HTML */ }
   }
   aplicarTextosSite();
