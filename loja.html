@@ -65,7 +65,7 @@
     box-shadow:0 1px 3px rgba(40,33,26,.06);transition:transform .25s ease, box-shadow .25s ease}
   .produto:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(40,33,26,.13)}
   @keyframes rise{to{opacity:1;transform:none}}
-  .foto{position:relative;aspect-ratio:4/3;background:var(--paper-2);overflow:hidden;
+  .foto{position:relative;aspect-ratio:1/1;background:var(--paper-2);overflow:hidden;
     display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(154,123,63,.28);
     box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
   .foto img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease}
@@ -81,16 +81,23 @@
   .lightbox.open{display:flex;animation:lbfade .25s ease}
   @keyframes lbfade{from{opacity:0}to{opacity:1}}
   .lightbox img{max-width:92vw;max-height:88vh;border-radius:5px;border:4px solid var(--paper);box-shadow:0 24px 70px rgba(0,0,0,.55)}
-  .corpo{padding:20px 20px 18px;display:flex;flex-direction:column;flex:1;gap:14px}
-  .desc{color:var(--ink-soft);line-height:1.6}
-  .rodape{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:6px}
-  .preco{font-family:'Fraunces','Cormorant Garamond',serif;font-weight:600;font-size:27px;color:var(--ink)}
-  .comprar{display:inline-flex;align-items:center;gap:8px;background:var(--wax);color:var(--paper);
+  .corpo{padding:16px 18px 16px;display:flex;flex-direction:column;flex:1;gap:9px}
+  .desc{color:var(--ink-soft);line-height:1.55;font-size:17px}
+  .preco-bloco{margin-top:auto;padding-top:4px;display:flex;flex-direction:column;line-height:1.12}
+  .preco-de{font-family:'Fraunces','Cormorant Garamond',serif;font-size:16px;color:var(--ink-faint);text-decoration:line-through}
+  .preco{font-family:'Fraunces','Cormorant Garamond',serif;font-weight:600;font-size:28px;color:var(--ink)}
+  .selo-off{position:absolute;top:0;right:0;z-index:2;font-family:'Fraunces',serif;font-weight:600;font-size:13px;letter-spacing:.02em;padding:5px 12px;border-bottom-left-radius:8px;background:var(--gold);color:#fff;box-shadow:0 2px 7px rgba(40,33,26,.22)}
+  .comprar{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,var(--wax),var(--wax-deep));color:var(--paper);
     text-decoration:none;font-family:'Fraunces',serif;font-weight:600;font-size:17px;
-    padding:11px 20px;border-radius:6px;box-shadow:0 3px 10px rgba(143,45,40,.28);transition:.2s background,.2s transform,.2s box-shadow}
-  .comprar:hover{background:var(--wax-deep);transform:translateY(-2px);box-shadow:0 6px 16px rgba(143,45,40,.34)}
+    padding:12px 20px;border-radius:7px;box-shadow:0 4px 12px rgba(143,45,40,.30);transition:.2s transform,.2s box-shadow,.2s filter}
+  .comprar:hover{filter:brightness(1.07);transform:translateY(-2px);box-shadow:0 8px 20px rgba(143,45,40,.38)}
   .comprar svg{width:18px;height:18px}
-  .comprar.disabled{background:#5a4f3e;pointer-events:none;opacity:.75;box-shadow:none}
+  .comprar.disabled{background:#5a4f3e;pointer-events:none;opacity:.75;box-shadow:none;filter:none}
+  .comprar-wrap{margin-top:10px}
+  .comprar-wrap>.comprar{width:100%;font-size:18px;padding:13px 20px}
+  .comprar-wrap .acoes{display:flex;gap:8px}
+  .comprar-wrap .acoes .comprar{flex:1}
+  .card-trust{margin-top:8px;text-align:center;font-family:'EB Garamond',serif;font-style:italic;font-size:12.5px;color:var(--gold);opacity:.92}
   .confianca{margin:14px auto 0;color:var(--gold);font-size:15px;font-style:italic}
   .cats{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:6px 0 0}
   .cat-chip{font-family:'EB Garamond',serif;font-size:15px;padding:5px 14px;border:1px solid var(--line);border-radius:30px;background:transparent;color:var(--ink-soft);cursor:pointer;transition:.2s}
@@ -115,6 +122,14 @@
   .mkt-btn svg{width:17px;height:17px}
   .mkt-ml{background:#FFE600;color:#2D3277}
   .mkt-shopee{background:#EE4D2D;color:#fff}
+  .card-acts{display:flex;justify-content:flex-end;align-items:center;gap:9px;margin-top:12px}
+  .mini-ic{--ic:var(--wax);display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:transparent;background:color-mix(in srgb, var(--ic) 13%, transparent);color:var(--ic);border:1px solid var(--line);border-color:color-mix(in srgb, var(--ic) 28%, transparent);text-decoration:none;cursor:pointer;padding:0;transition:transform .18s ease,box-shadow .18s ease,background .18s ease,color .18s ease,border-color .18s ease}
+  .mini-ic svg{width:16px;height:16px}
+  .mini-ic:hover{transform:translateY(-2px);background:var(--ic);color:#fff;border-color:var(--ic);box-shadow:0 5px 12px color-mix(in srgb, var(--ic) 35%, transparent)}
+  .mini-ic:active{transform:translateY(0)}
+  .mini-ml{--ic:#3483FA}
+  .mini-shopee{--ic:#EE4D2D}
+  .mini-share{--ic:var(--wax)}
   .lb-nav{position:fixed;top:50%;transform:translateY(-50%);background:rgba(246,239,225,.16);color:#fff;border:none;font-size:38px;line-height:1;width:52px;height:52px;border-radius:50%;cursor:pointer;display:none;z-index:81}
   .lb-nav.show{display:block}
   .lb-prev{left:18px}.lb-next{right:18px}
@@ -304,7 +319,7 @@
   }
 
   var DEMO_PRODUTOS = [
-    { id:'demo-a', descricao:'Produto teste A — com marketplaces', preco:'999', destaque:true, ativo:true, categoria:'Demonstração', criado_em:new Date().toISOString(),
+    { id:'demo-a', descricao:'Produto teste A — com marketplaces', preco:'999', preco_de:'1.299', destaque:true, ativo:true, categoria:'Demonstração', criado_em:new Date().toISOString(),
       link:'https://t.me/SEU_CONTATO', link_mercadolivre:'https://www.mercadolivre.com.br/', link_shopee:'https://shopee.com.br/' },
     { id:'demo-b', descricao:'Produto teste B — só Telegram', preco:'49,90', ativo:true, categoria:'Demonstração', criado_em:new Date().toISOString(),
       link:'https://t.me/SEU_CONTATO' }
@@ -359,6 +374,13 @@
   function dots(n){ var d=''; for(var k=0;k<n;k++) d+='<span></span>'; return '<div class="galeria-dots">'+d+'</div>'; }
 
   function fotosDe(p){ var f=[]; if(p.fotos){ f=p.fotos.split(/[\n,]+/).map(function(s){return s.trim();}).filter(Boolean); } if(!f.length && p.foto) f=[p.foto]; return f; }
+  function parsePreco(s){
+    if(s==null) return null;
+    var n=String(s).replace(/[^\d,\.]/g,'').replace(/\.(?=\d{3}(\D|$))/g,'').replace(',','.');
+    var v=parseFloat(n); return isFinite(v)?v:null;
+  }
+  function descontoPct(de,por){ var a=parsePreco(de), b=parsePreco(por); return (a&&b&&a>b)? Math.round((1-b/a)*100) : null; }
+
   function acoesHTML(p){
     var tgLink = p.link || TELEGRAM_LOJA;
     var msg = 'Olá! Tenho interesse neste item: '+(p.descricao||'')+(p.preco?(' — '+p.preco):'');
@@ -380,6 +402,29 @@
     return '<div class="mkt-area"><p class="mkt-label">também à venda em</p><div class="mkt-row">'+out+'</div></div>';
   }
 
+  function cardIconsHTML(p){
+    var ic='';
+    if(!p.esgotado && p.link_mercadolivre && String(p.link_mercadolivre).trim())
+      ic+='<a class="mini-ic mini-ml" href="'+esc(p.link_mercadolivre)+'" target="_blank" rel="noopener" title="Comprar no Mercado Livre" aria-label="Comprar no Mercado Livre">'+carrinhoSVG+'</a>';
+    if(!p.esgotado && p.link_shopee && String(p.link_shopee).trim())
+      ic+='<a class="mini-ic mini-shopee" href="'+esc(p.link_shopee)+'" target="_blank" rel="noopener" title="Comprar na Shopee" aria-label="Comprar na Shopee">'+carrinhoSVG+'</a>';
+    ic+='<button class="mini-ic mini-share" data-share="'+esc(p.id)+'" title="Compartilhar" aria-label="Compartilhar este produto">'+shareSVG+'</button>';
+    return '<div class="card-acts">'+ic+'</div>';
+  }
+  function toastLoja(msg){
+    var t=document.getElementById('loja-toast');
+    if(!t){ t=document.createElement('div'); t.id='loja-toast'; t.style.cssText='position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:8px;font-family:'+"'EB Garamond',serif"+';font-size:14px;z-index:200;opacity:0;transition:opacity .25s;pointer-events:none'; document.body.appendChild(t); }
+    t.textContent=msg; t.style.opacity='1'; clearTimeout(t._h); t._h=setTimeout(function(){ t.style.opacity='0'; },1800);
+  }
+  function compartilharProduto(id){
+    var p=produtosAtuais.find(function(x){ return String(x.id)===String(id); }); if(!p) return;
+    var url=location.origin+location.pathname+'?produto='+encodeURIComponent(id);
+    var nome=(p.descricao||'').replace(/\s+/g,' ').trim().slice(0,60);
+    if(navigator.share){ navigator.share({ title:'Entre Páginas', text:nome+(p.preco?(' — '+p.preco):''), url:url }).catch(function(){}); }
+    else if(navigator.clipboard){ navigator.clipboard.writeText(url).then(function(){ toastLoja('link copiado!'); }).catch(function(){ prompt('Link do produto:', url); }); }
+    else { prompt('Link do produto:', url); }
+  }
+
   function render(lista){
     var box = document.getElementById('produtos');
     if(!lista.length){
@@ -397,18 +442,24 @@
         ? '<div class="foto com-img"><img src="'+fotos[0]+'" alt="" loading="lazy">'+(fotos.length>1?dots(fotos.length):'')+'</div>'
         : '<div class="foto sem-foto">'+emblemaSVG+'</div>';
       var acoes = acoesHTML(p);
+      var temDe = p.preco_de && String(p.preco_de).trim();
+      var pct = temDe ? descontoPct(p.preco_de, p.preco) : null;
+      var precoBloco = '<div class="preco-bloco">'
+        + (temDe ? '<span class="preco-de">'+esc(p.preco_de)+'</span>' : '')
+        + '<span class="preco">'+esc(p.preco)+'</span>'
+        + '</div>';
       var card = document.createElement('div');
       card.className = 'produto'+(p.esgotado?' is-esgotado':'');
       card.setAttribute('data-pid', p.id);
       card.style.animationDelay = (i*0.06)+'s';
       card.innerHTML =
-        badge + fotoHTML +
+        badge + (pct?('<span class="selo-off">−'+pct+'%</span>'):'') + fotoHTML +
         '<div class="corpo">'+
           '<div class="desc">'+esc(p.descricao)+'</div>'+
-          '<div class="rodape">'+
-            '<span class="preco">'+esc(p.preco)+'</span>'+
-            acoes+
-          '</div>'+
+          precoBloco +
+          '<div class="comprar-wrap">'+acoes+'</div>'+
+          '<div class="card-trust">feito à mão · envio pra todo o Brasil</div>'+
+          cardIconsHTML(p)+
         '</div>';
       box.appendChild(card);
     });
@@ -427,6 +478,8 @@
   function fecharLightbox(){ lb.classList.remove('open'); lbImg.src=''; document.body.style.overflow=''; }
   function navGal(d){ if(!galFotos.length) return; galIdx=(galIdx+d+galFotos.length)%galFotos.length; mostrarGal(); }
   document.getElementById('produtos').addEventListener('click', function(e){
+    var sh=e.target.closest('[data-share]');
+    if(sh){ e.stopPropagation(); compartilharProduto(sh.getAttribute('data-share')); return; }
     if(e.target.closest('a')) return;
     var card=e.target.closest('.produto'); if(!card) return;
     var pid=card.getAttribute('data-pid');
