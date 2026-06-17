@@ -399,7 +399,7 @@
         </a>
       </div>
       <div class="foot-note" id="contagem"></div>
-      <div class="foot-note"><span data-cfg="rodape">Cada pergaminho é lido antes de ser selado.</span> · <a id="abrir-sobre" style="cursor:pointer;color:var(--wax)">sobre a taverna</a> · <a id="abrir-coletaneas" style="cursor:pointer;color:var(--wax)">coletâneas</a> · <a id="abrir-legal" style="cursor:pointer;color:var(--wax)">termos · privacidade</a> · <a id="meus-link" style="display:none;cursor:pointer;color:var(--wax)">os meus pergaminhos</a></div>
+      <div class="foot-note"><span data-cfg="rodape">Cada pergaminho é lido antes de ser selado.</span> · <a id="abrir-sobre" style="cursor:pointer;color:var(--wax)">sobre a taverna</a> · <a id="abrir-coletaneas" style="cursor:pointer;color:var(--wax)">coletâneas</a> · <a id="abrir-legal" style="cursor:pointer;color:var(--wax)">termos · privacidade</a> · <a id="meus-link" style="cursor:pointer;color:var(--wax)">acompanhar o seu texto</a></div>
       <button class="btn btn-ghost" id="instalar-btn" hidden>instalar na tela inicial</button>
     </footer>
   </div>
@@ -592,6 +592,20 @@
       <p class="note" style="text-align:left">Sua chave de autoria é guardada apenas como um código embaralhado (hash): nem a taverna consegue ver a chave original. Não vendemos nem compartilhamos seus dados.</p>
       <p class="note" style="text-align:left">Para remover seu texto ou tirar dúvidas, fale com o Taberneiro pelos canais no rodapé. Este é um resumo em linguagem simples e não substitui aconselhamento jurídico.</p>
       <div class="actions"><button class="btn btn-primary" id="legal-ok">Fechar</button></div>
+    </div>
+  </div>
+
+  <div class="modal" id="acompanhar-modal">
+    <div class="sheet" style="max-width:480px">
+      <button class="sheet-close" id="acompanhar-fechar" aria-label="Fechar">×</button>
+      <h3>Acompanhar o seu texto</h3>
+      <p class="note" style="text-align:left">Tem a sua chave de autoria? Cole aqui para saber se o seu pergaminho já foi selado no mural.</p>
+      <input id="acomp-chave" type="text" placeholder="TAVERNA-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false" style="width:100%;font-family:'EB Garamond',serif;font-size:16px;color:var(--ink);background:var(--paper-2);border:1px solid var(--line);border-radius:6px;padding:11px;letter-spacing:.5px">
+      <div id="acomp-result" class="verif-result" style="margin-top:10px;display:none"></div>
+      <div class="actions">
+        <button class="btn btn-ghost" id="acomp-meus" style="display:none">os meus no mural</button>
+        <button class="btn btn-primary" id="acomp-ver">Ver status</button>
+      </div>
     </div>
   </div>
 
@@ -970,6 +984,10 @@
     var w = textosAtuais.find(function(x){ return String(x.id)===String(p); });
     if(w) abrirLeitor(w);
   }
+  function irParaTexto(id){
+    var w = textosAtuais.find(function(x){ return String(x.id)===String(id); });
+    if(w){ abrirLeitor(w); } else { location.href = location.origin+location.pathname+'?texto='+id; }
+  }
 
   var f={autor:document.getElementById('f-autor'),titulo:document.getElementById('f-titulo'),
          genero:document.getElementById('f-genero'),texto:document.getElementById('f-texto'),
@@ -1089,7 +1107,8 @@
       if(primeiro){ festa.textContent='✦ Este é o seu primeiro pergaminho na taverna. Que seja o primeiro de muitos — seja bem-vindo(a) à mesa.'; festa.style.display='block'; try{ localStorage.setItem('pp_enviou','1'); }catch(e){} }
       else { festa.style.display='none'; }
       var seguir=document.getElementById('chave-seguir');
-      seguir.innerHTML='Quando for aprovado, o seu texto aparece no mural assinado por <b>'+esc(autor)+'</b>. Toque no nome (ou em "os meus pergaminhos", no rodapé) para acompanhar curtidas e comentários.';
+      var assin = autor ? ('assinado por <b>'+esc(autor)+'</b>') : 'de forma anônima';
+      seguir.innerHTML='Quando for selado, o seu texto aparece no mural '+assin+'. Guarde esta chave: em <b>"acompanhar o seu texto"</b>, no rodapé, você a cola e vê se o pergaminho já foi selado.';
       seguir.style.display='block';
       abrir(document.getElementById('chave-modal'));
     }catch(e){
@@ -1296,10 +1315,48 @@
 
   function atualizarMeusLink(){
     var el=document.getElementById('meus-link'); if(!el) return;
-    var nome=''; try{ nome=localStorage.getItem('pp_autor')||''; }catch(e){}
-    if(nome){ el.style.display='inline'; el.onclick=function(){ abrirAutor(nome); }; } else { el.style.display='none'; }
+    el.style.display='inline';
+    el.onclick=abrirAcompanhar;
   }
   atualizarMeusLink();
+
+  var acompModal=document.getElementById('acompanhar-modal');
+  function abrirAcompanhar(){
+    document.getElementById('acomp-chave').value='';
+    var r=document.getElementById('acomp-result'); r.style.display='none'; r.textContent=''; r.className='verif-result';
+    var nome=''; try{ nome=localStorage.getItem('pp_autor')||''; }catch(e){}
+    var mb=document.getElementById('acomp-meus');
+    if(nome){ mb.style.display=''; mb.onclick=function(){ fechar(acompModal); abrirAutor(nome); }; } else { mb.style.display='none'; }
+    abrir(acompModal);
+  }
+  document.getElementById('acompanhar-fechar').addEventListener('click', function(){ fechar(acompModal); });
+  document.getElementById('acomp-ver').addEventListener('click', async function(){
+    var chave=document.getElementById('acomp-chave').value.trim();
+    var r=document.getElementById('acomp-result');
+    if(!chave){ r.style.display='block'; r.className='verif-result no'; r.textContent='Cole a sua chave de autoria acima.'; return; }
+    var b=this; b.disabled=true; b.textContent='a procurar…';
+    try{
+      var hash=await sha256hex(chave);
+      var rows=await supaPost('/rpc/status_pergaminho', { p_chave_hash: hash }, 'return=representation');
+      r.style.display='block';
+      if(!rows || !rows.length){ r.className='verif-result no'; r.textContent='Não encontrei um pergaminho com essa chave. Confira se copiou certinho.'; }
+      else {
+        var p=rows[0];
+        if(p.status==='aprovado'){
+          r.className='verif-result ok';
+          r.innerHTML='✓ Selado! O seu pergaminho está no mural. <a id="acomp-ir" style="cursor:pointer;color:var(--wax);text-decoration:underline">ver o seu texto</a>';
+          var ir=document.getElementById('acomp-ir'); if(ir) ir.onclick=function(){ fechar(acompModal); irParaTexto(p.id); };
+        } else if(p.status==='recusado'){
+          r.className='verif-result no';
+          r.textContent='Este texto não foi para o mural desta vez. Você pode reescrevê-lo e enviar de novo — sem ressentimentos.';
+        } else {
+          r.className='verif-result';
+          r.textContent='⏳ Ainda em análise pelo Taberneiro. Guarde a sua chave: assim que for selado, ele aparece no mural.';
+        }
+      }
+    }catch(e){ console.error('Falha ao consultar status:', e); r.style.display='block'; r.className='verif-result no'; r.textContent='Não consegui consultar agora. Tente de novo em instantes.'; }
+    finally{ b.disabled=false; b.textContent='Ver status'; }
+  });
 
   (function(){
     var visto=false; try{ visto=!!localStorage.getItem('pp_visto'); }catch(e){}
