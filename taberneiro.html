@@ -307,7 +307,7 @@
     var titulo=(p.titulo||'Sem título').toString().trim();
     var autor=(p.autor||'').toString().trim();
     var assin=autor?(' — por '+autor):'';
-    var msg='✦ Novo pergaminho selado na taverna\n\n"'+titulo+'"'+assin+'\n\nvenha ler: '+SITE_URL+'?texto='+p.id;
+    var msg='✦ Novo pergaminho publicado na taverna\n\n"'+titulo+'"'+assin+'\n\nvenha ler: '+SITE_URL+'?texto='+p.id;
     document.getElementById('copiar-texto').value=msg;
     document.getElementById('copiar-modal').style.display='flex';
   }
