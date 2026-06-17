@@ -183,6 +183,18 @@
 
   <div class="toast" id="toast"></div>
 
+  <div id="copiar-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:1000;align-items:center;justify-content:center;padding:18px">
+    <div style="background:var(--card);border:1px solid var(--line);border-radius:12px;max-width:520px;width:100%;padding:24px 24px 20px;box-shadow:0 18px 50px rgba(0,0,0,.5)">
+      <h3 style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:25px;color:var(--ink);margin:0 0 4px">Selado! Avise o canal</h3>
+      <p style="font-style:italic;color:var(--ink-faint);margin:0 0 14px">Copie a mensagem e cole no seu canal do Telegram.</p>
+      <textarea id="copiar-texto" readonly style="width:100%;height:150px;resize:vertical;background:var(--field);border:1px solid var(--line);border-radius:8px;color:var(--ink);font-family:'EB Garamond',serif;font-size:16px;line-height:1.5;padding:12px;box-sizing:border-box"></textarea>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px">
+        <button id="copiar-fechar" style="background:none;border:1px solid var(--line);border-radius:7px;padding:9px 18px;cursor:pointer;color:var(--ink-soft);font-size:15px;font-family:inherit">Fechar</button>
+        <button id="copiar-btn" class="b-ok">Copiar mensagem</button>
+      </div>
+    </div>
+  </div>
+
 <script>
   // Endereço da Edge Function "painel" (porteiro). Ajuste se o ref do projeto mudar.
   var PAINEL_URL = 'https://mowrcqwxtmjuqtxbesfg.supabase.co/functions/v1/painel';
@@ -271,12 +283,12 @@
       '<div class="item-meta">por '+esc(p.autor||'Anónimo')+' · '+quando(p.criado_em)+'</div>'+
       '<div class="corpo">'+esc(p.conteudo||'')+'</div>'+
       '<div class="acoes"><button class="b-ok">Aprovar e selar</button><button class="b-no">Recusar</button></div>';
-    el.querySelector('.b-ok').addEventListener('click', function(){ decidir(el, p.id, 'aprovar', 'Selado no mural.'); });
+    el.querySelector('.b-ok').addEventListener('click', function(){ decidir(el, p.id, 'aprovar', 'Selado no mural.', p); });
     el.querySelector('.b-no').addEventListener('click', function(){ decidir(el, p.id, 'recusar', 'Recusado.'); });
     return el;
   }
 
-  async function decidir(el, id, acao, msg){
+  async function decidir(el, id, acao, msg, row){
     var btns=el.querySelectorAll('button'); btns.forEach(function(b){ b.disabled=true; });
     try{
       await chamar(acao, { id:id });
@@ -287,8 +299,25 @@
         if(!rest) document.getElementById('lista-pendentes').innerHTML='<div class="vazia">Nada à espera. A taverna está em dia. ✦</div>';
       },250);
       toast(msg);
+      if(acao==='aprovar' && row) mostrarMensagemCanal(row);
     }catch(err){ btns.forEach(function(b){ b.disabled=false; }); tratarErro(err); }
   }
+
+  function mostrarMensagemCanal(p){
+    var titulo=(p.titulo||'Sem título').toString().trim();
+    var autor=(p.autor||'').toString().trim();
+    var assin=autor?(' — por '+autor):'';
+    var msg='✦ Novo pergaminho selado na taverna\n\n"'+titulo+'"'+assin+'\n\nvenha ler: '+SITE_URL+'?texto='+p.id;
+    document.getElementById('copiar-texto').value=msg;
+    document.getElementById('copiar-modal').style.display='flex';
+  }
+  document.getElementById('copiar-fechar').addEventListener('click', function(){ document.getElementById('copiar-modal').style.display='none'; });
+  document.getElementById('copiar-btn').addEventListener('click', function(){
+    var ta=document.getElementById('copiar-texto'); ta.focus(); ta.select();
+    if(navigator.clipboard){ navigator.clipboard.writeText(ta.value).catch(function(){}); }
+    try{ document.execCommand('copy'); }catch(e){}
+    var b=this, old=b.textContent; b.textContent='copiado!'; setTimeout(function(){ b.textContent=old; },1400);
+  });
 
   // ===== Aprovados =====
   async function carregarAprovados(){
@@ -346,17 +375,18 @@
       '<div class="item-meta">por '+esc(p.autor||'Anónimo')+' · '+quando(p.criado_em)+'</div>'+
       '<div class="corpo">'+esc(p.conteudo||'')+'</div>'+
       '<div class="acoes"><button class="b-ok">Aprovar mesmo assim</button><button class="b-danger">apagar de vez</button></div>';
-    el.querySelector('.b-ok').addEventListener('click', function(){ decidirRecusado(el, p.id, 'aprovar', 'Resgatado para o mural.'); });
+    el.querySelector('.b-ok').addEventListener('click', function(){ decidirRecusado(el, p.id, 'aprovar', 'Resgatado para o mural.', p); });
     el.querySelector('.b-danger').addEventListener('click', function(){ if(confirm('Apagar este texto para sempre? Esta ação não pode ser desfeita.')) decidirRecusado(el, p.id, 'remover', 'Apagado.'); });
     return el;
   }
-  async function decidirRecusado(el, id, acao, msg){
+  async function decidirRecusado(el, id, acao, msg, row){
     var btns=el.querySelectorAll('button'); btns.forEach(function(b){ b.disabled=true; });
     try{
       await chamar(acao, { id:id });
       el.style.transition='opacity .25s'; el.style.opacity='0';
       setTimeout(function(){ el.remove(); if(!document.querySelectorAll('#lista-recusados .item').length) document.getElementById('lista-recusados').innerHTML='<div class="vazia">Nenhum texto recusado. ✦</div>'; },250);
       toast(msg);
+      if(acao==='aprovar' && row) mostrarMensagemCanal(row);
     }catch(err){ btns.forEach(function(b){ b.disabled=false; }); tratarErro(err); }
   }
 
