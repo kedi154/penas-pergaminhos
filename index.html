@@ -312,8 +312,8 @@
   .fav-star{font-size:19px;line-height:1}
   .fonte-ctrl{display:inline-flex;gap:4px}
   body.noite .busca::placeholder{color:rgba(236,227,210,.4)}
-</style>  <!-- Estatística simples e privada (GoatCounter, sem cookies). Crie uma conta grátis em goatcounter.com e troque SEUCODIGO pelo seu código. -->
-  <script data-goatcounter="https://SEUCODIGO.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</style>  <!-- Estatística simples e privada (GoatCounter, sem cookies). Painel: kedi.goatcounter.com (código já configurado abaixo). -->
+  <script data-goatcounter="https://kedi.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
 
@@ -399,7 +399,7 @@
         </a>
       </div>
       <div class="foot-note" id="contagem"></div>
-      <div class="foot-note"><span data-cfg="rodape">Cada pergaminho é lido antes de ser selado.</span> · <a id="abrir-sobre" style="cursor:pointer;color:var(--wax)">sobre a taverna</a> · <a id="abrir-coletaneas" style="cursor:pointer;color:var(--wax)">coletâneas</a> · <a id="meus-link" style="display:none;cursor:pointer;color:var(--wax)">os meus pergaminhos</a></div>
+      <div class="foot-note"><span data-cfg="rodape">Cada pergaminho é lido antes de ser selado.</span> · <a id="abrir-sobre" style="cursor:pointer;color:var(--wax)">sobre a taverna</a> · <a id="abrir-coletaneas" style="cursor:pointer;color:var(--wax)">coletâneas</a> · <a id="abrir-legal" style="cursor:pointer;color:var(--wax)">termos · privacidade</a> · <a id="meus-link" style="display:none;cursor:pointer;color:var(--wax)">os meus pergaminhos</a></div>
       <button class="btn btn-ghost" id="instalar-btn" hidden>instalar na tela inicial</button>
     </footer>
   </div>
@@ -423,6 +423,7 @@
         <button class="act act-icon" id="r-ouvir" title="Ouvir" aria-label="Ouvir"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9v6h4l5 4V5L9 9H5z"/><path d="M17 9a3.5 3.5 0 0 1 0 6"/></svg></button>
         <button class="act act-text" id="r-citar">criar cartão</button>
         <button class="act act-text" id="abrir-verificar">provar autoria</button>
+        <button class="act act-text" id="abrir-denuncia" style="opacity:.65" title="Reportar este texto">denunciar</button>
         <span class="fonte-ctrl"><button class="act" id="fonte-menos" title="Diminuir fonte">A−</button><button class="act" id="fonte-mais" title="Aumentar fonte">A+</button><button class="act" id="entrelinha" title="Espaçamento entre linhas" aria-label="Espaçamento entre linhas">↕</button></span>
       </div>
       <div class="verificar-area" id="verificar-area">
@@ -554,6 +555,43 @@
       <h3 id="autor-nome"></h3>
       <p class="note" id="autor-stats"></p>
       <div class="autor-lista" id="autor-lista"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="denuncia-modal">
+    <div class="sheet" style="max-width:460px">
+      <button class="sheet-close" id="denuncia-fechar" aria-label="Fechar">×</button>
+      <h3>Reportar este pergaminho</h3>
+      <p class="note">Algo de errado com este texto? Conte ao Taberneiro — sua denúncia é anônima e ajuda a manter a taverna acolhedora.</p>
+      <select id="den-motivo" style="width:100%;font-family:'EB Garamond',serif;font-size:16px;color:var(--ink);background:var(--paper-2);border:1px solid var(--line);border-radius:6px;padding:10px;margin-bottom:10px">
+        <option value="">Motivo (opcional)…</option>
+        <option>Plágio — copiaram um texto meu ou de outra pessoa</option>
+        <option>Conteúdo ofensivo ou de ódio</option>
+        <option>Spam ou propaganda</option>
+        <option>Conteúdo impróprio</option>
+        <option>Outro</option>
+      </select>
+      <textarea id="den-obs" rows="3" placeholder="quer detalhar? (opcional)" style="width:100%;font-family:'EB Garamond',serif;font-size:16px;color:var(--ink);background:var(--paper-2);border:1px solid var(--line);border-radius:6px;padding:10px;resize:vertical"></textarea>
+      <div class="actions">
+        <button class="btn btn-ghost" id="den-cancelar">Cancelar</button>
+        <button class="btn btn-primary" id="den-enviar">Enviar denúncia</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="legal-modal">
+    <div class="sheet" style="max-width:580px;max-height:82vh;overflow:auto">
+      <button class="sheet-close" id="legal-fechar" aria-label="Fechar">×</button>
+      <h3>Termos &amp; privacidade</h3>
+      <p class="note" style="font-weight:600;color:var(--ink);margin-top:6px;text-align:left">Termos de uso</p>
+      <p class="note" style="text-align:left">Ao deixar um texto, você declara que ele é seu — ou que tem o direito de publicá-lo — e autoriza a taverna a exibi-lo no mural e nas coletâneas do site. Os direitos sobre o texto continuam sendo seus.</p>
+      <p class="note" style="text-align:left">Não envie textos de outras pessoas sem permissão, nem conteúdo ofensivo, de ódio, ilegal ou impróprio. O Taberneiro pode recusar ou remover qualquer texto, a qualquer momento. A curadoria é humana e subjetiva: recusar um texto não é um julgamento sobre você.</p>
+      <p class="note" style="text-align:left">Quer remover um texto já selado? Guarde sua chave de autoria — é com ela que você prova que o texto é seu — e fale com o Taberneiro pelos canais do rodapé.</p>
+      <p class="note" style="font-weight:600;color:var(--ink);margin-top:14px;text-align:left">Privacidade</p>
+      <p class="note" style="text-align:left">Não criamos conta nem pedimos cadastro. Guardamos apenas o que você digita (o nome ou pseudónimo, se quiser, e o texto) e estatísticas de acesso anônimas, sem cookies de rastreamento.</p>
+      <p class="note" style="text-align:left">Sua chave de autoria é guardada apenas como um código embaralhado (hash): nem a taverna consegue ver a chave original. Não vendemos nem compartilhamos seus dados.</p>
+      <p class="note" style="text-align:left">Para remover seu texto ou tirar dúvidas, fale com o Taberneiro pelos canais no rodapé. Este é um resumo em linguagem simples e não substitui aconselhamento jurídico.</p>
+      <div class="actions"><button class="btn btn-primary" id="legal-ok">Fechar</button></div>
     </div>
   </div>
 
@@ -940,6 +978,31 @@
   function fb(m,t){els.fb.textContent=m;els.fb.className='feedback '+t;}
   function abrir(m){m.classList.add('open');document.body.style.overflow='hidden';}
   function fechar(m){m.classList.remove('open');document.body.style.overflow='';}
+
+  function ppToast(msg){
+    var t=document.getElementById('pp-toast');
+    if(!t){ t=document.createElement('div'); t.id='pp-toast'; t.style.cssText="position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:11px 18px;border-radius:8px;font-family:'EB Garamond',serif;font-size:15px;z-index:300;opacity:0;transition:opacity .25s;pointer-events:none;max-width:88vw;text-align:center"; document.body.appendChild(t); }
+    t.textContent=msg; t.style.opacity='1'; clearTimeout(t._h); t._h=setTimeout(function(){ t.style.opacity='0'; },2400);
+  }
+
+  var legalModal=document.getElementById('legal-modal');
+  document.getElementById('abrir-legal').addEventListener('click', function(){ abrir(legalModal); });
+  document.getElementById('legal-ok').addEventListener('click', function(){ fechar(legalModal); });
+  document.getElementById('legal-fechar').addEventListener('click', function(){ fechar(legalModal); });
+
+  var denunciaModal=document.getElementById('denuncia-modal');
+  document.getElementById('abrir-denuncia').addEventListener('click', function(){ if(currentReaderId==null) return; document.getElementById('den-motivo').value=''; document.getElementById('den-obs').value=''; abrir(denunciaModal); });
+  document.getElementById('den-cancelar').addEventListener('click', function(){ fechar(denunciaModal); });
+  document.getElementById('denuncia-fechar').addEventListener('click', function(){ fechar(denunciaModal); });
+  document.getElementById('den-enviar').addEventListener('click', async function(){
+    var mot=document.getElementById('den-motivo').value;
+    var obs=document.getElementById('den-obs').value.trim();
+    var texto=[mot,obs].filter(Boolean).join(' — ');
+    var btn=this; btn.disabled=true;
+    try{ await supaPost('/denuncias', { pergaminho_id: currentReaderId, motivo: texto||null }); }catch(e){}
+    btn.disabled=false; fechar(denunciaModal);
+    ppToast('Denúncia enviada. Obrigado por cuidar da taverna.');
+  });
   var avisoModal = document.getElementById('aviso-modal');
 
   // ===== Rascunho (guardado neste navegador) =====
