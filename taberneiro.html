@@ -116,6 +116,7 @@
           <button class="tab" data-aba="depoimentos">Depoimentos</button>
           <button class="tab" data-aba="tema">Tema do mês</button>
           <button class="tab" data-aba="textos">Textos</button>
+          <button class="tab" data-aba="denuncias">Denúncias <span id="badge-den"></span></button>
         </div>
         <button class="sair" id="sair">sair</button>
       </div>
@@ -172,6 +173,11 @@
         <p class="sub">edite as frases das páginas; salvam direto, sem re-subir arquivo</p>
         <div id="lista-textos"><div class="carregando">A carregar…</div></div>
       </section>
+      <section class="secao" id="aba-denuncias" style="display:none">
+        <h2>Denúncias</h2>
+        <p class="sub">reports enviados pelos leitores — veja o texto, decida, e apague o report</p>
+        <div id="lista-denuncias"><div class="carregando">A carregar…</div></div>
+      </section>
     </div>
   </div>
 
@@ -180,6 +186,7 @@
 <script>
   // Endereço da Edge Function "painel" (porteiro). Ajuste se o ref do projeto mudar.
   var PAINEL_URL = 'https://mowrcqwxtmjuqtxbesfg.supabase.co/functions/v1/painel';
+  var SITE_URL = 'https://www.penasepergaminhos.com.br/';
 
   var senhaAtual = '';
   try{ senhaAtual = sessionStorage.getItem('tab_senha') || ''; }catch(e){}
@@ -229,7 +236,7 @@
   }
 
   // ===== Abas =====
-  var LOADERS={ pendentes:carregarPendentes, aprovados:carregarAprovados, recusados:carregarRecusados, produtos:carregarProdutos, depoimentos:carregarDepoimentos, tema:carregarTemas, textos:carregarTextos };
+  var LOADERS={ pendentes:carregarPendentes, aprovados:carregarAprovados, recusados:carregarRecusados, produtos:carregarProdutos, depoimentos:carregarDepoimentos, tema:carregarTemas, textos:carregarTextos, denuncias:carregarDenuncias };
   document.querySelectorAll('.tab').forEach(function(t){
     t.addEventListener('click', function(){
       document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
@@ -368,6 +375,27 @@
     try{ await chamar('tabela_remover', { tabela:tabela, id:id }); el.style.opacity='0'; setTimeout(function(){ el.remove(); },250); toast('Removido.'); }
     catch(err){ tratarErro(err); }
   }
+  async function carregarDenuncias(){
+    var box=document.getElementById('lista-denuncias');
+    box.innerHTML='<div class="carregando">A carregar…</div>';
+    try{
+      var rows=await chamar('tabela_listar',{tabela:'denuncias'});
+      var b=document.getElementById('badge-den'); if(b) b.textContent = rows.length ? '('+rows.length+')':'';
+      if(!rows.length){ box.innerHTML='<div class="vazia">Nenhuma denúncia. A taverna está tranquila. ✦</div>'; return; }
+      box.innerHTML='';
+      rows.forEach(function(d){
+        var el=document.createElement('div'); el.className='item';
+        el.innerHTML=
+          '<div class="item-top"><span class="item-titulo">Pergaminho #'+d.pergaminho_id+'</span></div>'+
+          '<div class="item-meta">'+quando(d.criado_em)+'</div>'+
+          '<div class="corpo">'+(d.motivo?esc(d.motivo):'<em>sem motivo informado</em>')+'</div>'+
+          '<div class="acoes"><a class="b-ver" style="color:#c9a96a;text-decoration:none;margin-right:auto;align-self:center" href="'+SITE_URL+'?texto='+d.pergaminho_id+'" target="_blank" rel="noopener">Ver o texto ↗</a><button class="b-no">Apagar report</button></div>';
+        el.querySelector('.b-no').addEventListener('click', function(){ removerLinha(el,'denuncias',d.id); });
+        box.appendChild(el);
+      });
+    }catch(err){ tratarErro(err, box); }
+  }
+
   function val(el,f){ var e=el.querySelector('[data-f="'+f+'"]'); return e?e.value:''; }
   function chk(el,f){ var e=el.querySelector('[data-f="'+f+'"]'); return e?e.checked:false; }
 
