@@ -1,607 +1,1447 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex, nofollow">
-<title>Painel do Taberneiro</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Penas & Pergaminhos</title>
+<meta name="description" content="Histórias que a taverna não esquece — contos, versos e fragmentos da comunidade da Taverna do Leitor.">
+<meta name="theme-color" content="#8f2d28">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Penas & Pergaminhos">
+<meta property="og:title" content="Penas & Pergaminhos">
+<meta property="og:description" content="Histórias que a taverna não esquece.">
+<meta property="og:url" content="https://www.penasepergaminhos.com.br/">
+<meta property="og:image" content="https://www.penasepergaminhos.com.br/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Penas & Pergaminhos">
+<meta name="twitter:description" content="Histórias que a taverna não esquece.">
+<meta name="twitter:image" content="https://www.penasepergaminhos.com.br/og.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <style>
-  /* Aniron não está no Google Fonts (é uma fonte gratuita-para-uso-pessoal, da Pia Frauss).
-     Se você baixar o arquivo e colocar "Aniron.woff2" na mesma pasta deste HTML, ele é usado.
-     Sem o arquivo, cai no Cinzel (estilo de inscrição romana, bem perto do título dos filmes). */
-  @font-face{ font-family:'Aniron'; src:url('Aniron.woff2') format('woff2'); font-display:swap; }
   :root{
-    --bg:#1b1510; --bg2:#221a13; --card:#26201a; --field:#1f1812;
-    --ink:#ece2cd; --ink-soft:#cdbfa3; --ink-faint:#9c8d72;
-    --gold:#c8a24a; --gold-soft:#a8863a; --wax:#8f2d28;
-    --red:#cf6a5e; --ok:#6f8f57; --line:rgba(200,162,74,.22);
-    --disp:'Aniron','Cinzel',serif;
+    --paper:#f6efe1;--paper-2:#efe6d2;--ink:#28211a;--ink-soft:#5a4f3e;--ink-faint:#928570;
+    --wax:#8f2d28;--wax-deep:#6f201c;--line:rgba(90,79,62,.16);--gold:#9a7b3f;
   }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:'EB Garamond',serif;font-size:17px;line-height:1.6}
-  .wrap{max-width:820px;margin:0 auto;padding:0 22px}
-  a{color:var(--gold)}
-  button{font-family:inherit}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--paper);color:var(--ink);font-family:'EB Garamond',Georgia,serif;
+    font-size:19px;line-height:1.75;min-height:100vh;
+    background-image:radial-gradient(circle at 20% 8%, rgba(154,123,63,.05), transparent 45%),
+      radial-gradient(circle at 82% 88%, rgba(143,45,40,.045), transparent 42%);}
+  .wrap{max-width:720px;margin:0 auto;padding:0 30px}
+  ::selection{background:rgba(143,45,40,.18)}
 
-  /* ===== Login ===== */
-  .login{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;z-index:50;
-    background:radial-gradient(120% 90% at 50% 0%, #2a2014 0%, var(--bg) 60%)}
-  .login.hidden{display:none}
-  .login-card{width:100%;max-width:400px;text-align:center}
-  .login-card h1{font-family:var(--disp);font-weight:600;font-size:32px;letter-spacing:.04em;margin:0 0 6px;color:var(--gold)}
-  .login-card p{font-style:italic;color:var(--ink-faint);margin:0 0 24px}
-  .login-card input{width:100%;padding:13px 15px;border:1px solid var(--line);border-radius:7px;background:var(--field);font-family:inherit;font-size:17px;color:var(--ink);margin-bottom:12px}
-  .login-card input:focus{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--gold)}
-  .btn{background:linear-gradient(180deg,var(--gold),var(--gold-soft));color:#241a0e;border:none;border-radius:7px;padding:12px 22px;font-size:16px;font-weight:600;cursor:pointer;transition:filter .2s}
-  .btn:hover{filter:brightness(1.08)}
-  .btn-block{width:100%}
-  .login-erro{color:var(--red);font-style:italic;min-height:22px;margin-top:8px}
+  header{text-align:center;padding:64px 0 30px}
+  .seal{width:168px;height:168px;margin:0 auto 26px;display:block;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+  .seal:hover{transform:rotate(-4deg) scale(1.03)}
+  header h1{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(42px,9vw,68px);line-height:1;letter-spacing:.01em;color:var(--ink)}
+  header h1 .amp{color:var(--wax);font-style:italic;font-weight:500}
+  .byline{font-family:'EB Garamond',serif;font-style:italic;font-size:14px;letter-spacing:.16em;color:var(--ink-faint);margin-top:9px;text-transform:lowercase}
+  .tagline{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(20px,4vw,26px);color:var(--wax);margin-top:10px;letter-spacing:.02em}
+  .intro{max-width:500px;margin:26px auto 0;color:var(--ink-soft);line-height:1.8}
+  .flourish{margin:34px auto 0;width:60px;height:1px;background:var(--line);position:relative}
+  .flourish::after{content:"❧";position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--paper);padding:0 10px;color:var(--ink-faint);font-size:16px}
 
-  /* ===== App ===== */
-  .app{display:none}
-  .app.on{display:block}
-  .topbar{position:sticky;top:0;z-index:10;background:rgba(34,26,19,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);box-shadow:0 1px 0 rgba(200,162,74,.12)}
-  .topbar .wrap{display:flex;align-items:center;gap:16px;padding-top:14px;padding-bottom:14px;flex-wrap:wrap}
-  .brand{font-family:var(--disp);font-weight:600;font-size:22px;letter-spacing:.04em;color:var(--gold);margin-right:auto}
-  .tabs{display:flex;gap:6px;flex-wrap:wrap}
-  .tab{font-family:var(--disp);background:none;border:1px solid var(--line);border-radius:20px;padding:7px 15px;cursor:pointer;font-size:13px;letter-spacing:.03em;color:var(--ink-soft)}
-  .tab:hover{border-color:var(--gold-soft);color:var(--ink)}
-  .tab.active{background:linear-gradient(180deg,var(--gold),var(--gold-soft));color:#241a0e;border-color:var(--gold)}
-  .sair{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:15px;text-decoration:underline;text-underline-offset:3px}
-  .sair:hover{color:var(--gold)}
+  .cta-row{text-align:center;margin:40px 0 56px}
+  .btn{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:18px;letter-spacing:.06em;cursor:pointer;border:none;border-radius:2px;padding:13px 32px;transition:.22s transform,.22s box-shadow,.22s background,.22s color}
+  .btn-primary{background:var(--wax);color:var(--paper);box-shadow:0 7px 20px rgba(143,45,40,.26)}
+  .btn-primary:hover{background:var(--wax-deep);transform:translateY(-2px);box-shadow:0 11px 26px rgba(143,45,40,.32)}
+  .btn-ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--line)}
+  .btn-ghost:hover{background:rgba(90,79,62,.06);color:var(--ink)}
 
-  .secao{padding:26px 0 80px}
-  .secao h2{font-family:var(--disp);font-weight:600;font-size:25px;letter-spacing:.03em;margin:0 0 4px;color:var(--gold)}
-  .secao .sub{font-style:italic;color:var(--ink-faint);margin:0 0 22px}
-  .vazia{text-align:center;font-style:italic;color:var(--ink-faint);padding:50px 0;line-height:1.8}
-  .carregando{text-align:center;color:var(--ink-faint);padding:40px 0}
+  .shelf-head{text-align:center;font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:.32em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px}
+  .scrolls{padding-bottom:60px}
+  .scroll{border-top:1px solid var(--line);padding:32px 4px;cursor:pointer;opacity:0;transform:translateY(12px);animation:rise .6s ease forwards}
+  @keyframes rise{to{opacity:1;transform:none}}
+  .scroll:hover .s-title{color:var(--wax)}
+  .s-meta{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:16px;color:var(--ink-faint);margin-bottom:7px}
+  .s-meta .genre{color:var(--wax);font-style:normal;font-weight:600;letter-spacing:.02em}
+  .s-title{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:30px;line-height:1.2;color:var(--ink);transition:color .2s;margin-bottom:9px}
+  .s-preview{color:var(--ink-soft);font-style:italic}
+  .s-author{margin-top:12px;color:var(--ink-faint);font-size:17px}
+  .s-author b{color:var(--ink-soft);font-weight:600;font-style:normal}
+  .s-foot{margin-top:14px}
+  .like-btn{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-family:'Cormorant Garamond',serif;font-size:17px;display:inline-flex;align-items:center;gap:6px;padding:0}
+  .like-btn:hover,.like-btn.liked{color:var(--wax)}
+  .like-btn .lk-heart{font-size:19px;line-height:1}
 
-  .item{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:20px 22px;margin-bottom:16px}
-  .item-top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px}
-  .item-titulo{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:23px;color:var(--ink);line-height:1.2}
-  .item-meta{font-style:italic;color:var(--ink-faint);font-size:14px;margin-bottom:14px}
-  .pill{display:inline-block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);border:1px solid var(--line);border-radius:20px;padding:2px 9px}
-  .corpo{white-space:pre-wrap;font-size:17px;line-height:1.8;color:var(--ink-soft);max-height:300px;overflow:auto;border-left:2px solid var(--gold-soft);padding:2px 0 2px 16px;margin-bottom:16px}
-  .acoes{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-  .b-ok{background:var(--ok);color:#16210f;border:none;border-radius:7px;padding:9px 18px;cursor:pointer;font-size:15px;font-weight:600}
-  .b-ok:hover{filter:brightness(1.08)}
-  .b-no{background:none;color:var(--red);border:1px solid var(--red);border-radius:7px;padding:9px 18px;cursor:pointer;font-size:15px}
-  .b-no:hover{background:rgba(207,106,94,.12)}
-  .b-ghost{background:none;border:1px solid var(--line);border-radius:7px;padding:8px 14px;cursor:pointer;font-size:14px;color:var(--ink-soft)}
-  .b-ghost:hover{border-color:var(--gold);color:var(--gold)}
-  .b-ghost.on{background:linear-gradient(180deg,var(--gold),var(--gold-soft));color:#241a0e;border-color:var(--gold)}
-  .b-danger{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px;text-decoration:underline;text-underline-offset:3px}
-  .b-danger:hover{color:var(--red)}
-  .tema-input{border:1px solid var(--line);border-radius:7px;padding:8px 11px;font-family:inherit;font-size:14px;background:var(--field);color:var(--ink);min-width:160px}
-  .campo{display:block;margin-bottom:12px}
-  .campo>span{display:block;font-size:14px;color:var(--ink-faint);margin-bottom:4px}
-  .campo input,.campo textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:7px;background:var(--field);font-family:inherit;font-size:16px;color:var(--ink)}
-  .campo textarea{min-height:88px;resize:vertical;line-height:1.6}
-  .campo input:focus,.campo textarea:focus{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--gold)}
-  .linha{display:flex;gap:12px;flex-wrap:wrap}
-  .linha .campo{flex:1;min-width:130px}
-  .check{display:inline-flex;align-items:center;gap:7px;font-size:15px;color:var(--ink-soft);margin:0 16px 10px 0;cursor:pointer}
-  .check input{width:17px;height:17px;accent-color:var(--gold)}
+  .state{text-align:center;padding:64px 12px;color:var(--ink-faint);font-style:italic}
+  .state .big{font-family:'Cormorant Garamond',serif;font-style:normal;font-size:24px;color:var(--ink-soft);margin-bottom:8px}
 
-  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#2a2017;color:var(--ink);border:1px solid var(--line);padding:11px 20px;border-radius:8px;font-size:15px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:60}
-  .toast.show{opacity:1}
-</style>
+  .reader{position:fixed;inset:0;z-index:95;background:var(--paper);overflow-y:auto;display:none}
+  .reader.open{display:block;animation:fade .35s ease}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .reader-bar{position:sticky;top:0;background:rgba(246,239,225,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);padding:16px 0}
+  body.noite .reader-bar{background:rgba(31,26,19,.92)}
+  .reader-bar .wrap{display:flex;align-items:center;justify-content:space-between}
+  .back{background:none;border:none;cursor:pointer;color:var(--ink-soft);font-family:'Cormorant Garamond',serif;font-size:17px;letter-spacing:.04em;display:flex;align-items:center;gap:6px}
+  .back:hover{color:var(--wax)}
+  .reader-body{padding-top:54px;padding-bottom:110px}
+  .reader-body .gt{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;color:var(--wax)}
+  .reader-body h2{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(32px,6vw,46px);line-height:1.15;margin:8px 0 8px;color:var(--ink)}
+  .reader-body .by{color:var(--ink-faint);font-style:italic;margin-bottom:38px;padding-bottom:26px;border-bottom:1px solid var(--line)}
+  .reader-text{font-size:21px;line-height:1.9;color:var(--ink)}
+  .reader-text p{margin-bottom:1.3em}
+  .reader-end{text-align:center;margin-top:40px;color:var(--wax);font-size:24px}
+
+  .r-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:34px;padding-top:24px;border-top:1px solid var(--line)}
+  .act{background:none;border:1px solid var(--line);border-radius:2px;padding:9px 18px;cursor:pointer;font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--ink-soft);display:inline-flex;align-items:center;gap:8px;transition:.2s}
+  .act:hover{color:var(--wax);border-color:var(--wax)}
+  .act.liked{color:var(--wax);border-color:var(--wax)}
+  .act .lk-heart{font-size:18px;line-height:1}
+
+  .comments{margin-top:42px}
+  .c-head{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:25px;color:var(--ink);margin-bottom:16px}
+  .comment{border-top:1px solid var(--line);padding:16px 0}
+  .comment .ca{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--ink-faint);font-size:16px;margin-bottom:3px}
+  .comment .ct{color:var(--ink)}
+  .c-empty{color:var(--ink-faint);font-style:italic}
+  .c-form{margin-top:22px;display:flex;flex-direction:column;gap:10px}
+  .c-input{width:100%;background:rgba(255,255,255,.45);border:1px solid var(--line);border-radius:3px;padding:11px 14px;font-family:'EB Garamond',serif;font-size:17px;color:var(--ink)}
+  .c-input:focus{outline:none;border-color:var(--wax);background:#fff}
+  .c-form textarea{min-height:96px;resize:vertical;line-height:1.6}
+  .c-form .btn{align-self:flex-end}
+
+  .modal{position:fixed;inset:0;z-index:96;display:none;align-items:flex-start;justify-content:center;background:rgba(40,33,26,.5);overflow-y:auto;padding:42px 16px}
+  .modal.open{display:flex;animation:fade .25s ease}
+  .sheet{position:relative;background:var(--paper);border:1px solid var(--line);border-radius:4px;width:100%;max-width:540px;padding:38px 34px;box-shadow:0 26px 64px rgba(40,33,26,.4);animation:rise .35s ease forwards}
+  .sheet h3{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:30px;color:var(--ink)}
+  .sheet .note{color:var(--ink-soft);font-style:italic;margin:4px 0 24px}
+  .field{margin-bottom:18px}
+  .field label{display:block;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;color:var(--ink-faint);margin-bottom:6px}
+  .field input,.field select,.field textarea{width:100%;background:rgba(255,255,255,.45);border:1px solid var(--line);border-radius:3px;padding:12px 14px;font-family:'EB Garamond',serif;font-size:18px;color:var(--ink)}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--wax);background:#fff}
+  .field textarea{min-height:210px;resize:vertical;line-height:1.7}
+  .field .count{text-align:right;font-size:14px;color:var(--ink-faint);margin-top:4px;font-style:italic}
+  .actions{display:flex;gap:12px;justify-content:flex-end;margin-top:6px;flex-wrap:wrap}
+  .sheet-close{position:absolute;top:10px;right:12px;background:none;border:none;font-size:28px;line-height:1;color:var(--ink-faint);cursor:pointer;padding:2px 8px;transition:color .2s}
+  .sheet-close:hover{color:var(--wax)}
+  .autor-lista{display:flex;flex-direction:column;margin:8px 0 6px;max-height:50vh;overflow-y:auto}
+  .autor-item{text-align:left;background:none;border:none;border-bottom:1px solid var(--line);padding:11px 2px;cursor:pointer;font-family:'Cormorant Garamond',serif;font-size:19px;color:var(--ink);display:flex;justify-content:space-between;gap:10px;align-items:baseline;transition:color .2s}
+  .autor-item:hover{color:var(--wax)}
+  .autor-item .ai-likes{color:var(--ink-faint);font-size:14px;font-style:italic;white-space:nowrap}
+  .destaque-hero{margin:0 0 34px;padding:28px 30px;border:1px solid var(--line);border-radius:8px;background:linear-gradient(160deg,rgba(143,45,40,.05),rgba(154,123,63,.05));text-align:center}
+  .destaque-hero[hidden]{display:none}
+  .dh-label{font-family:'EB Garamond',serif;font-style:italic;font-size:13px;letter-spacing:.08em;color:var(--wax);text-transform:uppercase;margin-bottom:10px}
+  .dh-genre{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:6px}
+  .dh-title{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(28px,5vw,40px);line-height:1.12;color:var(--ink);margin-bottom:12px}
+  .dh-excerpt{font-family:'EB Garamond',serif;font-style:italic;font-size:18px;line-height:1.7;color:var(--ink-soft);max-width:560px;margin:0 auto 16px}
+  .dh-by{font-style:italic;color:var(--ink-faint);margin-bottom:18px}
+  .tema-mes{padding:64px 20px 12px;text-align:center;background:rgba(154,123,63,.06);border-bottom:1px solid rgba(154,123,63,.4)}
+  .tema-mes[hidden]{display:none}
+  .tm-inner{max-width:720px;margin:0 auto}
+  .tm-eyebrow{font-family:'EB Garamond',serif;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+  .tm-tema{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:clamp(17px,4.4vw,21px);line-height:1.25;color:var(--wax)}
+  .tm-timer{font-family:'EB Garamond',serif;font-size:12px;color:var(--ink-faint);margin-top:5px}
+  .tm-timer b{color:var(--ink);font-weight:400}
+  .tm-encerrado{font-style:italic;color:var(--ink-soft)}
+  body.tem-tema header{padding-top:26px}
+  body.noite .tema-mes{background:rgba(154,123,63,.10);border-bottom-color:rgba(154,123,63,.35)}
+  #instalar-btn{margin-top:6px}
+  .fab-escrever{position:fixed;right:18px;bottom:20px;z-index:35;width:54px;height:54px;border-radius:50%;background:var(--wax);color:var(--paper);border:none;box-shadow:0 6px 18px rgba(143,45,40,.4);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s,background .2s}
+  .fab-escrever:hover{transform:translateY(-2px);background:#7a2521}
+  .fab-escrever svg{width:24px;height:24px}
+  .ao-acaso{display:block;margin:0 auto 16px;background:none;border:none;cursor:pointer;font-family:'EB Garamond',serif;font-style:italic;font-size:15px;color:var(--gold)}
+  .ao-acaso:hover{color:var(--wax);text-decoration:underline;text-underline-offset:3px}
+  .sparks{margin:2px 0 14px;text-align:center}
+  .sparks-toggle{background:none;border:none;cursor:pointer;font-family:'EB Garamond',serif;font-style:italic;font-size:14px;color:var(--gold)}
+  .sparks-toggle:hover{color:var(--wax)}
+  .sparks-box{margin-top:10px;padding:14px 16px;border:1px dashed rgba(154,123,63,.5);border-radius:6px;background:rgba(154,123,63,.05);display:none}
+  .sparks-box.open{display:block}
+  .sparks-frase{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;color:var(--ink);line-height:1.4;margin-bottom:10px}
+  .sparks-acoes{display:flex;gap:16px;justify-content:center}
+  .sparks-acoes button{background:none;border:none;cursor:pointer;font-family:'EB Garamond',serif;font-size:14px;color:var(--gold)}
+  .sparks-acoes button:hover{color:var(--wax)}
+  .micro-hint{font-family:'EB Garamond',serif;font-style:italic;font-size:13px;color:var(--ink-faint);margin-top:4px}
+  .chave-festa{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;color:var(--wax);line-height:1.5;margin-bottom:12px}
+  .chips{flex:1 1 100%;min-width:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:3px}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:0 0 auto}
+  .controls-right{flex:1 1 100%;flex-wrap:wrap}
+  .busca{flex:1 1 150px;min-width:0}
+  .read-progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:100;background:transparent;pointer-events:none}
+  .read-progress-fill{display:block;height:100%;width:0;background:var(--wax)}
+  .leia-tambem{margin:28px 0 0;border-top:1px solid var(--line);padding-top:20px}
+  .leia-tambem[hidden]{display:none}
+  .lt-head{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:16px;color:var(--ink-faint);margin-bottom:10px;text-align:center}
+  .lt-item{display:block;width:100%;text-align:left;background:none;border:none;border-bottom:1px solid var(--line);cursor:pointer;padding:11px 0}
+  .lt-item:last-child{border-bottom:none}
+  .lt-titulo{font-family:'Cormorant Garamond',serif;font-size:19px;color:var(--ink);line-height:1.2}
+  .lt-meta{font-family:'EB Garamond',serif;font-style:italic;font-size:13px;color:var(--ink-faint);margin-top:2px}
+  .lt-item:hover .lt-titulo{color:var(--wax)}
+  :focus-visible{outline:2px solid var(--wax);outline-offset:2px;border-radius:2px}
+  @media (prefers-reduced-motion: reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
+  .coletanea{position:fixed;inset:0;z-index:95;background:var(--paper);overflow-y:auto;display:none}
+  .coletanea.open{display:block}
+  .col-body{padding:40px 30px 110px}
+  .col-tema-item{display:block;width:100%;text-align:left;background:none;border:1px solid var(--line);border-radius:8px;cursor:pointer;padding:18px 20px;margin-bottom:14px;transition:border-color .2s}
+  .col-tema-item:hover{border-color:var(--wax)}
+  .col-tema-nome{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:600;font-size:24px;color:var(--wax);line-height:1.2;display:block}
+  .col-tema-meta{font-family:'EB Garamond',serif;font-size:14px;color:var(--ink-faint);margin-top:4px;display:block}
+  .col-vazia{text-align:center;font-family:'EB Garamond',serif;font-style:italic;color:var(--ink-faint);padding:40px 0;line-height:1.8}
+  .col-acoes{display:flex;gap:16px;align-items:center;margin-bottom:26px;flex-wrap:wrap}
+  .col-voltar-lista{background:none;border:none;cursor:pointer;font-family:'EB Garamond',serif;color:var(--gold);font-size:15px}
+  .col-voltar-lista:hover{color:var(--wax)}
+  .col-print-btn{background:var(--wax);color:var(--paper);border:none;border-radius:6px;padding:9px 18px;cursor:pointer;font-family:'EB Garamond',serif;font-size:15px}
+  .col-titulo-tema{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(28px,5vw,42px);color:var(--ink);text-align:center;margin-bottom:6px}
+  .col-sub{text-align:center;font-family:'EB Garamond',serif;font-style:italic;color:var(--ink-faint);margin-bottom:36px}
+  .col-text{margin-bottom:40px;padding-bottom:34px;border-bottom:1px solid var(--line)}
+  .col-text:last-child{border-bottom:none}
+  .col-text h3{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:26px;color:var(--ink);margin-bottom:2px}
+  .col-by{font-family:'EB Garamond',serif;font-style:italic;color:var(--ink-faint);margin-bottom:14px}
+  .col-corpo{font-family:'EB Garamond',serif;font-size:18px;line-height:1.85;color:var(--ink)}
+  .col-corpo p{margin-bottom:14px}
+  @media print{
+    body{background:#fff !important}
+    body *{visibility:hidden !important}
+    #col-anthology, #col-anthology *{visibility:visible !important}
+    .coletanea{position:static !important;display:block !important;overflow:visible !important}
+    #col-anthology{position:absolute;left:0;top:0;width:100%;padding:0 6%}
+    .col-acoes{display:none !important}
+    .col-text{border-bottom:none}
+  }
+  .tema-opt{margin-top:-2px}
+  .tema-check{display:flex;align-items:flex-start;gap:9px;cursor:pointer;font-family:'EB Garamond',serif;font-size:15px;color:var(--ink-soft);line-height:1.4}
+  .tema-check input{margin-top:3px;width:17px;height:17px;accent-color:var(--wax);flex:none}
+  .tema-check em{font-style:italic;color:var(--wax)}
+  @media(max-width:600px){
+    .sheet{padding:34px 20px}
+    .actions{flex-direction:column;align-items:stretch}
+    .actions .btn{width:100%}
+    .btn{padding:13px 22px}
+    .controls{gap:8px;margin:2px 0 12px}
+    .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:3px;width:100%}
+    .chips::-webkit-scrollbar{display:none}
+    .chip{flex:0 0 auto}
+    .controls-right{width:100%;gap:8px;flex-wrap:nowrap}
+    .busca{flex:1;min-width:0}
+    .fav-toggle{padding:6px 12px;white-space:nowrap}
+    .fav-toggle .ft-label{display:none}
+    .sort-sel{padding:6px 8px;font-size:14px}
+    .r-actions{gap:8px;margin-top:24px;padding-top:18px}
+    .act{padding:8px 13px;font-size:15px}
+    .fonte-ctrl{margin-left:0}
+  }
+  .feedback{padding:12px 14px;border-radius:3px;margin-bottom:18px;font-size:17px;display:none;font-style:italic}
+  .feedback.err{display:block;background:rgba(143,45,40,.1);color:var(--wax);border:1px solid rgba(143,45,40,.25)}
+  .feedback.ok{display:block;background:rgba(154,123,63,.12);color:var(--gold);border:1px solid rgba(154,123,63,.3)}
+
+  footer{padding:40px 0 56px;border-top:1px solid var(--line);text-align:center}
+  .social{display:flex;gap:22px;justify-content:center;margin-bottom:16px}
+  .social a{display:inline-flex;align-items:center;gap:7px;color:var(--ink-soft);text-decoration:none;font-style:italic;font-size:16px;transition:color .2s}
+  .social a:hover{color:var(--wax)}
+  .social svg{width:20px;height:20px}
+  .foot-note{color:var(--ink-faint);font-size:16px;font-style:italic}
+  .topnav{position:fixed;top:16px;right:18px;z-index:40;display:flex;gap:14px;align-items:center;
+    background:rgba(246,239,225,.72);backdrop-filter:blur(5px);padding:8px 13px;border-radius:30px;border:1px solid var(--line)}
+  .topnav a{display:inline-flex;color:var(--ink-soft);transition:color .2s,transform .2s}
+  .topnav a:hover{color:var(--wax);transform:translateY(-1px)}
+  .topnav svg{width:22px;height:22px;display:block}
+  .chave-box{font-family:'Courier New',monospace;font-size:21px;letter-spacing:1px;color:var(--ink);
+    background:var(--paper-2);border:1px dashed var(--wax);border-radius:4px;padding:14px 16px;text-align:center;word-break:break-all;margin:6px 0 4px}
+  .chave-msg{color:var(--ink-soft);font-style:italic;line-height:1.75;font-size:16px;margin:16px 0 6px}
+  .verificar-area{margin-top:14px;display:none;flex-direction:column;gap:10px}
+  .verificar-area.open{display:flex}
+  .verificar-area input{background:rgba(255,255,255,.45);border:1px solid var(--line);border-radius:3px;padding:10px 13px;font-family:'Courier New',monospace;font-size:15px;color:var(--ink)}
+  .verificar-area input:focus{outline:none;border-color:var(--wax);background:#fff}
+  .verif-result{font-style:italic;font-size:16px;min-height:1px}
+  .verif-result.ok{color:var(--gold)}
+  .verif-result.no{color:var(--wax)}
+  .rascunho-nota{font-size:14px;color:var(--ink-faint);font-style:italic;margin:-2px 0 12px}
+  .rascunho-nota a{color:var(--wax)}
+  .aviso-box{background:rgba(143,45,40,.07);border:1px solid rgba(143,45,40,.25);border-left:3px solid var(--wax);border-radius:4px;padding:15px 17px;margin:6px 0 4px}
+  .aviso-box p{font-style:italic;color:var(--ink-soft);line-height:1.7}
+  .aviso-box .aviso-grave{font-style:normal;color:var(--ink);margin-top:10px}
+  .topnav button{background:none;border:none;padding:0;cursor:pointer;color:var(--ink-soft);display:inline-flex;transition:color .2s,transform .2s}
+  .topnav button:hover{color:var(--wax);transform:translateY(-1px)}
+  .topnav button svg{width:22px;height:22px;display:block}
+  body.noite{--paper:#1f1a13;--paper-2:#2a2318;--ink:#ece3d2;--ink-soft:#c4b8a1;--ink-faint:#8c8068;--wax:#d98b6a;--wax-deep:#c2704f;--line:rgba(236,227,210,.14);--gold:#caa86a}
+  body.noite .topnav{background:rgba(31,26,19,.72)}
+  body.noite .c-input,
+  body.noite .field input, body.noite .field select, body.noite .field textarea,
+  body.noite .verificar-area input{background:rgba(255,255,255,.06);color:var(--ink)}
+  body.noite .c-input::placeholder,
+  body.noite .field input::placeholder, body.noite .field textarea::placeholder,
+  body.noite .verificar-area input::placeholder{color:rgba(236,227,210,.4)}
+  body.noite .c-input:focus,
+  body.noite .field input:focus, body.noite .field select:focus, body.noite .field textarea:focus,
+  body.noite .verificar-area input:focus{background:rgba(255,255,255,.1)}
+  #r-text > p:first-of-type::first-letter{font-family:'Cormorant Garamond',serif;float:left;font-size:64px;line-height:.78;padding:8px 12px 0 0;color:var(--wax);font-weight:600}
+  .controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin:4px 0 18px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{font-family:'EB Garamond',serif;font-size:15px;padding:5px 13px;border:1px solid var(--line);border-radius:30px;background:transparent;color:var(--ink-soft);cursor:pointer;transition:.2s}
+  .chip:hover{border-color:var(--wax);color:var(--wax)}
+  .chip.on{background:var(--wax);border-color:var(--wax);color:var(--paper)}
+  .sort-sel{font-family:'EB Garamond',serif;font-size:15px;color:var(--ink-soft);background:transparent;border:1px solid var(--line);border-radius:4px;padding:6px 10px;cursor:pointer}
+  .autor-bar{display:none;align-items:center;justify-content:space-between;gap:12px;margin:0 0 16px;padding:10px 16px;background:rgba(143,45,40,.06);border:1px solid var(--line);border-radius:6px;font-style:italic;color:var(--ink-soft)}
+  .autor-bar.on{display:flex}
+  .autor-bar a{color:var(--wax);cursor:pointer}
+  .autor-link{cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;color:inherit}
+  .autor-link:hover{color:var(--wax)}
+  .scroll{position:relative}
+  .scroll.is-destaque{border-color:rgba(143,45,40,.4)}
+  .destaque-badge{position:absolute;top:0;right:0;background:var(--wax);color:var(--paper);font-family:'Cormorant Garamond',serif;font-size:13px;letter-spacing:.05em;padding:3px 11px;border-bottom-left-radius:8px}
+  .r-nav{display:flex;justify-content:space-between;gap:12px;margin-top:28px;padding-top:18px;border-top:1px solid var(--line)}
+  .r-nav button{background:transparent;border:none;color:var(--ink-soft);font-family:'Cormorant Garamond',serif;font-size:18px;cursor:pointer;transition:color .2s}
+  .r-nav button:hover:not(:disabled){color:var(--wax)}
+  .r-nav button:disabled{opacity:.32;cursor:default}
+  .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+  .stamp-ov{position:fixed;inset:0;z-index:97;background:rgba(40,33,26,.55);display:none;align-items:center;justify-content:center}
+  .stamp-ov.on{display:flex}
+  .stamp-ov svg{width:150px;height:150px;animation:carimbo .8s ease}
+  @keyframes carimbo{0%{transform:scale(2.6) rotate(-10deg);opacity:0}55%{transform:scale(.9) rotate(0);opacity:1}72%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
+  .controls-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .busca{font-family:'EB Garamond',serif;font-size:15px;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:30px;padding:6px 14px;min-width:150px}
+  .busca:focus{outline:none;border-color:var(--wax)}
+  .fav-toggle{font-family:'EB Garamond',serif;font-size:15px;padding:5px 13px;border:1px solid var(--line);border-radius:30px;background:transparent;color:var(--ink-soft);cursor:pointer;transition:.2s;white-space:nowrap}
+  .fav-toggle:hover{border-color:var(--wax);color:var(--wax)}
+  .fav-toggle.on{background:var(--wax);border-color:var(--wax);color:var(--paper)}
+  .s-foot .cmt-count{color:var(--ink-faint);font-size:15px;font-style:italic;margin-left:12px}
+  .act.on{color:var(--wax)}
+  .act-icon{border:none;background:none;padding:8px 10px}
+  .act-icon:hover{border-color:transparent;background:none}
+  .act-text{border:none;background:none;padding:9px 6px}
+  .act-text:hover{border-color:transparent;background:none;text-decoration:underline;text-underline-offset:4px}
+  .fav-star{font-size:19px;line-height:1}
+  .fonte-ctrl{display:inline-flex;gap:4px}
+  body.noite .busca::placeholder{color:rgba(236,227,210,.4)}
+</style>  <!-- Estatística simples e privada (GoatCounter, sem cookies). Painel: kedi.goatcounter.com (código já configurado abaixo). -->
+  <script data-goatcounter="https://kedi.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
 
-  <!-- LOGIN -->
-  <div class="login" id="login">
-    <div class="login-card">
-      <h1>Painel do Taberneiro</h1>
-      <p>só para os olhos do dono da taverna</p>
-      <input type="password" id="senha" placeholder="senha" autocomplete="current-password">
-      <button class="btn btn-block" id="entrar">Entrar</button>
-      <div class="login-erro" id="login-erro"></div>
+  <nav class="topnav" aria-label="Atalhos">
+    <button id="toggle-noite" aria-label="Alternar modo noturno" title="Modo noturno" aria-pressed="false">
+      <svg class="ic-noite" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8z"/></svg>
+    </button>
+    <a id="top-telegram" href="#" target="_blank" rel="noopener" aria-label="Telegram da Taverna" title="Telegram">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.9 4.3c-.2-.2-.5-.3-.9-.2L3.3 11c-.5.2-.5.9 0 1.1l4.5 1.6 1.7 5.4c.1.4.6.5.9.2l2.6-2.4 4.6 3.4c.4.3.9.1 1-.4L22 4.9c.1-.2 0-.5-.1-.6zM9.4 14.2l-.3 3.3-1-3.5 8.6-5.6-7.3 5.8z"/></svg>
+    </a>
+    <a id="top-instagram" href="#" target="_blank" rel="noopener" aria-label="Instagram da Taverna" title="Instagram">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1.1" fill="currentColor" stroke="none"/></svg>
+    </a>
+    <a id="top-loja" href="#" aria-label="Loja da Taverna" title="Loja">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M5 8 h14 l-1 12 h-12 z"/><path d="M9 8 V6 a3 3 0 0 1 6 0 v2"/></svg>
+    </a>
+  </nav>
+
+  <section class="tema-mes" id="tema-mes" hidden>
+    <div class="tm-inner">
+      <div class="tm-eyebrow">✦ tema do mês</div>
+      <div class="tm-tema" id="tm-tema"></div>
+      <div class="tm-timer" id="tm-timer"></div>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <header>
+      <svg class="seal" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-label="Selo de cera">
+        <defs>
+          <radialGradient id="wax" cx="38%" cy="32%" r="72%"><stop offset="0%" stop-color="#c2564b"/><stop offset="48%" stop-color="#a23a32"/><stop offset="100%" stop-color="#6c1e1a"/></radialGradient>
+          <g id="emblem">
+            <path d="M122 56 C 108 70,92 90,80 110 L74 122 L86 116 C106 104,124 86,138 70 C134 64,128 59,122 56 Z"/>
+            <path d="M120 60 L132 64 L122 72 Z"/><path d="M112 70 L125 73 L114 82 Z"/><path d="M103 81 L116 84 L105 93 Z"/>
+            <path d="M80 110 L73 124 L78 121 L83 113 Z"/><circle cx="71" cy="129" r="3.4"/>
+            <path d="M66 140 C84 150,116 150,138 138 C120 152,86 156,66 145 Z"/>
+          </g>
+        </defs>
+        <path fill="url(#wax)" d="M100 18 C128 16,150 30,168 52 C184 72,186 104,176 130 C166 156,138 176,104 178 C70 180,40 166,26 138 C13 112,16 78,34 54 C50 32,72 20,100 18 Z"/>
+        <circle cx="100" cy="98" r="66" fill="none" stroke="rgba(70,20,16,.45)" stroke-width="2"/>
+        <use href="#emblem" fill="rgba(70,20,16,.55)" transform="translate(1.1,1.4)"/><use href="#emblem" fill="#8e2c25"/><use href="#emblem" fill="rgba(255,220,210,.30)" transform="translate(-0.8,-1)"/>
+      </svg>
+
+      <h1>Penas <span class="amp">&amp;</span> Pergaminhos</h1>
+      <div class="byline">by Taverna do Leitor</div>
+      <div class="tagline" data-cfg="tagline">histórias que a taverna não esquece</div>
+      <p class="intro">Aqui repousam histórias escritas à mão e à alma — contos, versos, fragmentos. Cada uma traz uma marca única de quem ousou escrevê-la. Deixe a sua no livro dos dias da taverna.</p>
+      <div class="flourish"></div>
+    </header>
+
+    <div class="cta-row"><button class="btn btn-primary" id="abrir-publicar" data-cfg="cta">Confiar o seu texto</button></div>
+
+    <section class="destaque-hero" id="destaque-hero" hidden></section>
+
+    <div class="shelf-head">Selados até agora</div>
+    <button class="ao-acaso" id="ao-acaso">✦ ler um pergaminho ao acaso</button>
+    <div class="controls">
+      <div class="controls-right">
+        <input class="busca" id="busca" type="search" placeholder="buscar…" aria-label="Buscar">
+        <select class="sort-sel" id="genero-sel" aria-label="Género"></select>
+        <button class="fav-toggle" id="fav-toggle" aria-pressed="false" title="Ver guardados">★ <span class="ft-label">guardados</span></button>
+        <select class="sort-sel" id="sort-sel" aria-label="Ordenar">
+          <option value="recentes">mais recentes</option>
+          <option value="curtidos">mais curtidos</option>
+        </select>
+      </div>
+    </div>
+    <div class="autor-bar" id="autor-bar">
+      <span>a mostrar pergaminhos de <b id="autor-bar-nome"></b></span>
+      <a id="autor-bar-todos">ver todos</a>
+    </div>
+    <div class="scrolls" id="scrolls"><div class="state"><div class="big">A aquecer a cera…</div></div></div>
+
+    <footer>
+      <div class="social">
+        <a id="a-telegram" href="#" target="_blank" rel="noopener" aria-label="Telegram da Taverna">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.9 4.3c-.2-.2-.5-.3-.9-.2L3.3 11c-.5.2-.5.9 0 1.1l4.5 1.6 1.7 5.4c.1.4.6.5.9.2l2.6-2.4 4.6 3.4c.4.3.9.1 1-.4L22 4.9c.1-.2 0-.5-.1-.6zM9.4 14.2l-.3 3.3-1-3.5 8.6-5.6-7.3 5.8z"/></svg>
+          Telegram
+        </a>
+        <a id="a-instagram" href="#" target="_blank" rel="noopener" aria-label="Instagram da Taverna">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1.1" fill="currentColor" stroke="none"/></svg>
+          Instagram
+        </a>
+      </div>
+      <div class="foot-note" id="contagem"></div>
+      <div class="foot-note"><span data-cfg="rodape">Cada pergaminho é lido antes de ser selado.</span> · <a id="abrir-sobre" style="cursor:pointer;color:var(--wax)">sobre a taverna</a> · <a id="abrir-coletaneas" style="cursor:pointer;color:var(--wax)">coletâneas</a> · <a id="abrir-legal" style="cursor:pointer;color:var(--wax)">termos · privacidade</a> · <a id="meus-link" style="cursor:pointer;color:var(--wax)">acompanhar o seu texto</a></div>
+      <button class="btn btn-ghost" id="instalar-btn" hidden>instalar na tela inicial</button>
+    </footer>
+  </div>
+
+  <div class="reader" id="reader">
+    <div class="read-progress"><span class="read-progress-fill" id="r-progress"></span></div>
+    <div class="reader-bar"><div class="wrap">
+      <button class="back" id="fechar-reader">‹ voltar ao mural</button>
+      <span style="font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--ink-faint)">Penas &amp; Pergaminhos</span>
+    </div></div>
+    <div class="wrap reader-body">
+      <span class="gt" id="r-genre"></span>
+      <h2 id="r-title"></h2>
+      <p class="by" id="r-by"></p>
+      <div class="reader-text" id="r-text"></div>
+      <div class="reader-end">❦</div>
+      <div class="r-actions">
+        <button class="act act-icon" id="r-like" data-like=""><span class="lk-heart">♡</span> <span class="lk-count">0</span></button>
+        <button class="act act-icon" id="r-fav" title="Guardar" aria-label="Guardar"><span class="fav-star">☆</span></button>
+        <button class="act act-icon" id="r-share" title="Compartilhar" aria-label="Compartilhar"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="M8.4 10.7 15.6 6.3M8.4 13.3 15.6 17.7"/></svg></button>
+        <button class="act act-icon" id="r-ouvir" title="Ouvir" aria-label="Ouvir"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9v6h4l5 4V5L9 9H5z"/><path d="M17 9a3.5 3.5 0 0 1 0 6"/></svg></button>
+        <button class="act act-text" id="r-citar">criar cartão</button>
+        <button class="act act-text" id="abrir-verificar">provar autoria</button>
+        <button class="act act-text" id="abrir-denuncia" style="opacity:.65" title="Reportar este texto">denunciar</button>
+        <span class="fonte-ctrl"><button class="act" id="fonte-menos" title="Diminuir fonte">A−</button><button class="act" id="fonte-mais" title="Aumentar fonte">A+</button><button class="act" id="entrelinha" title="Espaçamento entre linhas" aria-label="Espaçamento entre linhas">↕</button></span>
+      </div>
+      <div class="verificar-area" id="verificar-area">
+        <input id="verif-chave" placeholder="cole aqui a sua chave de autoria">
+        <button class="btn btn-primary" id="verif-btn" style="align-self:flex-start">Verificar</button>
+        <div class="verif-result" id="verif-result"></div>
+      </div>
+      <div class="r-nav">
+        <button id="r-prev">‹ anterior</button>
+        <button id="r-next">próximo ›</button>
+      </div>
+      <div class="leia-tambem" id="leia-tambem" hidden></div>
+      <div class="comments">
+        <div class="c-head">Comentários</div>
+        <div id="c-list"></div>
+        <div class="c-form">
+          <input class="c-input" id="c-name" placeholder="o seu nome" maxlength="40">
+          <textarea class="c-input" id="c-text" placeholder="deixe um comentário…"></textarea>
+          <button class="btn btn-primary" id="c-send">Comentar</button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- APP -->
-  <div class="app" id="app">
-    <div class="topbar">
-      <div class="wrap">
-        <span class="brand">Taverna · painel</span>
-        <div class="tabs">
-          <button class="tab active" data-aba="pendentes">Pendentes <span id="badge-pend"></span></button>
-          <button class="tab" data-aba="aprovados">Aprovados</button>
-          <button class="tab" data-aba="recusados">Recusados</button>
-          <button class="tab" data-aba="produtos">Loja</button>
-          <button class="tab" data-aba="depoimentos">Depoimentos</button>
-          <button class="tab" data-aba="tema">Tema do mês</button>
-          <button class="tab" data-aba="textos">Textos</button>
-          <button class="tab" data-aba="denuncias">Denúncias <span id="badge-den"></span></button>
-          <button class="tab" data-aba="comentarios">Comentários <span id="badge-com"></span></button>
-        </div>
-        <button class="sair" id="sair">sair</button>
-      </div>
-    </div>
-
-    <div class="wrap">
-      <section class="secao" id="aba-pendentes">
-        <h2>Pergaminhos à espera</h2>
-        <p class="sub">leia e decida — aprovar coloca no mural; recusar guarda fora da vista</p>
-        <div id="lista-pendentes"><div class="carregando">A abrir o livro…</div></div>
-      </section>
-
-      <section class="secao" id="aba-aprovados" style="display:none">
-        <h2>No mural</h2>
-        <p class="sub">destacar, etiquetar com um tema ou remover</p>
-        <div id="lista-aprovados"><div class="carregando">A abrir o livro…</div></div>
-      </section>
-
-      <section class="secao" id="aba-recusados" style="display:none">
-        <h2>Recusados</h2>
-        <p class="sub">textos que você recusou — ficam guardados aqui, fora do mural; pode resgatar ou apagar de vez</p>
-        <div id="lista-recusados"><div class="carregando">A abrir o livro…</div></div>
-      </section>
-
-      <section class="secao" id="aba-produtos" style="display:none">
-        <h2>Loja · produtos</h2>
-        <p class="sub">criar, editar e remover as peças da loja</p>
-        <button class="btn" id="novo-produto" style="margin-bottom:18px">+ novo produto</button>
-        <div id="lista-produtos"><div class="carregando">A abrir a loja…</div></div>
-      </section>
-
-      <section class="secao" id="aba-depoimentos" style="display:none">
-        <h2>Depoimentos</h2>
-        <p class="sub">o que dizem — aparecem na loja quando ativos</p>
-        <button class="btn" id="novo-depoimento" style="margin-bottom:18px">+ novo depoimento</button>
-        <div id="lista-depoimentos"><div class="carregando">A carregar…</div></div>
-      </section>
-
-      <section class="secao" id="aba-tema" style="display:none">
-        <h2>Tema do mês</h2>
-        <p class="sub">o tema ativo aparece na faixa do topo do site; salvar um novo desativa os outros</p>
-        <div class="item" id="form-tema">
-          <label class="campo"><span>Tema</span><input id="tema-tema" placeholder="ex.: cartas que nunca foram enviadas"></label>
-          <label class="campo"><span>Prazo (encerra em)</span><input id="tema-prazo" type="datetime-local"></label>
-          <label class="check"><input type="checkbox" id="tema-ativo" checked> ativo (aparecer no site)</label>
-          <div class="acoes"><button class="b-ok" id="tema-salvar">Salvar tema</button><span id="tema-editando" class="item-meta" style="margin:0"></span></div>
-        </div>
-        <h3 style="font-family:'Cormorant Garamond',serif;font-weight:600;margin:28px 0 10px">Temas anteriores</h3>
-        <div id="lista-temas"><div class="carregando">A carregar…</div></div>
-      </section>
-
-      <section class="secao" id="aba-textos" style="display:none">
-        <h2>Textos do site</h2>
-        <p class="sub">edite as frases das páginas; salvam direto, sem re-subir arquivo</p>
-        <div id="lista-textos"><div class="carregando">A carregar…</div></div>
-      </section>
-      <section class="secao" id="aba-denuncias" style="display:none">
-        <h2>Denúncias</h2>
-        <p class="sub">reports enviados pelos leitores — veja o texto, decida, e apague o report</p>
-        <div id="lista-denuncias"><div class="carregando">A carregar…</div></div>
-      </section>
-      <section class="secao" id="aba-comentarios" style="display:none">
-        <h2>Comentários</h2>
-        <p class="sub">aprove os novos e apague qualquer um — protege quem escreve de comentário maldoso</p>
-        <div id="lista-comentarios"><div class="carregando">A carregar…</div></div>
-      </section>
+  <div class="coletanea" id="coletanea">
+    <div class="reader-bar"><div class="wrap">
+      <button class="back" id="coletanea-voltar">‹ voltar</button>
+      <span style="font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--ink-faint)">Coletâneas da taverna</span>
+    </div></div>
+    <div class="wrap col-body">
+      <div id="col-lista"></div>
+      <div id="col-anthology" hidden></div>
     </div>
   </div>
 
-  <div class="toast" id="toast"></div>
-
-  <div id="copiar-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:1000;align-items:center;justify-content:center;padding:18px">
-    <div style="background:var(--card);border:1px solid var(--line);border-radius:12px;max-width:520px;width:100%;padding:24px 24px 20px;box-shadow:0 18px 50px rgba(0,0,0,.5)">
-      <h3 style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:25px;color:var(--ink);margin:0 0 4px">Selado! Avise o canal</h3>
-      <p style="font-style:italic;color:var(--ink-faint);margin:0 0 14px">Copie a mensagem e cole no seu canal do Telegram.</p>
-      <textarea id="copiar-texto" readonly style="width:100%;height:150px;resize:vertical;background:var(--field);border:1px solid var(--line);border-radius:8px;color:var(--ink);font-family:'EB Garamond',serif;font-size:16px;line-height:1.5;padding:12px;box-sizing:border-box"></textarea>
-      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px">
-        <button id="copiar-fechar" style="background:none;border:1px solid var(--line);border-radius:7px;padding:9px 18px;cursor:pointer;color:var(--ink-soft);font-size:15px;font-family:inherit">Fechar</button>
-        <button id="copiar-btn" class="b-ok">Copiar mensagem</button>
+  <div class="modal" id="modal">
+    <div class="sheet">
+      <button class="sheet-close" id="publicar-fechar" aria-label="Fechar">×</button>
+      <h3>Confiar um pergaminho</h3>
+      <p class="note">Escreva à vontade. O taberneiro lê cada texto antes de fixar no mural.</p>
+      <div class="feedback" id="fb"></div>
+      <div class="hp" aria-hidden="true"><label>Deixe este campo vazio<input id="f-hp" tabindex="-1" autocomplete="off"></label></div>
+      <div class="field"><label>Como assina</label><input id="f-autor" placeholder="nome ou pseudónimo" maxlength="40"></div>
+      <div class="field"><label>Título</label><input id="f-titulo" placeholder="o título do seu texto" maxlength="120"></div>
+      <div class="field"><label>Género</label>
+        <select id="f-genero"><option>Conto</option><option>Poesia</option><option>Crónica</option><option>Ensaio</option><option>Fragmento</option><option>Outro</option></select>
+      </div>
+      <div class="field tema-opt" id="tema-opt" hidden>
+        <label class="tema-check"><input type="checkbox" id="f-tema-on" checked> <span>Este texto entra no tema do mês: <em id="tema-opt-nome"></em></span></label>
+      </div>
+      <div class="field"><label>O texto</label><textarea id="f-texto" placeholder="Era uma vez…"></textarea><div class="count"><span id="f-count">0</span> caracteres</div><div class="micro-hint">Pode ser uma frase ou uma página — micro-contos também são bem-vindos.</div></div>
+      <div class="sparks">
+        <button type="button" class="sparks-toggle" id="sparks-toggle">✦ sem ideia? comece por aqui</button>
+        <div class="sparks-box" id="sparks-box">
+          <div class="sparks-frase" id="sparks-frase"></div>
+          <div class="sparks-acoes"><button type="button" id="sparks-outra">outra ideia</button><button type="button" id="sparks-usar">usar este começo</button></div>
+        </div>
+      </div>
+      <div class="rascunho-nota" id="rascunho-nota" style="display:none">Rascunho restaurado deste navegador. <a href="#" id="descartar-rascunho">descartar</a></div>
+      <div class="actions">
+        <button class="btn btn-ghost" id="guardar-rascunho">guardar rascunho</button>
+        <button class="btn btn-primary" id="enviar">Selar e enviar o texto</button>
       </div>
     </div>
+  </div>
+
+  <div class="modal" id="aviso-modal">
+    <div class="sheet">
+      <h3>Antes de selar</h3>
+      <div class="aviso-box">
+        <p>Uma vez selado, o pergaminho entra para o livro dos dias da taverna — e nem o próprio punho que o escreveu poderá reescrevê-lo.</p>
+        <p class="aviso-grave">Ao confirmar, o texto será enviado como está e <strong>não poderá mais ser alterado</strong>. Reveja com calma.</p>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" id="aviso-rever">Rever o texto</button>
+        <button class="btn btn-primary" id="aviso-confirmar">Selar mesmo assim</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="chave-modal">
+    <div class="sheet">
+      <h3>A sua chave de autoria</h3>
+      <p class="chave-festa" id="chave-festa" style="display:none"></p>
+      <p class="note">Guarde-a num lugar seguro — é a prova de que este pergaminho é seu. Ela não será mostrada de novo.</p>
+      <div class="chave-box" id="chave-valor"></div>
+      <div style="text-align:right;margin-bottom:4px"><button class="act" id="copiar-chave" style="font-size:14px;padding:6px 12px">copiar</button></div>
+      <p class="note" id="chave-seguir" style="display:none;margin-bottom:10px"></p>
+      <p class="chave-msg">Dizem que, numa velha estalagem à beira da estrada — o Pónei Saltitante —, mais de um viajante distraído perdeu o que era seu para um vulto encapuzado que surgiu da penumbra exigindo o que não lhe cabia. Se um estranho de capa lhe pedir esta chave, não a entregue por ouro nem por juramento. Apenas o Taberneiro da Taverna do Leitor pode zelar por ela.</p>
+      <div class="actions">
+        <button class="btn btn-primary" id="chave-ok">Já guardei a chave</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="sobre-modal">
+    <div class="sheet">
+      <h3>A taverna</h3>
+      <p class="note" data-cfg="sobre" style="font-size:17px;line-height:1.85;color:var(--ink-soft)">Penas &amp; Pergaminhos é o mural de histórias da Taverna do Leitor — um canto para guardar o que se escreve à mão e à alma. Aqui não há nome a provar nem conta a criar: você chega, deixa o seu conto, verso ou fragmento, e o taberneiro o sela no livro dos dias. Cada texto fica marcado por uma chave só sua. Escreva sem medo — a taverna não esquece.</p>
+      <div class="actions"><button class="btn btn-primary" id="sobre-ok">Fechar</button></div>
+    </div>
+  </div>
+
+  <div class="modal" id="bemvindo-modal">
+    <div class="sheet">
+      <h3>Bem-vindo à taverna</h3>
+      <p class="note" data-cfg="boasvindas" style="font-size:17px;line-height:1.85;color:var(--ink-soft)">Aqui você deixa o que escreve — um conto, um verso, um fragmento — sem criar conta e, se quiser, sem dizer o seu nome. O taberneiro lê cada texto com cuidado antes de selá-lo no mural. Não há nota a tirar nem regra a decorar: escreva sem medo, e a taverna guarda.</p>
+      <div class="actions"><button class="btn btn-primary" id="bemvindo-ok">Entrar na taverna</button></div>
+    </div>
+  </div>
+
+  <button class="fab-escrever" id="fab-escrever" title="Escrever" aria-label="Escrever um texto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.2 4.8a5.5 5.5 0 0 0-7.8 0L4 13.2V20h6.8l8.4-8.4a5.5 5.5 0 0 0 0-7.8z"/><path d="M16 8 8 16"/><path d="M4 20l5-5"/></svg></button>
+
+  <div class="modal" id="citar-modal">
+    <div class="sheet" style="max-width:560px">
+      <h3>Cartão de citação</h3>
+      <p class="note">Selecione um trecho do texto antes de abrir, ou usamos o começo. Baixe e partilhe onde quiser.</p>
+      <div style="text-align:center"><canvas id="citar-canvas" width="1080" height="1350" style="width:100%;max-width:340px;border:1px solid var(--line);border-radius:6px"></canvas></div>
+      <div class="actions">
+        <button class="btn btn-ghost" id="citar-tema">alternar fundo</button>
+        <button class="btn btn-primary" id="citar-baixar">Baixar imagem</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="autor-modal">
+    <div class="sheet" style="max-width:460px">
+      <button class="sheet-close" id="autor-fechar" aria-label="Fechar">×</button>
+      <h3 id="autor-nome"></h3>
+      <p class="note" id="autor-stats"></p>
+      <button class="act act-text" id="autor-share" style="opacity:.85;margin:0 0 10px">✦ partilhar este perfil</button>
+      <div class="autor-lista" id="autor-lista"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="denuncia-modal">
+    <div class="sheet" style="max-width:460px">
+      <button class="sheet-close" id="denuncia-fechar" aria-label="Fechar">×</button>
+      <h3>Reportar este pergaminho</h3>
+      <p class="note">Algo de errado com este texto? Conte ao Taberneiro — sua denúncia é anônima e ajuda a manter a taverna acolhedora.</p>
+      <select id="den-motivo" style="width:100%;font-family:'EB Garamond',serif;font-size:16px;color:var(--ink);background:var(--paper-2);border:1px solid var(--line);border-radius:6px;padding:10px;margin-bottom:10px">
+        <option value="">Motivo (opcional)…</option>
+        <option>Plágio — copiaram um texto meu ou de outra pessoa</option>
+        <option>Conteúdo ofensivo ou de ódio</option>
+        <option>Spam ou propaganda</option>
+        <option>Conteúdo impróprio</option>
+        <option>Outro</option>
+      </select>
+      <textarea id="den-obs" rows="3" placeholder="quer detalhar? (opcional)" style="width:100%;font-family:'EB Garamond',serif;font-size:16px;color:var(--ink);background:var(--paper-2);border:1px solid var(--line);border-radius:6px;padding:10px;resize:vertical"></textarea>
+      <div class="actions">
+        <button class="btn btn-ghost" id="den-cancelar">Cancelar</button>
+        <button class="btn btn-primary" id="den-enviar">Enviar denúncia</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="legal-modal">
+    <div class="sheet" style="max-width:580px;max-height:82vh;overflow:auto">
+      <button class="sheet-close" id="legal-fechar" aria-label="Fechar">×</button>
+      <h3>Termos &amp; privacidade</h3>
+      <p class="note" style="font-weight:600;color:var(--ink);margin-top:6px;text-align:left">Termos de uso</p>
+      <p class="note" style="text-align:left">Ao deixar um texto, você declara que ele é seu — ou que tem o direito de publicá-lo — e autoriza a taverna a exibi-lo no mural e nas coletâneas do site. Os direitos sobre o texto continuam sendo seus.</p>
+      <p class="note" style="text-align:left">Não envie textos de outras pessoas sem permissão, nem conteúdo ofensivo, de ódio, ilegal ou impróprio. O Taberneiro pode recusar ou remover qualquer texto, a qualquer momento. A curadoria é humana e subjetiva: recusar um texto não é um julgamento sobre você.</p>
+      <p class="note" style="text-align:left">Quer remover um texto já selado? Guarde sua chave de autoria — é com ela que você prova que o texto é seu — e fale com o Taberneiro pelos canais do rodapé.</p>
+      <p class="note" style="font-weight:600;color:var(--ink);margin-top:14px;text-align:left">Privacidade</p>
+      <p class="note" style="text-align:left">Não criamos conta nem pedimos cadastro. Guardamos apenas o que você digita (o nome ou pseudónimo, se quiser, e o texto) e estatísticas de acesso anônimas, sem cookies de rastreamento.</p>
+      <p class="note" style="text-align:left">Sua chave de autoria é guardada apenas como um código embaralhado (hash): nem a taverna consegue ver a chave original. Não vendemos nem compartilhamos seus dados.</p>
+      <p class="note" style="text-align:left">Para remover seu texto ou tirar dúvidas, fale com o Taberneiro pelos canais no rodapé. Este é um resumo em linguagem simples e não substitui aconselhamento jurídico.</p>
+      <div class="actions"><button class="btn btn-primary" id="legal-ok">Fechar</button></div>
+    </div>
+  </div>
+
+  <div class="modal" id="acompanhar-modal">
+    <div class="sheet" style="max-width:480px">
+      <button class="sheet-close" id="acompanhar-fechar" aria-label="Fechar">×</button>
+      <h3>Acompanhar o seu texto</h3>
+      <p class="note" style="text-align:left">Tem a sua chave de autoria? Cole aqui para saber se o seu pergaminho já foi selado no mural.</p>
+      <input id="acomp-chave" type="text" placeholder="TAVERNA-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false" style="width:100%;font-family:'EB Garamond',serif;font-size:16px;color:var(--ink);background:var(--paper-2);border:1px solid var(--line);border-radius:6px;padding:11px;letter-spacing:.5px">
+      <div id="acomp-result" class="verif-result" style="margin-top:10px;display:none"></div>
+      <div class="actions">
+        <button class="btn btn-ghost" id="acomp-meus" style="display:none">os meus no mural</button>
+        <button class="btn btn-primary" id="acomp-ver">Ver status</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stamp-ov" id="selo-stamp">
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <radialGradient id="wax2" cx="38%" cy="32%" r="72%"><stop offset="0%" stop-color="#c2564b"/><stop offset="48%" stop-color="#a23a32"/><stop offset="100%" stop-color="#6c1e1a"/></radialGradient>
+        <g id="emblem2">
+          <path d="M122 56 C 108 70,92 90,80 110 L74 122 L86 116 C106 104,124 86,138 70 C134 64,128 59,122 56 Z"/>
+          <path d="M120 60 L132 64 L122 72 Z"/><path d="M112 70 L125 73 L114 82 Z"/><path d="M103 81 L116 84 L105 93 Z"/>
+          <path d="M80 110 L73 124 L78 121 L83 113 Z"/><circle cx="71" cy="129" r="3.4"/>
+          <path d="M66 140 C84 150,116 150,138 138 C120 152,86 156,66 145 Z"/>
+        </g>
+      </defs>
+      <path fill="url(#wax2)" d="M100 18 C128 16,150 30,168 52 C184 72,186 104,176 130 C166 156,138 176,104 178 C70 180,40 166,26 138 C13 112,16 78,34 54 C50 32,72 20,100 18 Z"/>
+      <circle cx="100" cy="98" r="66" fill="none" stroke="rgba(70,20,16,.45)" stroke-width="2"/>
+      <use href="#emblem2" fill="rgba(70,20,16,.55)" transform="translate(1.1,1.4)"/><use href="#emblem2" fill="#8e2c25"/><use href="#emblem2" fill="rgba(255,220,210,.30)" transform="translate(-0.8,-1)"/>
+    </svg>
   </div>
 
 <script>
-  // Endereço da Edge Function "painel" (porteiro). Ajuste se o ref do projeto mudar.
-  var PAINEL_URL = 'https://mowrcqwxtmjuqtxbesfg.supabase.co/functions/v1/painel';
-  var SITE_URL = 'https://www.penasepergaminhos.com.br/';
+  // ===== Configuração do Supabase =====
+  var SUPABASE_URL = 'https://mowrcqwxtmjuqtxbesfg.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_gSMSa-F4C1FHkEpz1QHN3w_pIQ3epsc';
+  var REST = SUPABASE_URL + '/rest/v1';
+  // Mude para true DEPOIS de publicar a Edge Function "partilha" no Supabase (ver instruções).
+  var OG_DINAMICO = false;
+  var temaAtivo = null;
+  var GENEROS_DEFAULT = ['Conto','Poesia','Crónica','Ensaio','Fragmento','Outro'];
+  var GENEROS = GENEROS_DEFAULT.slice();
+  var HEADERS = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' };
 
-  var senhaAtual = '';
-  try{ senhaAtual = sessionStorage.getItem('tab_senha') || ''; }catch(e){}
+  // ===== Links sociais (preencha com os seus) =====
+  var LINKS = {
+    telegram: 'https://t.me/SEU_GRUPO',
+    instagram: 'https://instagram.com/SEU_PERFIL',
+    loja: 'loja.html'
+  };
 
-  var elLogin=document.getElementById('login'), elApp=document.getElementById('app');
-  var elErro=document.getElementById('login-erro'), elToast=document.getElementById('toast');
+  var els = {
+    scrolls: document.getElementById('scrolls'),
+    reader: document.getElementById('reader'),
+    modal: document.getElementById('modal'),
+    fb: document.getElementById('fb')
+  };
+  var textosAtuais = [];
+  var vistaAtual = [];
+  var filtroGenero = 'Todos';
+  var ordenacao = 'recentes';
+  var filtroAutor = null;
+  var busca = '';
+  var soFavoritos = false;
+  var comentMap = {};
+  var likedSet = new Set();
+  try{ (JSON.parse(localStorage.getItem('pp_likes')||'[]')||[]).forEach(function(x){ likedSet.add(String(x)); }); }catch(e){}
+  function salvarLikes(){ try{ localStorage.setItem('pp_likes', JSON.stringify(Array.from(likedSet))); }catch(e){} }
+  var favSet = new Set();
+  try{ (JSON.parse(localStorage.getItem('pp_favs')||'[]')||[]).forEach(function(x){ favSet.add(String(x)); }); }catch(e){}
+  function salvarFavs(){ try{ localStorage.setItem('pp_favs', JSON.stringify(Array.from(favSet))); }catch(e){} }
+  var fonteLeitor = 19;
+  try{ var fl=parseInt(localStorage.getItem('pp_fonte'),10); if(fl>=15 && fl<=30) fonteLeitor=fl; }catch(e){}
+  function aplicarFonte(){ var t=document.getElementById('r-text'); if(t) t.style.fontSize=fonteLeitor+'px'; try{localStorage.setItem('pp_fonte',String(fonteLeitor));}catch(e){} }
+  var ENTRELINHAS=[1.7,1.9,2.15], entreIdx=1;
+  try{ var ei=parseInt(localStorage.getItem('pp_entrelinha'),10); if(ei>=0 && ei<ENTRELINHAS.length) entreIdx=ei; }catch(e){}
+  function aplicarEntrelinha(){ var t=document.getElementById('r-text'); if(t) t.style.lineHeight=ENTRELINHAS[entreIdx]; try{localStorage.setItem('pp_entrelinha',String(entreIdx));}catch(e){} }
+  var currentReaderId = null;
+  var iconeOuvir='<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9v6h4l5 4V5L9 9H5z"/><path d="M17 9a3.5 3.5 0 0 1 0 6"/></svg>';
+  var iconeParar='<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
 
-  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-  function toast(m){ elToast.textContent=m; elToast.classList.add('show'); setTimeout(function(){ elToast.classList.remove('show'); },2200); }
+  function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tempo(t){var n=(t||'').trim().split(/\s+/).length;return Math.max(1,Math.round(n/200))+' min';}
+  function mapRow(r){return {id:r.id,title:r.titulo,author:r.autor,genre:r.genero,content:r.conteudo,likes:r.curtidas||0,destaque:!!r.destaque,leituras:r.leituras||0,tema:r.tema||''};}
 
-  async function chamar(acao, extra){
-    var payload = Object.assign({ senha: senhaAtual, acao: acao }, extra||{});
-    var res = await fetch(PAINEL_URL, { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(payload) });
-    if(res.status === 401){ throw { senhaInvalida:true }; }
-    var data = await res.json().catch(function(){ return {}; });
-    if(!res.ok){ throw new Error(data && data.erro ? data.erro : ('HTTP '+res.status)); }
-    return data;
+  function montarDestaque(){
+    var hero=document.getElementById('destaque-hero');
+    var destaques=textosAtuais.filter(function(w){ return w.destaque; });
+    if(!destaques.length){ hero.hidden=true; hero.innerHTML=''; return; }
+    var w=destaques[Math.floor(Math.random()*destaques.length)];
+    var trecho=(w.content||'').replace(/\s+/g,' ').trim().slice(0,180);
+    if((w.content||'').replace(/\s+/g,' ').trim().length>180) trecho+='…';
+    hero.innerHTML='<div class="dh-label">✦ em destaque na taverna</div>'+
+      '<div class="dh-genre">'+esc(w.genre||'Conto')+'</div>'+
+      '<h2 class="dh-title">'+esc(w.title||'Sem título')+'</h2>'+
+      '<p class="dh-excerpt">'+esc(trecho)+'</p>'+
+      '<div class="dh-by">por '+esc(w.author||'Anónimo')+'</div>'+
+      '<button class="btn btn-primary dh-open">Ler este pergaminho</button>';
+    hero.querySelector('.dh-open').addEventListener('click', function(){ abrirLeitor(w); });
+    hero.hidden=false;
   }
 
-  function entrarApp(){
-    elLogin.classList.add('hidden');
-    elApp.classList.add('on');
-    carregarPendentes();
-  }
-  function sair(){
-    senhaAtual=''; try{ sessionStorage.removeItem('tab_senha'); }catch(e){}
-    elApp.classList.remove('on'); elLogin.classList.remove('hidden');
-    document.getElementById('senha').value='';
+  function registrarLeitura(w){
+    w.leituras=(w.leituras||0)+1;
+    var el=document.getElementById('r-leituras'); if(el) el.textContent=w.leituras+(w.leituras===1?' leitura':' leituras');
+    supaPost('/rpc/registrar_leitura',{ p_id:w.id }).catch(function(e){ console.error('Falha ao registrar leitura:',e); });
   }
 
-  document.getElementById('entrar').addEventListener('click', tentarEntrar);
-  document.getElementById('senha').addEventListener('keydown', function(e){ if(e.key==='Enter') tentarEntrar(); });
-  document.getElementById('sair').addEventListener('click', sair);
-
-  async function tentarEntrar(){
-    var s=document.getElementById('senha').value.trim();
-    if(!s){ elErro.textContent='Digite a senha.'; return; }
-    elErro.textContent='A conferir…'; senhaAtual=s;
+  var temaTimer=null;
+  function iniciarTimer(prazo){
+    var alvo=new Date(prazo).getTime();
+    var el=document.getElementById('tm-timer');
+    if(isNaN(alvo)){ el.textContent=''; return; }
+    function par(n){ return n<10?'0'+n:''+n; }
+    function tick(){
+      var diff=alvo-Date.now();
+      if(diff<=0){ el.innerHTML='<span class="tm-encerrado">As publicações deste tema foram encerradas.</span>'; if(temaTimer) clearInterval(temaTimer); return; }
+      var d=Math.floor(diff/864e5), h=Math.floor(diff%864e5/36e5), m=Math.floor(diff%36e5/6e4), s=Math.floor(diff%6e4/1e3);
+      el.innerHTML='encerra em <b>'+d+'d</b> · <b>'+par(h)+'h</b> · <b>'+par(m)+'m</b> · <b>'+par(s)+'s</b>';
+    }
+    tick(); if(temaTimer) clearInterval(temaTimer); temaTimer=setInterval(tick,1000);
+  }
+  async function carregarTema(){
+    var sec=document.getElementById('tema-mes');
     try{
-      await chamar('listar_pendentes');
-      try{ sessionStorage.setItem('tab_senha', s); }catch(e){}
-      elErro.textContent=''; entrarApp();
-    }catch(err){
-      senhaAtual='';
-      elErro.textContent = err && err.senhaInvalida ? 'Senha incorreta.' : ('Erro: '+(err && err.message || 'tente de novo'));
+      var rows=await supaGet('/tema_mes?ativo=eq.true&select=*&order=criado_em.desc&limit=1');
+      if(!rows || !rows.length || !rows[0].tema){ sec.hidden=true; document.body.classList.remove('tem-tema'); temaAtivo=null; return; }
+      var t=rows[0];
+      temaAtivo=t.tema;
+      document.getElementById('tm-tema').textContent='“'+t.tema+'”';
+      if(t.prazo){ iniciarTimer(t.prazo); } else { document.getElementById('tm-timer').textContent=''; }
+      sec.hidden=false; document.body.classList.add('tem-tema');
+    }catch(e){ sec.hidden=true; document.body.classList.remove('tem-tema'); temaAtivo=null; }
+  }
+
+  async function supaGet(path){
+    var res = await fetch(REST + path, { headers: HEADERS });
+    if(!res.ok) throw new Error('HTTP ' + res.status + ' ' + (await res.text()));
+    return res.json();
+  }
+  async function supaPost(path, body, prefer){
+    var h = Object.assign({}, HEADERS);
+    h['Prefer'] = prefer || 'return=minimal';
+    var res = await fetch(REST + path, { method:'POST', headers:h, body:JSON.stringify(body) });
+    if(!res.ok) throw new Error('HTTP ' + res.status + ' ' + (await res.text()));
+    var txt = await res.text();
+    return txt ? JSON.parse(txt) : null;
+  }
+
+  document.getElementById('a-telegram').href = LINKS.telegram;
+  document.getElementById('a-instagram').href = LINKS.instagram;
+  document.getElementById('top-telegram').href = LINKS.telegram;
+  document.getElementById('top-instagram').href = LINKS.instagram;
+  document.getElementById('top-loja').href = LINKS.loja;
+
+  async function carregar(){
+    try{
+      var rows = await supaGet('/pergaminhos?status=eq.aprovado&select=*&order=criado_em.desc');
+      textosAtuais = rows.map(mapRow);
+      try{ var cs=await supaGet('/comentarios?select=pergaminho_id'); comentMap={}; cs.forEach(function(c){ var k=String(c.pergaminho_id); comentMap[k]=(comentMap[k]||0)+1; }); }catch(e){ comentMap={}; }
+      var n=textosAtuais.length;
+      document.getElementById('contagem').textContent = n? (n + (n===1?' pergaminho selado':' pergaminhos selados')) : '';
+      montarDestaque();
+      aplicarGeneros();
+      aplicarVista();
+      abrirDoLink();
+      abrirAutorDoLink();
+    }catch(e){
+      console.error('Falha ao carregar:', e);
+      els.scrolls.innerHTML = '<div class="state"><div class="big">O mural está trancado</div>Não consegui falar com a taverna. Veja o console (F12).</div>';
     }
   }
 
-  // ===== Abas =====
-  var LOADERS={ pendentes:carregarPendentes, aprovados:carregarAprovados, recusados:carregarRecusados, produtos:carregarProdutos, depoimentos:carregarDepoimentos, tema:carregarTemas, textos:carregarTextos, denuncias:carregarDenuncias, comentarios:carregarComentariosPainel };
-  document.querySelectorAll('.tab').forEach(function(t){
-    t.addEventListener('click', function(){
-      document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
-      t.classList.add('active');
-      var aba=t.getAttribute('data-aba');
-      Object.keys(LOADERS).forEach(function(n){ var s=document.getElementById('aba-'+n); if(s) s.style.display = n===aba?'':'none'; });
-      var fn=LOADERS[aba]; if(fn) fn();
+  function aplicarVista(){
+    var lista = textosAtuais.slice();
+    if(soFavoritos) lista = lista.filter(function(w){ return favSet.has(String(w.id)); });
+    if(filtroAutor) lista = lista.filter(function(w){ return (w.author||'Anónimo')===filtroAutor; });
+    if(filtroGenero!=='Todos') lista = lista.filter(function(w){ return (w.genre||'Conto')===filtroGenero; });
+    if(busca){ var q=busca.toLowerCase(); lista = lista.filter(function(w){ return ((w.title||'')+' '+(w.author||'')+' '+(w.content||'')).toLowerCase().indexOf(q)>=0; }); }
+    lista.sort(function(a,b){
+      var d=(b.destaque?1:0)-(a.destaque?1:0); if(d) return d;
+      if(ordenacao==='curtidos'){ var l=(b.likes||0)-(a.likes||0); if(l) return l; }
+      return (b.id||0)-(a.id||0);
     });
-  });
-
-  function quando(iso){
-    try{ var d=new Date(iso); return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }catch(e){ return ''; }
+    vistaAtual = lista;
+    render(lista);
+    var ab=document.getElementById('autor-bar');
+    if(filtroAutor){ document.getElementById('autor-bar-nome').textContent=filtroAutor; ab.classList.add('on'); }
+    else ab.classList.remove('on');
   }
-
-  // ===== Pendentes =====
-  async function carregarPendentes(){
-    var box=document.getElementById('lista-pendentes');
-    box.innerHTML='<div class="carregando">A abrir o livro…</div>';
-    try{
-      var rows=await chamar('listar_pendentes');
-      document.getElementById('badge-pend').textContent = rows.length ? '('+rows.length+')' : '';
-      if(!rows.length){ box.innerHTML='<div class="vazia">Nada à espera. A taverna está em dia. ✦</div>'; return; }
-      box.innerHTML='';
-      rows.forEach(function(p){ box.appendChild(cardPendente(p)); });
-    }catch(err){ tratarErro(err, box); }
+  function montarGeneroSel(){
+    var sel=document.getElementById('genero-sel'); if(!sel) return;
+    sel.innerHTML='';
+    var todos=document.createElement('option'); todos.value='Todos'; todos.textContent='todos os géneros'; sel.appendChild(todos);
+    GENEROS.forEach(function(g){ var o=document.createElement('option'); o.value=g; o.textContent=g; sel.appendChild(o); });
+    sel.value = (filtroGenero==='Todos' || GENEROS.indexOf(filtroGenero)>=0) ? filtroGenero : 'Todos';
+    filtroGenero = sel.value;
   }
-
-  function cardPendente(p){
-    var el=document.createElement('div'); el.className='item';
-    el.innerHTML =
-      '<div class="item-top"><span class="item-titulo">'+esc(p.titulo||'Sem título')+'</span>'+(p.genero?'<span class="pill">'+esc(p.genero)+'</span>':'')+(p.tema?'<span class="pill">tema: '+esc(p.tema)+'</span>':'')+'</div>'+
-      '<div class="item-meta">por '+esc(p.autor||'Anónimo')+' · '+quando(p.criado_em)+'</div>'+
-      '<div class="corpo">'+esc(p.conteudo||'')+'</div>'+
-      '<div class="acoes"><button class="b-ok">Aprovar e selar</button><button class="b-no">Recusar</button></div>';
-    el.querySelector('.b-ok').addEventListener('click', function(){ decidir(el, p.id, 'aprovar', 'Selado no mural.', p); });
-    el.querySelector('.b-no').addEventListener('click', function(){ decidir(el, p.id, 'recusar', 'Recusado.'); });
-    return el;
+  function aplicarGeneros(){
+    var fg=document.getElementById('f-genero');
+    if(fg){ var cur=fg.value; fg.innerHTML=''; GENEROS.forEach(function(g){ var o=document.createElement('option'); o.value=g; o.textContent=g; fg.appendChild(o); }); if(GENEROS.indexOf(cur)>=0) fg.value=cur; }
+    montarGeneroSel();
   }
-
-  async function decidir(el, id, acao, msg, row){
-    var btns=el.querySelectorAll('button'); btns.forEach(function(b){ b.disabled=true; });
-    try{
-      await chamar(acao, { id:id });
-      el.style.transition='opacity .25s'; el.style.opacity='0';
-      setTimeout(function(){ el.remove();
-        var rest=document.querySelectorAll('#lista-pendentes .item').length;
-        document.getElementById('badge-pend').textContent = rest ? '('+rest+')' : '';
-        if(!rest) document.getElementById('lista-pendentes').innerHTML='<div class="vazia">Nada à espera. A taverna está em dia. ✦</div>';
-      },250);
-      toast(msg);
-      if(acao==='aprovar' && row) mostrarMensagemCanal(row);
-    }catch(err){ btns.forEach(function(b){ b.disabled=false; }); tratarErro(err); }
-  }
-
-  function mostrarMensagemCanal(p){
-    var titulo=(p.titulo||'Sem título').toString().trim();
-    var autor=(p.autor||'').toString().trim();
-    var assin=autor?(' — por '+autor):'';
-    var msg='✦ Novo pergaminho selado na taverna\n\n"'+titulo+'"'+assin+'\n\nvenha ler: '+SITE_URL+'?texto='+p.id;
-    document.getElementById('copiar-texto').value=msg;
-    document.getElementById('copiar-modal').style.display='flex';
-  }
-  document.getElementById('copiar-fechar').addEventListener('click', function(){ document.getElementById('copiar-modal').style.display='none'; });
-  document.getElementById('copiar-btn').addEventListener('click', function(){
-    var ta=document.getElementById('copiar-texto'); ta.focus(); ta.select();
-    if(navigator.clipboard){ navigator.clipboard.writeText(ta.value).catch(function(){}); }
-    try{ document.execCommand('copy'); }catch(e){}
-    var b=this, old=b.textContent; b.textContent='copiado!'; setTimeout(function(){ b.textContent=old; },1400);
-  });
-
-  // ===== Aprovados =====
-  async function carregarAprovados(){
-    var box=document.getElementById('lista-aprovados');
-    box.innerHTML='<div class="carregando">A abrir o livro…</div>';
-    try{
-      var rows=await chamar('listar_aprovados');
-      if(!rows.length){ box.innerHTML='<div class="vazia">Ainda não há pergaminhos no mural.</div>'; return; }
-      box.innerHTML='';
-      rows.forEach(function(p){ box.appendChild(cardAprovado(p)); });
-    }catch(err){ tratarErro(err, box); }
-  }
-
-  function cardAprovado(p){
-    var el=document.createElement('div'); el.className='item';
-    el.innerHTML =
-      '<div class="item-top"><span class="item-titulo">'+esc(p.titulo||'Sem título')+'</span>'+(p.genero?'<span class="pill">'+esc(p.genero)+'</span>':'')+'</div>'+
-      '<div class="item-meta">por '+esc(p.autor||'Anónimo')+' · ♥ '+(p.curtidas||0)+' · '+(p.leituras||0)+' leituras · '+quando(p.criado_em)+'</div>'+
-      '<div class="acoes">'+
-        '<button class="b-ghost'+(p.destaque?' on':'')+'" data-role="destaque">'+(p.destaque?'★ em destaque':'☆ destacar')+'</button>'+
-        '<input class="tema-input" placeholder="etiquetar com tema…" value="'+esc(p.tema||'')+'">'+
-        '<button class="b-ghost" data-role="tema">salvar tema</button>'+
-        '<button class="b-danger" data-role="remover">remover</button>'+
-      '</div>';
-    var bDest=el.querySelector('[data-role="destaque"]');
-    bDest.addEventListener('click', async function(){
-      bDest.disabled=true;
-      try{ var novo=!p.destaque; await chamar('destaque',{id:p.id,valor:novo}); p.destaque=novo;
-        bDest.classList.toggle('on',novo); bDest.textContent=novo?'★ em destaque':'☆ destacar'; toast(novo?'Em destaque.':'Destaque removido.');
-      }catch(err){ tratarErro(err); } bDest.disabled=false;
+  function filtrarAutor(nome){ filtroAutor=nome; aplicarVista(); var sh=document.querySelector('.shelf-head'); if(sh) sh.scrollIntoView({behavior:'smooth',block:'start'}); }
+  var autorAtual = '';
+  function abrirAutor(nome){
+    autorAtual = nome;
+    var list = textosAtuais.filter(function(w){ return (w.author||'Anónimo')===nome; });
+    var likes = list.reduce(function(a,w){ return a+(w.likes||0); },0);
+    var leituras = list.reduce(function(a,w){ return a+(w.leituras||0); },0);
+    document.getElementById('autor-nome').textContent = nome;
+    var n=list.length;
+    var partes = [ n+(n===1?' pergaminho':' pergaminhos') ];
+    if(leituras) partes.push(leituras+(leituras===1?' leitura':' leituras'));
+    partes.push(likes+(likes===1?' curtida':' curtidas'));
+    document.getElementById('autor-stats').textContent = partes.join(' · ');
+    var box=document.getElementById('autor-lista'); box.innerHTML='';
+    list.forEach(function(w){
+      var b=document.createElement('button'); b.className='autor-item';
+      b.innerHTML='<span>'+esc(w.title||'Sem título')+'</span><span class="ai-likes">♥ '+(w.likes||0)+'</span>';
+      b.addEventListener('click', function(){ fechar(document.getElementById('autor-modal')); abrirLeitor(w); });
+      box.appendChild(b);
     });
-    el.querySelector('[data-role="tema"]').addEventListener('click', async function(){
-      var v=el.querySelector('.tema-input').value.trim();
-      try{ await chamar('definir_tema',{id:p.id,tema:v}); p.tema=v; toast(v?'Tema salvo.':'Tema removido.'); }catch(err){ tratarErro(err); }
-    });
-    el.querySelector('[data-role="remover"]').addEventListener('click', async function(){
-      if(!confirm('Remover este pergaminho para sempre? Esta ação não pode ser desfeita.')) return;
-      try{ await chamar('remover',{id:p.id}); el.style.opacity='0'; setTimeout(function(){ el.remove(); },250); toast('Removido.'); }catch(err){ tratarErro(err); }
-    });
-    return el;
+    abrir(document.getElementById('autor-modal'));
+  }
+  function partilharPerfil(nome){
+    var url = location.origin+location.pathname+'?autor='+encodeURIComponent(nome);
+    if(navigator.share){ navigator.share({ title:'Penas & Pergaminhos', text:'Os pergaminhos de '+nome+' na taverna', url:url }).catch(function(){}); }
+    else if(navigator.clipboard){ navigator.clipboard.writeText(url).then(function(){ ppToast('Link do perfil copiado!'); }).catch(function(){ prompt('Link do perfil:', url); }); }
+    else { prompt('Link do perfil:', url); }
+  }
+  function abrirAutorDoLink(){
+    var a = new URLSearchParams(location.search).get('autor');
+    if(a) abrirAutor(a);
   }
 
-  // ===== Recusados =====
-  async function carregarRecusados(){
-    var box=document.getElementById('lista-recusados'); box.innerHTML='<div class="carregando">A abrir o livro…</div>';
-    try{ var rows=await chamar('listar_recusados');
-      if(!rows.length){ box.innerHTML='<div class="vazia">Nenhum texto recusado. ✦</div>'; return; }
-      box.innerHTML=''; rows.forEach(function(p){ box.appendChild(cardRecusado(p)); });
-    }catch(err){ tratarErro(err, box); }
-  }
-  function cardRecusado(p){
-    var el=document.createElement('div'); el.className='item';
-    el.innerHTML=
-      '<div class="item-top"><span class="item-titulo">'+esc(p.titulo||'Sem título')+'</span>'+(p.genero?'<span class="pill">'+esc(p.genero)+'</span>':'')+'</div>'+
-      '<div class="item-meta">por '+esc(p.autor||'Anónimo')+' · '+quando(p.criado_em)+'</div>'+
-      '<div class="corpo">'+esc(p.conteudo||'')+'</div>'+
-      '<div class="acoes"><button class="b-ok">Aprovar mesmo assim</button><button class="b-danger">apagar de vez</button></div>';
-    el.querySelector('.b-ok').addEventListener('click', function(){ decidirRecusado(el, p.id, 'aprovar', 'Resgatado para o mural.', p); });
-    el.querySelector('.b-danger').addEventListener('click', function(){ if(confirm('Apagar este texto para sempre? Esta ação não pode ser desfeita.')) decidirRecusado(el, p.id, 'remover', 'Apagado.'); });
-    return el;
-  }
-  async function decidirRecusado(el, id, acao, msg, row){
-    var btns=el.querySelectorAll('button'); btns.forEach(function(b){ b.disabled=true; });
-    try{
-      await chamar(acao, { id:id });
-      el.style.transition='opacity .25s'; el.style.opacity='0';
-      setTimeout(function(){ el.remove(); if(!document.querySelectorAll('#lista-recusados .item').length) document.getElementById('lista-recusados').innerHTML='<div class="vazia">Nenhum texto recusado. ✦</div>'; },250);
-      toast(msg);
-      if(acao==='aprovar' && row) mostrarMensagemCanal(row);
-    }catch(err){ btns.forEach(function(b){ b.disabled=false; }); tratarErro(err); }
+  function render(lista){
+    els.scrolls.innerHTML = '';
+    if(!lista.length){
+      els.scrolls.innerHTML = '<div class="state"><div class="big">Nada por aqui ainda</div>Nenhum pergaminho com estes filtros.</div>';
+      return;
+    }
+    lista.forEach(function(w,i){
+      var card = document.createElement('div');
+      card.className='scroll'+(w.destaque?' is-destaque':'');
+      card.style.animationDelay=(i*0.06)+'s';
+      var prev=(w.content||'').trim().slice(0,150);
+      var liked=likedSet.has(String(w.id));
+      card.innerHTML =
+        (w.destaque?'<div class="destaque-badge">em destaque</div>':'')+
+        '<div class="s-meta"><span class="genre">'+esc(w.genre||'Conto')+'</span> · '+tempo(w.content)+' de leitura</div>'+
+        '<div class="s-title">'+esc(w.title||'Sem título')+'</div>'+
+        '<div class="s-preview">"'+esc(prev)+'…"</div>'+
+        '<div class="s-author">por <a class="autor-link">'+esc(w.author||'Anónimo')+'</a></div>'+
+        '<div class="s-foot"><button class="like-btn'+(liked?' liked':'')+'" data-like="'+w.id+'"><span class="lk-heart">'+(liked?'♥':'♡')+'</span> <span class="lk-count">'+(w.likes||0)+'</span></button>'+(comentMap[String(w.id)]?'<span class="cmt-count">💬 '+comentMap[String(w.id)]+'</span>':'')+(w.leituras?'<span class="cmt-count">'+w.leituras+' leituras</span>':'')+'</div>';
+      card.addEventListener('click', function(){ abrirLeitor(w); });
+      var lk = card.querySelector('.like-btn');
+      lk.addEventListener('click', function(e){ e.stopPropagation(); curtir(w.id); });
+      var al = card.querySelector('.autor-link');
+      if(al) al.addEventListener('click', function(e){ e.stopPropagation(); abrirAutor(w.author||'Anónimo'); });
+      els.scrolls.appendChild(card);
+    });
   }
 
-  // ===== Helpers de salvar/remover linha (produtos, depoimentos) =====
-  async function salvarLinha(el, tabela, id, dados){
-    var btns=el.querySelectorAll('button'); btns.forEach(function(b){ b.disabled=true; });
-    try{
-      await chamar('tabela_salvar', { tabela:tabela, id:id||undefined, dados:dados });
-      toast('Salvo.');
-      if(tabela==='produtos') carregarProdutos(); else if(tabela==='depoimentos') carregarDepoimentos();
-    }catch(err){ btns.forEach(function(b){ b.disabled=false; }); tratarErro(err); }
+  async function curtir(id){
+    var key=String(id);
+    var t = textosAtuais.find(function(x){ return String(x.id)===key; });
+    if(likedSet.has(key)){
+      likedSet.delete(key);
+      if(t) t.likes = Math.max(0,(t.likes||0)-1);
+      salvarLikes(); updateLikeUI(id);
+      try{ await supaPost('/rpc/descurtir', { p_id: id }); }
+      catch(e){ console.error('Falha ao descurtir:', e); }
+    } else {
+      likedSet.add(key);
+      if(t) t.likes = (t.likes||0)+1;
+      salvarLikes(); updateLikeUI(id);
+      try{ await supaPost('/rpc/curtir', { p_id: id }); }
+      catch(e){ console.error('Falha ao curtir:', e); }
+    }
   }
-  async function removerLinha(el, tabela, id){
-    if(!id){ el.remove(); return; }
-    if(!confirm('Remover para sempre? Esta ação não pode ser desfeita.')) return;
-    try{ await chamar('tabela_remover', { tabela:tabela, id:id }); el.style.opacity='0'; setTimeout(function(){ el.remove(); },250); toast('Removido.'); }
-    catch(err){ tratarErro(err); }
+  function updateLikeUI(id){
+    var t = textosAtuais.find(function(x){ return String(x.id)===String(id); });
+    var n = t ? (t.likes||0) : 0, liked = likedSet.has(String(id));
+    document.querySelectorAll('[data-like="'+id+'"]').forEach(function(el){
+      el.classList.toggle('liked', liked);
+      var h=el.querySelector('.lk-heart'); if(h) h.textContent = liked?'♥':'♡';
+      var c=el.querySelector('.lk-count'); if(c) c.textContent = n;
+    });
   }
-  async function carregarDenuncias(){
-    var box=document.getElementById('lista-denuncias');
-    box.innerHTML='<div class="carregando">A carregar…</div>';
-    try{
-      var rows=await chamar('tabela_listar',{tabela:'denuncias'});
-      var b=document.getElementById('badge-den'); if(b) b.textContent = rows.length ? '('+rows.length+')':'';
-      if(!rows.length){ box.innerHTML='<div class="vazia">Nenhuma denúncia. A taverna está tranquila. ✦</div>'; return; }
-      box.innerHTML='';
-      rows.forEach(function(d){
-        var el=document.createElement('div'); el.className='item';
-        el.innerHTML=
-          '<div class="item-top"><span class="item-titulo">Pergaminho #'+d.pergaminho_id+'</span></div>'+
-          '<div class="item-meta">'+quando(d.criado_em)+'</div>'+
-          '<div class="corpo">'+(d.motivo?esc(d.motivo):'<em>sem motivo informado</em>')+'</div>'+
-          '<div class="acoes"><a class="b-ver" style="color:#c9a96a;text-decoration:none;margin-right:auto;align-self:center" href="'+SITE_URL+'?texto='+d.pergaminho_id+'" target="_blank" rel="noopener">Ver o texto ↗</a><button class="b-no">Apagar report</button></div>';
-        el.querySelector('.b-no').addEventListener('click', function(){ removerLinha(el,'denuncias',d.id); });
-        box.appendChild(el);
+
+  function abrirLeitor(w){
+    currentReaderId = w.id;
+    document.getElementById('r-genre').textContent = w.genre||'Conto';
+    document.getElementById('r-title').textContent = w.title||'Sem título';
+    var by=document.getElementById('r-by');
+    by.innerHTML='por <a class="autor-link" id="r-autor"></a> · '+tempo(w.content)+' de leitura · <span id="r-leituras"></span>';
+    var ra=document.getElementById('r-autor'); ra.textContent=w.author||'Anónimo';
+    ra.addEventListener('click', function(){ abrirAutor(w.author||'Anónimo'); });
+    registrarLeitura(w);
+    var html=(w.content||'').split(/\n\s*\n/).map(function(p){return '<p>'+esc(p).replace(/\n/g,'<br>')+'</p>';}).join('');
+    document.getElementById('r-text').innerHTML = html;
+    aplicarFonte();
+    aplicarEntrelinha();
+    montarLeiaTambem(w);
+    var pg=document.getElementById('r-progress'); if(pg) pg.style.width='0%';
+    var rf=document.getElementById('r-fav'); var isF=favSet.has(String(w.id));
+    rf.classList.toggle('on',isF); rf.querySelector('.fav-star').textContent=isF?'★':'☆'; rf.title=isF?'Guardado':'Guardar';
+    try{ window.speechSynthesis.cancel(); }catch(e){}
+    var ob=document.getElementById('r-ouvir'); ob.innerHTML=iconeOuvir; ob.title='Ouvir'; ob.classList.remove('on');
+    document.getElementById('r-like').setAttribute('data-like', w.id);
+    updateLikeUI(w.id);
+    var rs=document.getElementById('r-share'); rs.title='Compartilhar'; rs.classList.remove('on');
+    document.getElementById('verificar-area').classList.remove('open');
+    document.getElementById('verif-chave').value='';
+    var vr=document.getElementById('verif-result'); vr.textContent=''; vr.className='verif-result';
+    atualizarNav();
+    els.reader.classList.add('open'); els.reader.scrollTop=0; document.body.style.overflow='hidden';
+    carregarComentarios(w.id);
+  }
+  function atualizarNav(){
+    var idx = vistaAtual.findIndex(function(x){ return String(x.id)===String(currentReaderId); });
+    var prev=document.getElementById('r-prev'), next=document.getElementById('r-next');
+    if(!prev||!next) return;
+    prev.disabled = idx<=0;
+    next.disabled = idx<0 || idx>=vistaAtual.length-1;
+    prev.onclick = function(){ if(idx>0) abrirLeitor(vistaAtual[idx-1]); };
+    next.onclick = function(){ if(idx>=0 && idx<vistaAtual.length-1) abrirLeitor(vistaAtual[idx+1]); };
+  }
+  function montarLeiaTambem(w){
+    var box=document.getElementById('leia-tambem'); if(!box) return;
+    var outros=textosAtuais.filter(function(x){ return String(x.id)!==String(w.id); });
+    var mesmoGenero=outros.filter(function(x){ return x.genre===w.genre; });
+    var mesmoAutor=outros.filter(function(x){ return x.author===w.author; });
+    var pool=mesmoGenero.length?mesmoGenero:(mesmoAutor.length?mesmoAutor:outros);
+    if(!pool.length){ box.hidden=true; box.innerHTML=''; return; }
+    pool=pool.slice();
+    for(var i=pool.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)), t=pool[i]; pool[i]=pool[j]; pool[j]=t; }
+    var h='<div class="lt-head">se gostou deste, leia também</div>';
+    pool.slice(0,3).forEach(function(x){
+      h+='<button class="lt-item" data-lt="'+x.id+'"><span class="lt-titulo">'+esc(x.title||'Sem título')+'</span><span class="lt-meta">'+esc(x.genre||'Conto')+' · por '+esc(x.author||'Anónimo')+'</span></button>';
+    });
+    box.innerHTML=h;
+    box.querySelectorAll('.lt-item').forEach(function(b){
+      b.addEventListener('click', function(){
+        var alvo=textosAtuais.find(function(x){ return String(x.id)===String(b.getAttribute('data-lt')); });
+        if(alvo) abrirLeitor(alvo);
       });
-    }catch(err){ tratarErro(err, box); }
+    });
+    box.hidden=false;
+  }
+  document.getElementById('fechar-reader').addEventListener('click', function(){
+    try{ window.speechSynthesis.cancel(); }catch(e){}
+    var ob=document.getElementById('r-ouvir'); if(ob){ ob.innerHTML=iconeOuvir; ob.title='Ouvir'; ob.classList.remove('on'); }
+    els.reader.classList.remove('open'); document.body.style.overflow='';
+  });
+  document.getElementById('r-like').addEventListener('click', function(){ if(currentReaderId!=null) curtir(currentReaderId); });
+  document.getElementById('r-share').addEventListener('click', function(){ if(currentReaderId!=null) compartilhar(currentReaderId); });
+
+  function compartilhar(id){
+    var btn = document.getElementById('r-share');
+    var w = textosAtuais.find(function(x){ return String(x.id)===String(id); });
+    var titulo = w ? (w.title||'Sem título') : 'Penas & Pergaminhos';
+    var url = OG_DINAMICO ? (SUPABASE_URL + '/functions/v1/partilha?id=' + id) : (location.origin + location.pathname + '?texto=' + id);
+    if(navigator.share){
+      navigator.share({ title:titulo, text:'“'+titulo+'” — na taverna Penas & Pergaminhos', url:url }).catch(function(){});
+    } else if(navigator.clipboard){
+      navigator.clipboard.writeText(url).then(function(){
+        btn.title='link copiado!'; btn.classList.add('on'); setTimeout(function(){ btn.title='Compartilhar'; btn.classList.remove('on'); },1800);
+      }).catch(function(){ btn.title='copie: '+url; });
+    } else { btn.title=url; }
   }
 
-  async function carregarComentariosPainel(){
-    var box=document.getElementById('lista-comentarios');
-    box.innerHTML='<div class="carregando">A carregar…</div>';
+  async function carregarComentarios(id){
+    var box = document.getElementById('c-list');
+    box.innerHTML = '<p class="c-empty">A carregar comentários…</p>';
     try{
-      var rows=await chamar('tabela_listar',{tabela:'comentarios'});
-      var pend=rows.filter(function(c){ return (c.status||'pendente')!=='aprovado'; });
-      var apro=rows.filter(function(c){ return (c.status||'pendente')==='aprovado'; });
-      var b=document.getElementById('badge-com'); if(b) b.textContent = pend.length ? '('+pend.length+')':'';
-      if(!rows.length){ box.innerHTML='<div class="vazia">Nenhum comentário ainda. ✦</div>'; return; }
-      box.innerHTML='';
-      if(pend.length){ var h=document.createElement('h3'); h.style.cssText="font-family:'Cormorant Garamond',serif;font-weight:600;color:var(--ink);margin:4px 0 14px"; h.textContent='À espera de aprovação ('+pend.length+')'; box.appendChild(h); pend.forEach(function(c){ box.appendChild(cardComentario(c,true)); }); }
-      if(apro.length){ var h2=document.createElement('h3'); h2.style.cssText="font-family:'Cormorant Garamond',serif;font-weight:600;color:var(--ink-soft);margin:26px 0 14px"; h2.textContent='No mural'; box.appendChild(h2); apro.forEach(function(c){ box.appendChild(cardComentario(c,false)); }); }
-    }catch(err){ tratarErro(err, box); }
+      var rows = await supaGet('/comentarios?pergaminho_id=eq.'+id+'&select=*&order=criado_em.asc');
+      if(!rows.length){ box.innerHTML='<p class="c-empty">Seja o primeiro a comentar.</p>'; return; }
+      box.innerHTML = rows.map(function(c){
+        return '<div class="comment"><div class="ca">'+esc(c.autor)+'</div><div class="ct">'+esc(c.texto)+'</div></div>';
+      }).join('');
+    }catch(e){
+      console.error('Falha ao carregar comentários:', e);
+      box.innerHTML='<p class="c-empty">Não consegui carregar os comentários.</p>';
+    }
   }
-  function cardComentario(c, pendente){
-    var el=document.createElement('div'); el.className='item';
-    el.innerHTML=
-      '<div class="item-top"><span class="item-titulo" style="font-size:20px">'+esc(c.autor||'Anónimo')+'</span></div>'+
-      '<div class="item-meta">no pergaminho #'+c.pergaminho_id+' · '+quando(c.criado_em)+'</div>'+
-      '<div class="corpo">'+esc(c.texto||'')+'</div>'+
-      '<div class="acoes"><a class="b-ver" style="color:#c9a96a;text-decoration:none;margin-right:auto;align-self:center" href="'+SITE_URL+'?texto='+c.pergaminho_id+'" target="_blank" rel="noopener">ver o texto ↗</a>'+(pendente?'<button class="b-ok">Aprovar</button>':'')+'<button class="b-danger">Apagar</button></div>';
-    if(pendente){ el.querySelector('.b-ok').addEventListener('click', function(){ aprovarComentario(el, c.id); }); }
-    el.querySelector('.b-danger').addEventListener('click', function(){ if(confirm('Apagar este comentário para sempre?')) removerLinha(el,'comentarios',c.id); });
-    return el;
-  }
-  async function aprovarComentario(el, id){
-    var btns=el.querySelectorAll('button'); btns.forEach(function(b){ b.disabled=true; });
-    try{ await chamar('tabela_salvar',{tabela:'comentarios', id:id, dados:{status:'aprovado'}}); toast('Comentário aprovado.'); carregarComentariosPainel(); }
-    catch(err){ btns.forEach(function(b){ b.disabled=false; }); tratarErro(err); }
-  }
-
-  function val(el,f){ var e=el.querySelector('[data-f="'+f+'"]'); return e?e.value:''; }
-  function chk(el,f){ var e=el.querySelector('[data-f="'+f+'"]'); return e?e.checked:false; }
-
-  // ===== Produtos =====
-  async function carregarProdutos(){
-    var box=document.getElementById('lista-produtos'); box.innerHTML='<div class="carregando">A abrir a loja…</div>';
-    try{ var rows=await chamar('tabela_listar',{tabela:'produtos'});
-      box.innerHTML=''; if(!rows.length){ box.innerHTML='<div class="vazia">Nenhum produto ainda.</div>'; return; }
-      rows.forEach(function(p){ box.appendChild(cardProduto(p)); });
-    }catch(err){ tratarErro(err, box); }
-  }
-  document.getElementById('novo-produto').addEventListener('click', function(){
-    var box=document.getElementById('lista-produtos'); var v=box.querySelector('.vazia'); if(v) v.remove();
-    box.insertBefore(cardProduto({}), box.firstChild);
+  document.getElementById('c-send').addEventListener('click', async function(){
+    var id = currentReaderId; if(id==null) return;
+    var nome = document.getElementById('c-name').value.trim();
+    var txt = document.getElementById('c-text').value.trim();
+    if(!nome || !txt) return;
+    var btn = this; btn.disabled=true; btn.textContent='a enviar…';
+    try{
+      await supaPost('/comentarios', { pergaminho_id: id, autor: nome, texto: txt });
+      document.getElementById('c-text').value='';
+      ppToast('Comentário enviado — aparece assim que o Taberneiro aprovar.');
+    }catch(e){ console.error('Falha ao comentar:', e); }
+    finally{ btn.disabled=false; btn.textContent='Comentar'; }
   });
-  function cardProduto(p){
-    var el=document.createElement('div'); el.className='item';
-    el.innerHTML=
-      '<label class="campo"><span>Descrição</span><textarea data-f="descricao">'+esc(p.descricao||'')+'</textarea></label>'+
-      '<div class="linha"><label class="campo"><span>Preço</span><input data-f="preco" value="'+esc(p.preco||'')+'"></label>'+
-        '<label class="campo"><span>Categoria</span><input data-f="categoria" value="'+esc(p.categoria||'')+'"></label>'+
-        '<label class="campo"><span>Ordem</span><input data-f="ordem" type="number" value="'+(p.ordem!=null?p.ordem:0)+'"></label></div>'+
-      '<label class="campo"><span>Link de compra (Telegram/loja)</span><input data-f="link" value="'+esc(p.link||'')+'"></label>'+
-      '<div class="linha"><label class="campo"><span>Link Mercado Livre (opcional)</span><input data-f="link_mercadolivre" value="'+esc(p.link_mercadolivre||'')+'"></label>'+
-        '<label class="campo"><span>Link Shopee (opcional)</span><input data-f="link_shopee" value="'+esc(p.link_shopee||'')+'"></label></div>'+
-      '<label class="campo"><span>Fotos (uma URL por linha)</span><textarea data-f="fotos">'+esc(p.fotos||p.foto||'')+'</textarea></label>'+
-      '<div style="margin-bottom:12px"><label class="check"><input type="checkbox" data-f="ativo" '+(p.ativo===false?'':'checked')+'> ativo</label>'+
-        '<label class="check"><input type="checkbox" data-f="destaque" '+(p.destaque?'checked':'')+'> destaque</label>'+
-        '<label class="check"><input type="checkbox" data-f="esgotado" '+(p.esgotado?'checked':'')+'> esgotado</label></div>'+
-      '<div class="acoes"><button class="b-ok">Salvar</button><button class="b-danger">remover</button></div>';
-    el.querySelector('.b-ok').addEventListener('click', function(){
-      salvarLinha(el,'produtos',p.id,{ descricao:val(el,'descricao'), preco:val(el,'preco'), categoria:val(el,'categoria')||null, ordem:parseInt(val(el,'ordem'),10)||0, link:val(el,'link')||null, link_mercadolivre:val(el,'link_mercadolivre')||null, link_shopee:val(el,'link_shopee')||null, fotos:val(el,'fotos')||null, ativo:chk(el,'ativo'), destaque:chk(el,'destaque'), esgotado:chk(el,'esgotado') });
-    });
-    el.querySelector('.b-danger').addEventListener('click', function(){ removerLinha(el,'produtos',p.id); });
-    return el;
+
+  function abrirDoLink(){
+    var p = new URLSearchParams(location.search).get('texto');
+    if(!p) return;
+    var w = textosAtuais.find(function(x){ return String(x.id)===String(p); });
+    if(w) abrirLeitor(w);
+  }
+  function irParaTexto(id){
+    var w = textosAtuais.find(function(x){ return String(x.id)===String(id); });
+    if(w){ abrirLeitor(w); } else { location.href = location.origin+location.pathname+'?texto='+id; }
   }
 
-  // ===== Depoimentos =====
-  async function carregarDepoimentos(){
-    var box=document.getElementById('lista-depoimentos'); box.innerHTML='<div class="carregando">A carregar…</div>';
-    try{ var rows=await chamar('tabela_listar',{tabela:'depoimentos'});
-      box.innerHTML=''; if(!rows.length){ box.innerHTML='<div class="vazia">Nenhum depoimento ainda.</div>'; return; }
-      rows.forEach(function(d){ box.appendChild(cardDepo(d)); });
-    }catch(err){ tratarErro(err, box); }
+  var f={autor:document.getElementById('f-autor'),titulo:document.getElementById('f-titulo'),
+         genero:document.getElementById('f-genero'),texto:document.getElementById('f-texto'),
+         count:document.getElementById('f-count')};
+  f.texto.addEventListener('input',function(){f.count.textContent=f.texto.value.length;});
+  function fb(m,t){els.fb.textContent=m;els.fb.className='feedback '+t;}
+  function abrir(m){m.classList.add('open');document.body.style.overflow='hidden';}
+  function fechar(m){m.classList.remove('open');document.body.style.overflow='';}
+
+  function ppToast(msg){
+    var t=document.getElementById('pp-toast');
+    if(!t){ t=document.createElement('div'); t.id='pp-toast'; t.style.cssText="position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:11px 18px;border-radius:8px;font-family:'EB Garamond',serif;font-size:15px;z-index:300;opacity:0;transition:opacity .25s;pointer-events:none;max-width:88vw;text-align:center"; document.body.appendChild(t); }
+    t.textContent=msg; t.style.opacity='1'; clearTimeout(t._h); t._h=setTimeout(function(){ t.style.opacity='0'; },2400);
   }
-  document.getElementById('novo-depoimento').addEventListener('click', function(){
-    var box=document.getElementById('lista-depoimentos'); var v=box.querySelector('.vazia'); if(v) v.remove();
-    box.insertBefore(cardDepo({}), box.firstChild);
+
+  var legalModal=document.getElementById('legal-modal');
+  document.getElementById('abrir-legal').addEventListener('click', function(){ abrir(legalModal); });
+  document.getElementById('legal-ok').addEventListener('click', function(){ fechar(legalModal); });
+  document.getElementById('legal-fechar').addEventListener('click', function(){ fechar(legalModal); });
+
+  var denunciaModal=document.getElementById('denuncia-modal');
+  document.getElementById('abrir-denuncia').addEventListener('click', function(){ if(currentReaderId==null) return; document.getElementById('den-motivo').value=''; document.getElementById('den-obs').value=''; abrir(denunciaModal); });
+  document.getElementById('den-cancelar').addEventListener('click', function(){ fechar(denunciaModal); });
+  document.getElementById('denuncia-fechar').addEventListener('click', function(){ fechar(denunciaModal); });
+  document.getElementById('den-enviar').addEventListener('click', async function(){
+    var mot=document.getElementById('den-motivo').value;
+    var obs=document.getElementById('den-obs').value.trim();
+    var texto=[mot,obs].filter(Boolean).join(' — ');
+    var btn=this; btn.disabled=true;
+    try{ await supaPost('/denuncias', { pergaminho_id: currentReaderId, motivo: texto||null }); }catch(e){}
+    btn.disabled=false; fechar(denunciaModal);
+    ppToast('Denúncia enviada. Obrigado por cuidar da taverna.');
   });
-  function cardDepo(d){
-    var el=document.createElement('div'); el.className='item';
-    el.innerHTML=
-      '<label class="campo"><span>Texto</span><textarea data-f="texto">'+esc(d.texto||'')+'</textarea></label>'+
-      '<div class="linha"><label class="campo"><span>Nome (quem disse)</span><input data-f="nome" value="'+esc(d.nome||'')+'"></label>'+
-        '<label class="campo"><span>Ordem</span><input data-f="ordem" type="number" value="'+(d.ordem!=null?d.ordem:0)+'"></label></div>'+
-      '<div style="margin-bottom:12px"><label class="check"><input type="checkbox" data-f="ativo" '+(d.ativo===false?'':'checked')+'> ativo</label></div>'+
-      '<div class="acoes"><button class="b-ok">Salvar</button><button class="b-danger">remover</button></div>';
-    el.querySelector('.b-ok').addEventListener('click', function(){
-      salvarLinha(el,'depoimentos',d.id,{ texto:val(el,'texto'), nome:val(el,'nome')||null, ordem:parseInt(val(el,'ordem'),10)||0, ativo:chk(el,'ativo') });
-    });
-    el.querySelector('.b-danger').addEventListener('click', function(){ removerLinha(el,'depoimentos',d.id); });
-    return el;
-  }
+  var avisoModal = document.getElementById('aviso-modal');
 
-  // ===== Tema do mês =====
-  var temaEditId=null;
-  function isoParaInput(iso){ try{ var d=new Date(iso); return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16); }catch(e){ return ''; } }
-  function limparFormTema(){ temaEditId=null; document.getElementById('tema-tema').value=''; document.getElementById('tema-prazo').value=''; document.getElementById('tema-ativo').checked=true; document.getElementById('tema-editando').textContent=''; }
-  document.getElementById('tema-salvar').addEventListener('click', async function(){
-    var tema=document.getElementById('tema-tema').value.trim();
-    var prazoRaw=document.getElementById('tema-prazo').value;
-    var dados={ tema:tema||null, prazo: prazoRaw? new Date(prazoRaw).toISOString() : null, ativo: document.getElementById('tema-ativo').checked };
-    try{ await chamar('tabela_salvar',{ tabela:'tema_mes', id:temaEditId||undefined, dados:dados }); toast('Tema salvo.'); limparFormTema(); carregarTemas(); }
-    catch(err){ tratarErro(err); }
+  // ===== Rascunho (guardado neste navegador) =====
+  var RKEY='pp_rascunho';
+  function temConteudo(){ return !!(f.autor.value || f.titulo.value || f.texto.value); }
+  function salvarRascunho(silent){
+    try{
+      localStorage.setItem(RKEY, JSON.stringify({autor:f.autor.value,titulo:f.titulo.value,genero:f.genero.value,texto:f.texto.value}));
+      if(!silent) fb('Rascunho guardado neste navegador.','ok');
+    }catch(e){ if(!silent) fb('Este navegador não deixou guardar o rascunho.','err'); }
+  }
+  function lerRascunho(){ try{ var r=localStorage.getItem(RKEY); return r?JSON.parse(r):null; }catch(e){ return null; } }
+  function limparRascunho(){ try{ localStorage.removeItem(RKEY); }catch(e){} var n=document.getElementById('rascunho-nota'); if(n) n.style.display='none'; }
+  ['autor','titulo','texto'].forEach(function(k){ f[k].addEventListener('input', function(){ if(temConteudo()) salvarRascunho(true); }); });
+  f.genero.addEventListener('change', function(){ if(temConteudo()) salvarRascunho(true); });
+  document.getElementById('guardar-rascunho').addEventListener('click', function(){
+    if(!temConteudo()){ fb('Escreva algo antes de guardar o rascunho.','err'); return; }
+    salvarRascunho(false);
+    setTimeout(function(){ fechar(els.modal); }, 900);
   });
-  async function carregarTemas(){
-    var box=document.getElementById('lista-temas'); box.innerHTML='<div class="carregando">A carregar…</div>';
-    try{ var rows=await chamar('tabela_listar',{tabela:'tema_mes'});
-      box.innerHTML=''; if(!rows.length){ box.innerHTML='<div class="vazia">Nenhum tema ainda.</div>'; return; }
-      rows.forEach(function(t){
-        var el=document.createElement('div'); el.className='item';
-        el.innerHTML='<div class="item-top"><span class="item-titulo">'+esc(t.tema||'(sem tema)')+'</span>'+(t.ativo?'<span class="pill">ativo</span>':'')+'</div>'+
-          '<div class="item-meta">'+(t.prazo?('encerra '+quando(t.prazo)):'sem prazo')+'</div>'+
-          '<div class="acoes"><button class="b-ghost" data-role="editar">editar</button><button class="b-danger" data-role="rem">remover</button></div>';
-        el.querySelector('[data-role="editar"]').addEventListener('click', function(){
-          temaEditId=t.id; document.getElementById('tema-tema').value=t.tema||''; document.getElementById('tema-prazo').value=t.prazo?isoParaInput(t.prazo):''; document.getElementById('tema-ativo').checked=!!t.ativo; document.getElementById('tema-editando').textContent='(editando)'; document.getElementById('form-tema').scrollIntoView({behavior:'smooth'});
-        });
-        el.querySelector('[data-role="rem"]').addEventListener('click', function(){ removerLinha(el,'tema_mes',t.id); });
-        box.appendChild(el);
-      });
-    }catch(err){ tratarErro(err, box); }
-  }
+  document.getElementById('descartar-rascunho').addEventListener('click', function(e){
+    e.preventDefault(); limparRascunho();
+    f.titulo.value=''; f.texto.value=''; f.count.textContent='0';
+    fb('Rascunho descartado.','ok');
+  });
 
-  // ===== Textos do site =====
-  var TEXTOS_DEF=[
-    {chave:'link_telegram', rotulo:'Links · Telegram (URL do grupo/canal — usado no site e na loja)', multi:false},
-    {chave:'link_instagram', rotulo:'Links · Instagram (URL do perfil — usado no site e na loja)', multi:false},
-    {chave:'generos', rotulo:'Mural · géneros do site (um por linha)', multi:true},
-    {chave:'tagline', rotulo:'Site · slogan (abaixo do título)', multi:false},
-    {chave:'cta', rotulo:'Site · botão principal ("Confiar o seu texto")', multi:false},
-    {chave:'sobre', rotulo:'Site · texto "sobre a taverna"', multi:true},
-    {chave:'boasvindas', rotulo:'Site · texto de boas-vindas (1ª visita)', multi:true},
-    {chave:'rodape', rotulo:'Site · nota do rodapé', multi:false},
-    {chave:'loja_lema', rotulo:'Loja · lema', multi:false},
-    {chave:'loja_nota', rotulo:'Loja · nota (impressão 3D / envio)', multi:false},
-    {chave:'loja_passo1', rotulo:'Loja · "como funciona" passo 1', multi:true},
-    {chave:'loja_passo2', rotulo:'Loja · "como funciona" passo 2', multi:true},
-    {chave:'loja_passo3', rotulo:'Loja · "como funciona" passo 3', multi:true}
+  document.getElementById('abrir-publicar').addEventListener('click',function(){
+    fb('','');
+    var nota=document.getElementById('rascunho-nota'), r=lerRascunho();
+    if(r && (r.autor||r.titulo||r.texto)){
+      if(r.autor) f.autor.value=r.autor;
+      if(r.titulo) f.titulo.value=r.titulo;
+      if(r.genero) f.genero.value=r.genero;
+      if(r.texto) f.texto.value=r.texto;
+      f.count.textContent=f.texto.value.length;
+      if(nota) nota.style.display='block';
+    } else if(nota){ nota.style.display='none'; }
+    try{
+      var na=localStorage.getItem('pp_autor'); if(na && !f.autor.value.trim()) f.autor.value=na;
+      var ng=localStorage.getItem('pp_genero'); if(ng && (!r || !r.genero)) f.genero.value=ng;
+    }catch(e){}
+    var topt=document.getElementById('tema-opt');
+    if(topt){
+      if(temaAtivo){ document.getElementById('tema-opt-nome').textContent='“'+temaAtivo+'”'; document.getElementById('f-tema-on').checked=true; topt.hidden=false; }
+      else topt.hidden=true;
+    }
+    abrir(els.modal);
+  });
+  document.getElementById('publicar-fechar').addEventListener('click',function(){fechar(els.modal);});
+  els.modal.addEventListener('click',function(e){if(e.target===els.modal)fechar(els.modal);});
+
+  // ===== Envio com aviso de que não poderá ser alterado =====
+  document.getElementById('enviar').addEventListener('click', function(){
+    if(document.getElementById('f-hp').value){ fechar(els.modal); return; }
+    var autor=f.autor.value.trim(),titulo=f.titulo.value.trim(),texto=f.texto.value.trim();
+    if(!autor){fb('Diga como devemos assinar.','err');return;}
+    if(!titulo){fb('O pergaminho precisa de um título.','err');return;}
+    if(texto.length<20){fb('Escreva ao menos uma frase.','err');return;}
+    fechar(els.modal); abrir(avisoModal);
+  });
+  document.getElementById('aviso-rever').addEventListener('click', function(){ fechar(avisoModal); abrir(els.modal); });
+  document.getElementById('aviso-confirmar').addEventListener('click', async function(){
+    var autor=f.autor.value.trim(),titulo=f.titulo.value.trim(),genero=f.genero.value,texto=f.texto.value.trim();
+    var temaOn=document.getElementById('f-tema-on');
+    var pTema=(temaAtivo && temaOn && temaOn.checked) ? temaAtivo : null;
+    var btn=this;btn.disabled=true;btn.textContent='a selar…';
+    fechar(avisoModal);
+    var stamp=document.getElementById('selo-stamp'); stamp.classList.add('on');
+    try{
+      var chave=gerarChave();
+      var hash=await sha256hex(chave);
+      await Promise.all([
+        supaPost('/rpc/enviar_pergaminho', { p_autor:autor, p_titulo:titulo, p_genero:genero, p_conteudo:texto, p_chave_hash:hash, p_tema: pTema }),
+        new Promise(function(r){ setTimeout(r, 820); })
+      ]);
+      limparRascunho();
+      try{ localStorage.setItem('pp_autor',autor); localStorage.setItem('pp_genero',genero); }catch(e){}
+      atualizarMeusLink();
+      f.titulo.value='';f.texto.value='';f.count.textContent='0';
+      stamp.classList.remove('on');
+      document.getElementById('chave-valor').textContent = chave;
+      var primeiro=false; try{ primeiro=!localStorage.getItem('pp_enviou'); }catch(e){}
+      var festa=document.getElementById('chave-festa');
+      if(primeiro){ festa.textContent='✦ Este é o seu primeiro pergaminho na taverna. Que seja o primeiro de muitos — seja bem-vindo(a) à mesa.'; festa.style.display='block'; try{ localStorage.setItem('pp_enviou','1'); }catch(e){} }
+      else { festa.style.display='none'; }
+      var seguir=document.getElementById('chave-seguir');
+      var assin = autor ? ('assinado por <b>'+esc(autor)+'</b>') : 'de forma anônima';
+      seguir.innerHTML='Quando for selado, o seu texto aparece no mural '+assin+'. Guarde esta chave: em <b>"acompanhar o seu texto"</b>, no rodapé, você a cola e vê se o pergaminho já foi selado.';
+      seguir.style.display='block';
+      abrir(document.getElementById('chave-modal'));
+    }catch(e){
+      console.error('Falha ao enviar:', e);
+      stamp.classList.remove('on');
+      abrir(els.modal);
+      fb('Não consegui enviar agora. Veja o console (F12).','err');
+    }finally{btn.disabled=false;btn.textContent='Selar mesmo assim';}
+  });
+
+  // ===== Chave de autoria =====
+  function gerarChave(){
+    var bytes=new Uint8Array(12); crypto.getRandomValues(bytes);
+    var chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789', s='';
+    for(var i=0;i<bytes.length;i++){ s+=chars[bytes[i]%chars.length]; if((i+1)%4===0 && i<bytes.length-1) s+='-'; }
+    return 'TAVERNA-'+s;
+  }
+  async function sha256hex(str){
+    var buf=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+  }
+  document.getElementById('chave-ok').addEventListener('click', function(){ fechar(document.getElementById('chave-modal')); });
+  document.getElementById('copiar-chave').addEventListener('click', function(){
+    var v=document.getElementById('chave-valor').textContent, b=this;
+    if(navigator.clipboard){ navigator.clipboard.writeText(v).then(function(){ b.textContent='copiado!'; setTimeout(function(){b.textContent='copiar';},1500); }); }
+  });
+  document.getElementById('abrir-verificar').addEventListener('click', function(){
+    document.getElementById('verificar-area').classList.toggle('open');
+  });
+  document.getElementById('verif-btn').addEventListener('click', async function(){
+    var chave=document.getElementById('verif-chave').value.trim(), res=document.getElementById('verif-result');
+    if(!chave || currentReaderId==null) return;
+    var b=this; b.disabled=true; b.textContent='a verificar…';
+    try{
+      var hash=await sha256hex(chave);
+      var ok=await supaPost('/rpc/verificar_autoria', { p_id: currentReaderId, p_chave_hash: hash }, 'return=representation');
+      if(ok===true){ res.textContent='✓ Confere — este pergaminho é seu.'; res.className='verif-result ok'; }
+      else { res.textContent='✗ Não confere com este pergaminho.'; res.className='verif-result no'; }
+    }catch(e){ console.error('Falha ao verificar:', e); res.textContent='Não consegui verificar agora. Veja o console (F12).'; res.className='verif-result no'; }
+    finally{ b.disabled=false; b.textContent='Verificar'; }
+  });
+
+  // ===== Modo noturno =====
+  (function(){
+    var b=document.getElementById('toggle-noite');
+    function setNoite(on){ document.body.classList.toggle('noite',on); b.setAttribute('aria-pressed',on?'true':'false'); try{localStorage.setItem('pp_noite',on?'1':'0');}catch(e){} }
+    b.addEventListener('click', function(){ setNoite(!document.body.classList.contains('noite')); });
+    try{ if(localStorage.getItem('pp_noite')==='1') setNoite(true); }catch(e){}
+  })();
+  document.getElementById('sort-sel').addEventListener('change', function(){ ordenacao=this.value; aplicarVista(); });
+  document.getElementById('genero-sel').addEventListener('change', function(){ filtroGenero=this.value; aplicarVista(); });
+  document.getElementById('autor-bar-todos').addEventListener('click', function(){ filtroAutor=null; aplicarVista(); });
+
+  // ===== Busca e favoritos =====
+  document.getElementById('busca').addEventListener('input', function(){ busca=this.value.trim(); aplicarVista(); });
+  document.getElementById('fav-toggle').addEventListener('click', function(){
+    soFavoritos=!soFavoritos; this.classList.toggle('on',soFavoritos); this.setAttribute('aria-pressed',soFavoritos?'true':'false'); aplicarVista();
+  });
+  document.getElementById('r-fav').addEventListener('click', function(){
+    if(currentReaderId==null) return; var key=String(currentReaderId);
+    var star=this.querySelector('.fav-star');
+    if(favSet.has(key)){ favSet.delete(key); this.classList.remove('on'); if(star) star.textContent='☆'; this.title='Guardar'; }
+    else { favSet.add(key); this.classList.add('on'); if(star) star.textContent='★'; this.title='Guardado'; }
+    salvarFavs(); if(soFavoritos) aplicarVista();
+  });
+
+  // ===== Ouvir (leitura por voz) =====
+  var falando=false;
+  document.getElementById('r-ouvir').addEventListener('click', function(){
+    var btn=this;
+    if(!('speechSynthesis' in window)){ btn.title='Sem voz neste navegador'; return; }
+    if(falando){ window.speechSynthesis.cancel(); falando=false; btn.innerHTML=iconeOuvir; btn.title='Ouvir'; btn.classList.remove('on'); return; }
+    var txt=document.getElementById('r-text').textContent||''; if(!txt) return;
+    var u=new SpeechSynthesisUtterance(txt); u.lang='pt-BR'; u.rate=0.98;
+    u.onend=function(){ falando=false; btn.innerHTML=iconeOuvir; btn.title='Ouvir'; btn.classList.remove('on'); };
+    window.speechSynthesis.cancel(); window.speechSynthesis.speak(u);
+    falando=true; btn.innerHTML=iconeParar; btn.title='Parar'; btn.classList.add('on');
+  });
+
+  // ===== Tamanho da fonte =====
+  document.getElementById('fonte-menos').addEventListener('click', function(){ fonteLeitor=Math.max(15,fonteLeitor-1); aplicarFonte(); });
+  document.getElementById('fonte-mais').addEventListener('click', function(){ fonteLeitor=Math.min(30,fonteLeitor+1); aplicarFonte(); });
+  document.getElementById('entrelinha').addEventListener('click', function(){ entreIdx=(entreIdx+1)%ENTRELINHAS.length; aplicarEntrelinha(); });
+  els.reader.addEventListener('scroll', function(){
+    var fill=document.getElementById('r-progress'); if(!fill) return;
+    var max=els.reader.scrollHeight-els.reader.clientHeight;
+    fill.style.width=(max>0?Math.min(100,Math.max(0,els.reader.scrollTop/max*100)):0)+'%';
+  }, {passive:true});
+  document.addEventListener('keydown', function(e){
+    if(!els.reader.classList.contains('open')) return;
+    if(e.key==='Escape'){ document.getElementById('fechar-reader').click(); }
+    else if(e.key==='ArrowLeft'){ navReader(-1); }
+    else if(e.key==='ArrowRight'){ navReader(1); }
+  });
+
+  // ===== Sobre =====
+  var sobreModal=document.getElementById('sobre-modal');
+  document.getElementById('abrir-sobre').addEventListener('click', function(){ abrir(sobreModal); });
+  document.getElementById('sobre-ok').addEventListener('click', function(){ fechar(sobreModal); });
+  sobreModal.addEventListener('click', function(e){ if(e.target===sobreModal) fechar(sobreModal); });
+
+  // ===== Cartão de citação =====
+  var citarModal=document.getElementById('citar-modal'), citacaoTexto='', citacaoAutor='';
+  function desenharCitacao(){
+    var c=document.getElementById('citar-canvas'), ctx=c.getContext('2d'), W=c.width, H=c.height;
+    var dark=c.dataset.tema==='escuro';
+    ctx.fillStyle=dark?'#1c160f':'#f6efe1'; ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle=dark?'rgba(217,139,106,.5)':'rgba(143,45,40,.4)'; ctx.lineWidth=4; ctx.strokeRect(60,60,W-120,H-120);
+    ctx.textAlign='center';
+    ctx.fillStyle=dark?'#8c8068':'#928570'; ctx.font='80px Georgia, serif'; ctx.fillText('\u201C', W/2, 230);
+    ctx.fillStyle=dark?'#ece3d2':'#28211a'; ctx.font='italic 56px Georgia, serif';
+    var words=(citacaoTexto||'').split(/\s+/), lines=[], line='', maxW=W-260;
+    for(var i=0;i<words.length;i++){ var test=line?line+' '+words[i]:words[i]; if(ctx.measureText(test).width>maxW && line){ lines.push(line); line=words[i]; } else line=test; }
+    if(line) lines.push(line); lines=lines.slice(0,10);
+    var lh=80, startY=H/2-(lines.length*lh)/2+30;
+    lines.forEach(function(ln,i){ ctx.fillText(ln, W/2, startY+i*lh); });
+    ctx.fillStyle=dark?'#d98b6a':'#8f2d28'; ctx.font='italic 40px Georgia, serif';
+    ctx.fillText('— '+(citacaoAutor||'Anónimo'), W/2, startY+lines.length*lh+60);
+    ctx.fillStyle=dark?'#c4b8a1':'#5a4f3e'; ctx.font='44px Georgia, serif'; ctx.fillText('Penas & Pergaminhos', W/2, H-140);
+    ctx.fillStyle=dark?'#8c8068':'#928570'; ctx.font='italic 30px Georgia, serif'; ctx.fillText('histórias da taverna', W/2, H-94);
+  }
+  document.getElementById('r-citar').addEventListener('click', function(){
+    var sel=(window.getSelection && window.getSelection().toString().trim())||'';
+    var full=document.getElementById('r-text').textContent||'';
+    citacaoTexto = sel || full.slice(0,200).trim();
+    if(citacaoTexto.length>=200) citacaoTexto=citacaoTexto.slice(0,200).trim()+'…';
+    var ra=document.getElementById('r-autor'); citacaoAutor=(ra?ra.textContent:'')||'Anónimo';
+    var c=document.getElementById('citar-canvas'); c.dataset.tema=document.body.classList.contains('noite')?'escuro':'claro';
+    desenharCitacao(); abrir(citarModal);
+  });
+  document.getElementById('citar-tema').addEventListener('click', function(){ var c=document.getElementById('citar-canvas'); c.dataset.tema=c.dataset.tema==='escuro'?'claro':'escuro'; desenharCitacao(); });
+  document.getElementById('citar-baixar').addEventListener('click', function(){ var c=document.getElementById('citar-canvas'); var a=document.createElement('a'); a.download='citacao-penas-e-pergaminhos.png'; a.href=c.toDataURL('image/png'); a.click(); });
+  citarModal.addEventListener('click', function(e){ if(e.target===citarModal) fechar(citarModal); });
+
+  // ===== Caixa do autor =====
+  var autorModal=document.getElementById('autor-modal');
+  document.getElementById('autor-fechar').addEventListener('click', function(){ fechar(autorModal); });
+  document.getElementById('autor-share').addEventListener('click', function(){ if(autorAtual) partilharPerfil(autorAtual); });
+  autorModal.addEventListener('click', function(e){ if(e.target===autorModal) fechar(autorModal); });
+
+  // ===== Instalar na tela inicial (PWA) =====
+  var deferredPrompt=null, instalarBtn=document.getElementById('instalar-btn');
+  window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); deferredPrompt=e; if(instalarBtn) instalarBtn.hidden=false; });
+  if(instalarBtn) instalarBtn.addEventListener('click', function(){
+    if(!deferredPrompt) return;
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.finally(function(){ deferredPrompt=null; instalarBtn.hidden=true; });
+  });
+  window.addEventListener('appinstalled', function(){ if(instalarBtn) instalarBtn.hidden=true; });
+  if('serviceWorker' in navigator){ window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
+
+  // ===== Novos recursos: estímulos, FAB, ao acaso, deslizar, acompanhar, boas-vindas =====
+  var ESTIMULOS=[
+    "Comece por uma porta que ninguém deveria ter aberto.",
+    "Escreva sobre algo que você perdeu e nunca procurou de volta.",
+    "“A última vez que a vi, ela…”",
+    "Conte um segredo que uma casa guarda.",
+    "Descreva o cheiro de um lugar da sua infância.",
+    "Alguém recebe uma carta com vinte anos de atraso.",
+    "“Eu não devia estar aqui, mas…”",
+    "Escreva o que o silêncio entre duas pessoas está dizendo.",
+    "Um objeto comum que carrega uma história inteira.",
+    "A cidade amanheceu diferente, e só você reparou.",
+    "Escreva uma despedida que nunca foi dita.",
+    "“Dizem que, naquela estrada…”",
+    "O que acontece na taverna depois que todos vão embora.",
+    "Conte uma noite inteira em três frases.",
+    "Comece pela última linha de uma história e volte ao início."
   ];
-  async function carregarTextos(){
-    var box=document.getElementById('lista-textos'); box.innerHTML='<div class="carregando">A carregar…</div>';
+  (function(){
+    var toggle=document.getElementById('sparks-toggle'), box=document.getElementById('sparks-box'), frase=document.getElementById('sparks-frase');
+    if(!toggle) return;
+    function nova(){ frase.textContent=ESTIMULOS[Math.floor(Math.random()*ESTIMULOS.length)]; }
+    toggle.addEventListener('click', function(){ if(box.classList.toggle('open')) nova(); });
+    document.getElementById('sparks-outra').addEventListener('click', nova);
+    document.getElementById('sparks-usar').addEventListener('click', function(){
+      var t=document.getElementById('f-texto');
+      if(!t.value.trim()){ t.value=frase.textContent.replace(/^[“"]|[”"]$/g,'')+'\n\n'; t.dispatchEvent(new Event('input')); }
+      t.focus(); box.classList.remove('open');
+    });
+  })();
+
+  var fab=document.getElementById('fab-escrever');
+  if(fab) fab.addEventListener('click', function(){ document.getElementById('abrir-publicar').click(); });
+
+  var aoAcaso=document.getElementById('ao-acaso');
+  if(aoAcaso) aoAcaso.addEventListener('click', function(){
+    if(!textosAtuais.length) return;
+    abrirLeitor(textosAtuais[Math.floor(Math.random()*textosAtuais.length)]);
+  });
+
+  function navReader(dir){
+    var idx=vistaAtual.findIndex(function(x){ return String(x.id)===String(currentReaderId); });
+    if(idx<0) return; var ni=idx+dir;
+    if(ni>=0 && ni<vistaAtual.length) abrirLeitor(vistaAtual[ni]);
+  }
+  (function(){
+    var x0=0,y0=0,t0=0;
+    els.reader.addEventListener('touchstart', function(e){ var t=e.changedTouches[0]; x0=t.clientX; y0=t.clientY; t0=Date.now(); }, {passive:true});
+    els.reader.addEventListener('touchend', function(e){
+      var t=e.changedTouches[0], dx=t.clientX-x0, dy=t.clientY-y0;
+      if(Date.now()-t0<600 && Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)*1.6){ navReader(dx<0?1:-1); }
+    }, {passive:true});
+  })();
+
+  function atualizarMeusLink(){
+    var el=document.getElementById('meus-link'); if(!el) return;
+    el.style.display='inline';
+    el.onclick=abrirAcompanhar;
+  }
+  atualizarMeusLink();
+
+  var acompModal=document.getElementById('acompanhar-modal');
+  function abrirAcompanhar(){
+    document.getElementById('acomp-chave').value='';
+    var r=document.getElementById('acomp-result'); r.style.display='none'; r.textContent=''; r.className='verif-result';
+    var nome=''; try{ nome=localStorage.getItem('pp_autor')||''; }catch(e){}
+    var mb=document.getElementById('acomp-meus');
+    if(nome){ mb.style.display=''; mb.onclick=function(){ fechar(acompModal); abrirAutor(nome); }; } else { mb.style.display='none'; }
+    abrir(acompModal);
+  }
+  document.getElementById('acompanhar-fechar').addEventListener('click', function(){ fechar(acompModal); });
+  document.getElementById('acomp-ver').addEventListener('click', async function(){
+    var chave=document.getElementById('acomp-chave').value.trim();
+    var r=document.getElementById('acomp-result');
+    if(!chave){ r.style.display='block'; r.className='verif-result no'; r.textContent='Cole a sua chave de autoria acima.'; return; }
+    var b=this; b.disabled=true; b.textContent='a procurar…';
     try{
-      var rows=await chamar('config_listar'); var mapa={}; (rows||[]).forEach(function(r){ mapa[r.chave]=r.valor; });
-      box.innerHTML='';
-      TEXTOS_DEF.forEach(function(def){
-        var el=document.createElement('div'); el.className='item';
-        var atual=mapa[def.chave]!=null?mapa[def.chave]:'';
-        if(def.chave==='generos' && !String(atual).trim()) atual='Conto\nPoesia\nCrónica\nEnsaio\nFragmento\nOutro';
-        var campo=def.multi?'<textarea data-f="valor">'+esc(atual)+'</textarea>':'<input data-f="valor" value="'+esc(atual)+'">';
-        el.innerHTML='<label class="campo"><span>'+esc(def.rotulo)+'</span>'+campo+'</label><div class="acoes"><button class="b-ok">Salvar</button></div>';
-        el.querySelector('.b-ok').addEventListener('click', async function(){
-          try{ await chamar('config_salvar',{ chave:def.chave, valor: el.querySelector('[data-f="valor"]').value }); toast('Salvo.'); }
-          catch(err){ tratarErro(err); }
-        });
-        box.appendChild(el);
+      var hash=await sha256hex(chave);
+      var rows=await supaPost('/rpc/status_pergaminho', { p_chave_hash: hash }, 'return=representation');
+      r.style.display='block';
+      if(!rows || !rows.length){ r.className='verif-result no'; r.textContent='Não encontrei um pergaminho com essa chave. Confira se copiou certinho.'; }
+      else {
+        var p=rows[0];
+        if(p.status==='aprovado'){
+          r.className='verif-result ok';
+          r.innerHTML='✓ Selado! O seu pergaminho está no mural. <a id="acomp-ir" style="cursor:pointer;color:var(--wax);text-decoration:underline">ver o seu texto</a>';
+          var ir=document.getElementById('acomp-ir'); if(ir) ir.onclick=function(){ fechar(acompModal); irParaTexto(p.id); };
+        } else if(p.status==='recusado'){
+          r.className='verif-result no';
+          r.textContent='Este texto não foi para o mural desta vez. Você pode reescrevê-lo e enviar de novo — sem ressentimentos.';
+        } else {
+          r.className='verif-result';
+          r.textContent='⏳ Ainda em análise pelo Taberneiro. Guarde a sua chave: assim que for selado, ele aparece no mural.';
+        }
+      }
+    }catch(e){ console.error('Falha ao consultar status:', e); r.style.display='block'; r.className='verif-result no'; r.textContent='Não consegui consultar agora. Tente de novo em instantes.'; }
+    finally{ b.disabled=false; b.textContent='Ver status'; }
+  });
+
+  (function(){
+    var visto=false; try{ visto=!!localStorage.getItem('pp_visto'); }catch(e){}
+    var bm=document.getElementById('bemvindo-modal');
+    if(!visto && bm){ setTimeout(function(){ abrir(bm); }, 500); }
+    var ok=document.getElementById('bemvindo-ok');
+    if(ok) ok.addEventListener('click', function(){ fechar(bm); try{ localStorage.setItem('pp_visto','1'); }catch(e){} });
+  })();
+
+  function abrirColetaneas(){
+    var ov=document.getElementById('coletanea'), lista=document.getElementById('col-lista');
+    document.getElementById('col-anthology').hidden=true; lista.hidden=false;
+    var mapa={};
+    textosAtuais.forEach(function(w){ var tm=(w.tema||'').trim(); if(tm){ (mapa[tm]=mapa[tm]||[]).push(w); } });
+    var temas=Object.keys(mapa);
+    if(!temas.length){
+      lista.innerHTML='<div class="col-vazia">Ainda não há coletâneas.<br>Quando um tema do mês reunir textos, eles aparecem aqui.</div>';
+    } else {
+      var h='';
+      temas.forEach(function(tm){ var n=mapa[tm].length;
+        h+='<button class="col-tema-item" data-tema="'+esc(tm)+'"><span class="col-tema-nome">“'+esc(tm)+'”</span><span class="col-tema-meta">'+n+(n===1?' pergaminho':' pergaminhos')+'</span></button>';
       });
-    }catch(err){ tratarErro(err, box); }
+      lista.innerHTML=h;
+      lista.querySelectorAll('.col-tema-item').forEach(function(b){ b.addEventListener('click', function(){ renderAnthology(b.getAttribute('data-tema')); }); });
+    }
+    ov.classList.add('open'); ov.scrollTop=0; document.body.style.overflow='hidden';
   }
+  function renderAnthology(tema){
+    var textos=textosAtuais.filter(function(w){ return (w.tema||'').trim()===tema; });
+    var box=document.getElementById('col-anthology');
+    var h='<div class="col-acoes"><button class="col-voltar-lista" id="col-voltar-lista">‹ todas as coletâneas</button><button class="col-print-btn" id="col-print">baixar / imprimir (PDF)</button></div>';
+    h+='<div class="col-titulo-tema">“'+esc(tema)+'”</div><div class="col-sub">coletânea da taverna · '+textos.length+(textos.length===1?' pergaminho':' pergaminhos')+'</div>';
+    textos.forEach(function(w){
+      var corpo=(w.content||'').split(/\n\s*\n/).map(function(p){return '<p>'+esc(p).replace(/\n/g,'<br>')+'</p>';}).join('');
+      h+='<div class="col-text"><h3>'+esc(w.title||'Sem título')+'</h3><div class="col-by">por '+esc(w.author||'Anónimo')+'</div><div class="col-corpo">'+corpo+'</div></div>';
+    });
+    box.innerHTML=h;
+    document.getElementById('col-lista').hidden=true; box.hidden=false;
+    document.getElementById('coletanea').scrollTop=0;
+    document.getElementById('col-voltar-lista').addEventListener('click', abrirColetaneas);
+    document.getElementById('col-print').addEventListener('click', function(){ window.print(); });
+  }
+  document.getElementById('abrir-coletaneas').addEventListener('click', abrirColetaneas);
+  document.getElementById('coletanea-voltar').addEventListener('click', function(){ document.getElementById('coletanea').classList.remove('open'); document.body.style.overflow=''; });
 
-  function tratarErro(err, box){
-    if(err && err.senhaInvalida){ toast('Sessão expirou — entre de novo.'); sair(); return; }
-    var m='Erro: '+(err && err.message || 'tente de novo');
-    if(box) box.innerHTML='<div class="vazia">'+esc(m)+'</div>'; else toast(m);
+  async function aplicarTextosSite(){
+    try{
+      var rows=await supaGet('/site_config?select=chave,valor');
+      if(!rows || !rows.length) return;
+      var mapa={}; rows.forEach(function(r){ mapa[r.chave]=r.valor; });
+      document.querySelectorAll('[data-cfg]').forEach(function(el){
+        var v=mapa[el.getAttribute('data-cfg')];
+        if(v!=null && String(v).trim()!=='') el.textContent=v;
+      });
+      var setHref=function(id,v){ var e=document.getElementById(id); if(e && v && String(v).trim()!=='') e.href=v; };
+      setHref('top-telegram', mapa.link_telegram); setHref('a-telegram', mapa.link_telegram);
+      setHref('top-instagram', mapa.link_instagram); setHref('a-instagram', mapa.link_instagram);
+      if(mapa.generos && String(mapa.generos).trim()){
+        var gs=String(mapa.generos).split(/\r?\n/).map(function(s){ return s.trim(); }).filter(Boolean);
+        if(gs.length){ GENEROS=gs; aplicarGeneros(); }
+      }
+    }catch(e){ /* mantém os textos padrão do HTML */ }
   }
-
-  // auto-login se a senha já está na sessão
-  if(senhaAtual){
-    chamar('listar_pendentes').then(function(){ entrarApp(); }).catch(function(){ sair(); });
-  }
+  aplicarTextosSite();
+  carregar();
+  carregarTema();
 </script>
 </body>
 </html>
