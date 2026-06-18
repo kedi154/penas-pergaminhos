@@ -82,9 +82,10 @@
   @keyframes lbfade{from{opacity:0}to{opacity:1}}
   .lightbox img{max-width:92vw;max-height:88vh;border-radius:5px;border:4px solid var(--paper);box-shadow:0 24px 70px rgba(0,0,0,.55)}
   .corpo{padding:20px 20px 18px;display:flex;flex-direction:column;flex:1;gap:14px}
-  .desc{color:var(--ink-soft);line-height:1.6}
+  .nome{font-family:'Fraunces','Cormorant Garamond',serif;font-weight:600;font-size:19px;color:var(--ink);line-height:1.3}
+  .desc{color:var(--ink-soft);line-height:1.55;font-size:15px}
   .rodape{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:6px}
-  .preco{font-family:'Fraunces','Cormorant Garamond',serif;font-weight:600;font-size:27px;color:var(--ink)}
+  .preco{font-family:'Fraunces','Cormorant Garamond',serif;font-weight:600;font-size:27px;color:var(--ink);white-space:nowrap}
   .comprar{display:inline-flex;align-items:center;gap:8px;background:var(--wax);color:var(--paper);
     text-decoration:none;font-family:'Fraunces',serif;font-weight:600;font-size:17px;
     padding:11px 20px;border-radius:6px;box-shadow:0 3px 10px rgba(143,45,40,.28);transition:.2s background,.2s transform,.2s box-shadow}
@@ -146,6 +147,7 @@
   .pm-dots{display:flex;gap:5px;justify-content:center;margin-top:8px}
   .pm-dots span{width:6px;height:6px;border-radius:50%;background:var(--ink-faint);opacity:.4}
   .pm-dots span.on{opacity:1;background:var(--wax)}
+  .pm-nome{font-family:'Fraunces','Cormorant Garamond',serif;font-weight:600;font-size:23px;color:var(--ink);line-height:1.25;margin-bottom:6px}
   .pm-preco{font-family:'Fraunces','Cormorant Garamond',serif;font-weight:600;font-size:26px;color:var(--ink);margin-bottom:10px}
   .pm-desc{font-family:'EB Garamond',serif;font-size:17px;line-height:1.7;color:var(--ink-soft);margin-bottom:18px;white-space:pre-wrap}
   .pm-acoes{margin-bottom:14px}
@@ -254,6 +256,7 @@
         <button class="pm-nav pm-next" id="pm-next" aria-label="Próxima">›</button>
         <div class="pm-dots" id="pm-dots"></div>
       </div>
+      <h2 class="pm-nome" id="pm-nome"></h2>
       <div class="pm-preco" id="pm-preco"></div>
       <p class="pm-desc" id="pm-desc"></p>
       <div class="pm-acoes" id="pm-acoes"></div>
@@ -288,6 +291,7 @@
   };
 
   function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function fmtPreco(v){ var s=(v==null?'':String(v)).trim().replace(/^r\$\s*/i,'').trim(); return s? 'R$ '+s : ''; }
 
   document.getElementById('a-telegram').href = LINKS.telegram;
   document.getElementById('a-instagram').href = LINKS.instagram;
@@ -312,9 +316,9 @@
   }
 
   var DEMO_PRODUTOS = [
-    { id:'demo-a', descricao:'Produto teste A — com marketplaces', preco:'999', destaque:true, ativo:true, categoria:'Demonstração', criado_em:new Date().toISOString(),
+    { id:'demo-a', nome:'Marca-página do Dragão', descricao:'Produto teste A — com marketplaces', preco:'999', destaque:true, ativo:true, categoria:'Demonstração', criado_em:new Date().toISOString(),
       link:'https://t.me/SEU_CONTATO', link_mercadolivre:'https://www.mercadolivre.com.br/', link_shopee:'https://shopee.com.br/' },
-    { id:'demo-b', descricao:'Produto teste B — só Telegram', preco:'49,90', ativo:true, categoria:'Demonstração', criado_em:new Date().toISOString(),
+    { id:'demo-b', nome:'Vela da Taverna', descricao:'Produto teste B — só Telegram', preco:'49,90', ativo:true, categoria:'Demonstração', criado_em:new Date().toISOString(),
       link:'https://t.me/SEU_CONTATO' }
   ];
 
@@ -369,7 +373,7 @@
   function fotosDe(p){ var f=[]; if(p.fotos){ f=p.fotos.split(/[\n,]+/).map(function(s){return s.trim();}).filter(Boolean); } if(!f.length && p.foto) f=[p.foto]; return f; }
   function acoesHTML(p){
     var tgLink = p.link || TELEGRAM_LOJA;
-    var msg = 'Olá! Tenho interesse neste item: '+(p.descricao||'')+(p.preco?(' — '+p.preco):'');
+    var msg = 'Olá! Tenho interesse neste item: '+(p.nome||p.descricao||'')+(p.preco?(' — '+fmtPreco(p.preco)):'');
     var waLink = WHATSAPP_LOJA ? ('https://wa.me/'+WHATSAPP_LOJA+'?text='+encodeURIComponent(msg)) : '';
     if(p.esgotado) return '<span class="comprar disabled">Esgotado</span>';
     if(waLink) return '<div class="acoes"><a class="comprar" href="'+waLink+'" target="_blank" rel="noopener" aria-label="Comprar pelo WhatsApp">'+whatsappSVG+' Comprar</a>'
@@ -405,8 +409,8 @@
   function compartilharProduto(id){
     var p=produtosAtuais.find(function(x){ return String(x.id)===String(id); }); if(!p) return;
     var url=location.origin+location.pathname+'?produto='+encodeURIComponent(id);
-    var nome=(p.descricao||'').replace(/\s+/g,' ').trim().slice(0,60);
-    if(navigator.share){ navigator.share({ title:'Entre Páginas', text:nome+(p.preco?(' — '+p.preco):''), url:url }).catch(function(){}); }
+    var nome=(p.nome||p.descricao||'').replace(/\s+/g,' ').trim().slice(0,60);
+    if(navigator.share){ navigator.share({ title:'Entre Páginas', text:nome+(p.preco?(' — '+fmtPreco(p.preco)):''), url:url }).catch(function(){}); }
     else if(navigator.clipboard){ navigator.clipboard.writeText(url).then(function(){ toastLoja('link copiado!'); }).catch(function(){ prompt('Link do produto:', url); }); }
     else { prompt('Link do produto:', url); }
   }
@@ -435,9 +439,10 @@
       card.innerHTML =
         badge + fotoHTML +
         '<div class="corpo">'+
-          '<div class="desc">'+esc(p.descricao)+'</div>'+
+          (p.nome ? '<div class="nome">'+esc(p.nome)+'</div>' : '')+
+          (p.descricao ? '<div class="desc">'+esc(p.descricao)+'</div>' : '')+
           '<div class="rodape">'+
-            '<span class="preco">'+esc(p.preco)+'</span>'+
+            '<span class="preco">'+esc(fmtPreco(p.preco))+'</span>'+
             acoes+
           '</div>'+
           cardIconsHTML(p)+
@@ -485,7 +490,8 @@
     produtoAtual=p; pmFotos=fotosDe(p); pmIdx=0;
     document.getElementById('pm-galeria').style.display=pmFotos.length?'':'none';
     pmMostrar();
-    document.getElementById('pm-preco').textContent=p.preco||'';
+    var nm=document.getElementById('pm-nome'); nm.textContent=p.nome||''; nm.style.display=p.nome?'':'none';
+    document.getElementById('pm-preco').textContent=fmtPreco(p.preco);
     document.getElementById('pm-desc').textContent=p.descricao||'';
     document.getElementById('pm-acoes').innerHTML=acoesHTML(p)+marketplacesHTML(p);
     abrirModal(produtoModal);
@@ -498,9 +504,9 @@
   document.getElementById('pm-share').addEventListener('click', function(){
     if(!produtoAtual) return;
     var url=location.origin+location.pathname+'?produto='+produtoAtual.id;
-    var nome=(produtoAtual.descricao||'').replace(/\s+/g,' ').trim().slice(0,60);
+    var nome=(produtoAtual.nome||produtoAtual.descricao||'').replace(/\s+/g,' ').trim().slice(0,60);
     var btn=this;
-    if(navigator.share){ navigator.share({ title:'Entre Páginas', text:nome+(produtoAtual.preco?(' — '+produtoAtual.preco):''), url:url }).catch(function(){}); }
+    if(navigator.share){ navigator.share({ title:'Entre Páginas', text:nome+(produtoAtual.preco?(' — '+fmtPreco(produtoAtual.preco)):''), url:url }).catch(function(){}); }
     else if(navigator.clipboard){ navigator.clipboard.writeText(url).then(function(){ btn.textContent='link copiado!'; setTimeout(function(){ btn.textContent='compartilhar este produto'; },1800); }).catch(function(){}); }
     else { btn.textContent=url; }
   });
