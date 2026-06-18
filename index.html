@@ -610,6 +610,17 @@
     </div>
   </div>
 
+  <div class="modal" id="coment-enviado-modal">
+    <div class="sheet" style="max-width:420px;text-align:center">
+      <div style="font-size:32px;line-height:1;margin-bottom:8px;color:var(--wax)">✦</div>
+      <h3>Comentário enviado</h3>
+      <p class="note" style="text-align:center">O seu comentário foi recebido e <b>vai aparecer no mural assim que o Taberneiro aprovar</b>. Essa curadoria existe para garantir a harmonia das postagens — pode levar um tempinho.</p>
+      <div class="actions" style="justify-content:center">
+        <button class="btn btn-primary" id="coment-enviado-ok">Entendi</button>
+      </div>
+    </div>
+  </div>
+
   <div class="stamp-ov" id="selo-stamp">
     <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <defs>
@@ -991,8 +1002,8 @@
     try{
       await supaPost('/comentarios', { pergaminho_id: id, autor: nome, texto: txt });
       document.getElementById('c-text').value='';
-      ppToast('Comentário enviado — aparece assim que o Taberneiro aprovar.');
-    }catch(e){ console.error('Falha ao comentar:', e); }
+      abrir(document.getElementById('coment-enviado-modal'));
+    }catch(e){ console.error('Falha ao comentar:', e); ppToast('Não consegui enviar agora. Tente de novo.'); }
     finally{ btn.disabled=false; btn.textContent='Comentar'; }
   });
 
@@ -1349,6 +1360,7 @@
     abrir(acompModal);
   }
   document.getElementById('acompanhar-fechar').addEventListener('click', function(){ fechar(acompModal); });
+  document.getElementById('coment-enviado-ok').addEventListener('click', function(){ fechar(document.getElementById('coment-enviado-modal')); if(els.reader.classList.contains('open')) document.body.style.overflow='hidden'; });
   document.getElementById('acomp-ver').addEventListener('click', async function(){
     var chave=document.getElementById('acomp-chave').value.trim();
     var r=document.getElementById('acomp-result');
