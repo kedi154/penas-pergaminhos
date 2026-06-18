@@ -117,6 +117,7 @@
           <button class="tab" data-aba="tema">Tema do mês</button>
           <button class="tab" data-aba="textos">Textos</button>
           <button class="tab" data-aba="denuncias">Denúncias <span id="badge-den"></span></button>
+          <button class="tab" data-aba="comentarios">Comentários <span id="badge-com"></span></button>
         </div>
         <button class="sair" id="sair">sair</button>
       </div>
@@ -177,6 +178,11 @@
         <h2>Denúncias</h2>
         <p class="sub">reports enviados pelos leitores — veja o texto, decida, e apague o report</p>
         <div id="lista-denuncias"><div class="carregando">A carregar…</div></div>
+      </section>
+      <section class="secao" id="aba-comentarios" style="display:none">
+        <h2>Comentários</h2>
+        <p class="sub">aprove os novos e apague qualquer um — protege quem escreve de comentário maldoso</p>
+        <div id="lista-comentarios"><div class="carregando">A carregar…</div></div>
       </section>
     </div>
   </div>
@@ -248,7 +254,7 @@
   }
 
   // ===== Abas =====
-  var LOADERS={ pendentes:carregarPendentes, aprovados:carregarAprovados, recusados:carregarRecusados, produtos:carregarProdutos, depoimentos:carregarDepoimentos, tema:carregarTemas, textos:carregarTextos, denuncias:carregarDenuncias };
+  var LOADERS={ pendentes:carregarPendentes, aprovados:carregarAprovados, recusados:carregarRecusados, produtos:carregarProdutos, depoimentos:carregarDepoimentos, tema:carregarTemas, textos:carregarTextos, denuncias:carregarDenuncias, comentarios:carregarComentariosPainel };
   document.querySelectorAll('.tab').forEach(function(t){
     t.addEventListener('click', function(){
       document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
@@ -307,7 +313,7 @@
     var titulo=(p.titulo||'Sem título').toString().trim();
     var autor=(p.autor||'').toString().trim();
     var assin=autor?(' — por '+autor):'';
-    var msg='✦ Novo pergaminho publicado na taverna\n\n"'+titulo+'"'+assin+'\n\nvenha ler: '+SITE_URL+'?texto='+p.id;
+    var msg='✦ Novo pergaminho selado na taverna\n\n"'+titulo+'"'+assin+'\n\nvenha ler: '+SITE_URL+'?texto='+p.id;
     document.getElementById('copiar-texto').value=msg;
     document.getElementById('copiar-modal').style.display='flex';
   }
@@ -424,6 +430,37 @@
         box.appendChild(el);
       });
     }catch(err){ tratarErro(err, box); }
+  }
+
+  async function carregarComentariosPainel(){
+    var box=document.getElementById('lista-comentarios');
+    box.innerHTML='<div class="carregando">A carregar…</div>';
+    try{
+      var rows=await chamar('tabela_listar',{tabela:'comentarios'});
+      var pend=rows.filter(function(c){ return (c.status||'pendente')!=='aprovado'; });
+      var apro=rows.filter(function(c){ return (c.status||'pendente')==='aprovado'; });
+      var b=document.getElementById('badge-com'); if(b) b.textContent = pend.length ? '('+pend.length+')':'';
+      if(!rows.length){ box.innerHTML='<div class="vazia">Nenhum comentário ainda. ✦</div>'; return; }
+      box.innerHTML='';
+      if(pend.length){ var h=document.createElement('h3'); h.style.cssText="font-family:'Cormorant Garamond',serif;font-weight:600;color:var(--ink);margin:4px 0 14px"; h.textContent='À espera de aprovação ('+pend.length+')'; box.appendChild(h); pend.forEach(function(c){ box.appendChild(cardComentario(c,true)); }); }
+      if(apro.length){ var h2=document.createElement('h3'); h2.style.cssText="font-family:'Cormorant Garamond',serif;font-weight:600;color:var(--ink-soft);margin:26px 0 14px"; h2.textContent='No mural'; box.appendChild(h2); apro.forEach(function(c){ box.appendChild(cardComentario(c,false)); }); }
+    }catch(err){ tratarErro(err, box); }
+  }
+  function cardComentario(c, pendente){
+    var el=document.createElement('div'); el.className='item';
+    el.innerHTML=
+      '<div class="item-top"><span class="item-titulo" style="font-size:20px">'+esc(c.autor||'Anónimo')+'</span></div>'+
+      '<div class="item-meta">no pergaminho #'+c.pergaminho_id+' · '+quando(c.criado_em)+'</div>'+
+      '<div class="corpo">'+esc(c.texto||'')+'</div>'+
+      '<div class="acoes"><a class="b-ver" style="color:#c9a96a;text-decoration:none;margin-right:auto;align-self:center" href="'+SITE_URL+'?texto='+c.pergaminho_id+'" target="_blank" rel="noopener">ver o texto ↗</a>'+(pendente?'<button class="b-ok">Aprovar</button>':'')+'<button class="b-danger">Apagar</button></div>';
+    if(pendente){ el.querySelector('.b-ok').addEventListener('click', function(){ aprovarComentario(el, c.id); }); }
+    el.querySelector('.b-danger').addEventListener('click', function(){ if(confirm('Apagar este comentário para sempre?')) removerLinha(el,'comentarios',c.id); });
+    return el;
+  }
+  async function aprovarComentario(el, id){
+    var btns=el.querySelectorAll('button'); btns.forEach(function(b){ b.disabled=true; });
+    try{ await chamar('tabela_salvar',{tabela:'comentarios', id:id, dados:{status:'aprovado'}}); toast('Comentário aprovado.'); carregarComentariosPainel(); }
+    catch(err){ btns.forEach(function(b){ b.disabled=false; }); tratarErro(err); }
   }
 
   function val(el,f){ var e=el.querySelector('[data-f="'+f+'"]'); return e?e.value:''; }
