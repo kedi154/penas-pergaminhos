@@ -46,10 +46,21 @@
   .topbar{position:sticky;top:0;z-index:10;background:rgba(34,26,19,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);box-shadow:0 1px 0 rgba(200,162,74,.12)}
   .topbar .wrap{display:flex;align-items:center;gap:16px;padding-top:14px;padding-bottom:14px;flex-wrap:wrap}
   .brand{font-family:var(--disp);font-weight:600;font-size:22px;letter-spacing:.04em;color:var(--gold);margin-right:auto}
-  .tabs{display:flex;gap:6px;flex-wrap:wrap}
-  .tab{font-family:var(--disp);background:none;border:1px solid var(--line);border-radius:20px;padding:7px 15px;cursor:pointer;font-size:13px;letter-spacing:.03em;color:var(--ink-soft)}
-  .tab:hover{border-color:var(--gold-soft);color:var(--ink)}
-  .tab.active{background:linear-gradient(180deg,var(--gold),var(--gold-soft));color:#241a0e;border-color:var(--gold)}
+  .tabs{display:flex;flex-direction:column;gap:15px;margin-bottom:4px}
+  .tab-group{display:flex;flex-direction:column;gap:8px}
+  .tab-group-label{font-family:var(--disp);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);display:flex;align-items:center;gap:8px;padding-left:1px}
+  .tab-group-label::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--accent)}
+  .tab-group-btns{display:flex;gap:8px;flex-wrap:wrap}
+  .tab{display:inline-flex;align-items:center;gap:8px;font-family:'EB Garamond','Cormorant Garamond',serif;background:var(--field);border:1px solid var(--line);border-radius:11px;padding:9px 14px;cursor:pointer;font-size:15px;letter-spacing:.01em;color:var(--ink-soft);transition:border-color .18s,color .18s,background .18s}
+  .tab svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;color:var(--accent);opacity:.85;flex-shrink:0}
+  .tab:hover{border-color:var(--accent);color:var(--ink)}
+  .tab.active{background:color-mix(in srgb,var(--accent) 16%,var(--field));border-color:var(--accent);color:var(--ink)}
+  .tab.active svg{opacity:1}
+  .tab .badge:not(:empty){margin-left:1px;font-size:12.5px;color:var(--accent);font-weight:700}
+  .g-pergaminhos{--accent:var(--gold)}
+  .g-moderacao{--accent:var(--red)}
+  .g-loja{--accent:#8bb673}
+  .g-site{--accent:#6f9ec9}
   .sair{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:15px;text-decoration:underline;text-underline-offset:3px}
   .sair:hover{color:var(--gold)}
 
@@ -109,15 +120,35 @@
       <div class="wrap">
         <span class="brand">Taverna · painel</span>
         <div class="tabs">
-          <button class="tab active" data-aba="pendentes">Pendentes <span id="badge-pend"></span></button>
-          <button class="tab" data-aba="aprovados">Aprovados</button>
-          <button class="tab" data-aba="recusados">Recusados</button>
-          <button class="tab" data-aba="produtos">Loja</button>
-          <button class="tab" data-aba="depoimentos">Depoimentos</button>
-          <button class="tab" data-aba="tema">Tema do mês</button>
-          <button class="tab" data-aba="textos">Textos</button>
-          <button class="tab" data-aba="denuncias">Denúncias <span id="badge-den"></span></button>
-          <button class="tab" data-aba="comentarios">Comentários <span id="badge-com"></span></button>
+          <div class="tab-group g-pergaminhos">
+            <span class="tab-group-label">Pergaminhos</span>
+            <div class="tab-group-btns">
+              <button class="tab active" data-aba="pendentes"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span>Pendentes</span><span class="badge" id="badge-pend"></span></button>
+              <button class="tab" data-aba="aprovados"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.3l2.4 2.4 4.6-5"/></svg><span>Aprovados</span></button>
+              <button class="tab" data-aba="recusados"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M9 9l6 6M15 9l-6 6"/></svg><span>Recusados</span></button>
+            </div>
+          </div>
+          <div class="tab-group g-moderacao">
+            <span class="tab-group-label">Moderação</span>
+            <div class="tab-group-btns">
+              <button class="tab" data-aba="comentarios"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H8l-4 4z"/></svg><span>Comentários</span><span class="badge" id="badge-com"></span></button>
+              <button class="tab" data-aba="denuncias"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4h12l-2.5 4L17 12H5"/></svg><span>Denúncias</span><span class="badge" id="badge-den"></span></button>
+            </div>
+          </div>
+          <div class="tab-group g-loja">
+            <span class="tab-group-label">Loja</span>
+            <div class="tab-group-btns">
+              <button class="tab" data-aba="produtos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span>Produtos</span></button>
+            </div>
+          </div>
+          <div class="tab-group g-site">
+            <span class="tab-group-label">Conteúdo do site</span>
+            <div class="tab-group-btns">
+              <button class="tab" data-aba="tema"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 9.5h16M8.5 3v4M15.5 3v4"/></svg><span>Tema do mês</span></button>
+              <button class="tab" data-aba="depoimentos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 4.6-7 9-7 9z"/></svg><span>Depoimentos</span></button>
+              <button class="tab" data-aba="textos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h4"/></svg><span>Textos do site</span></button>
+            </div>
+          </div>
         </div>
         <button class="sair" id="sair">sair</button>
       </div>
