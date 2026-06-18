@@ -489,6 +489,10 @@
       '<div class="linha"><label class="campo"><span>Link Mercado Livre (opcional)</span><input data-f="link_mercadolivre" value="'+esc(p.link_mercadolivre||'')+'"></label>'+
         '<label class="campo"><span>Link Shopee (opcional)</span><input data-f="link_shopee" value="'+esc(p.link_shopee||'')+'"></label></div>'+
       '<label class="campo"><span>Fotos (uma URL por linha)</span><textarea data-f="fotos">'+esc(p.fotos||p.foto||'')+'</textarea></label>'+
+      '<div class="campo" style="margin-bottom:14px"><span style="display:block;margin-bottom:6px">Ou envie imagens do seu dispositivo</span>'+
+        '<input type="file" data-f="arquivo" accept="image/*" multiple style="font-size:14px;max-width:100%">'+
+        '<button class="b-upload" type="button" style="margin-left:8px;background:none;border:1px solid var(--line);border-radius:6px;padding:7px 14px;color:var(--ink-soft);cursor:pointer;font-size:14px;font-family:inherit">enviar imagem(ns)</button>'+
+        '<span class="up-status" style="display:block;margin-top:8px;font-size:13px;color:var(--ink-faint);font-style:italic"></span></div>'+
       '<div style="margin-bottom:12px"><label class="check"><input type="checkbox" data-f="ativo" '+(p.ativo===false?'':'checked')+'> ativo</label>'+
         '<label class="check"><input type="checkbox" data-f="destaque" '+(p.destaque?'checked':'')+'> destaque</label>'+
         '<label class="check"><input type="checkbox" data-f="esgotado" '+(p.esgotado?'checked':'')+'> esgotado</label></div>'+
@@ -497,7 +501,38 @@
       salvarLinha(el,'produtos',p.id,{ descricao:val(el,'descricao'), preco:val(el,'preco'), categoria:val(el,'categoria')||null, ordem:parseInt(val(el,'ordem'),10)||0, link:val(el,'link')||null, link_mercadolivre:val(el,'link_mercadolivre')||null, link_shopee:val(el,'link_shopee')||null, fotos:val(el,'fotos')||null, ativo:chk(el,'ativo'), destaque:chk(el,'destaque'), esgotado:chk(el,'esgotado') });
     });
     el.querySelector('.b-danger').addEventListener('click', function(){ removerLinha(el,'produtos',p.id); });
+    var upBtn=el.querySelector('.b-upload'), fileInput=el.querySelector('[data-f="arquivo"]'), upStatus=el.querySelector('.up-status'), taFotos=el.querySelector('[data-f="fotos"]');
+    upBtn.addEventListener('click', async function(){
+      var files=fileInput.files; if(!files||!files.length){ upStatus.textContent='Escolha uma ou mais imagens primeiro.'; return; }
+      upBtn.disabled=true; var ok=0;
+      for(var i=0;i<files.length;i++){
+        upStatus.textContent='Enviando '+(i+1)+' de '+files.length+'…';
+        try{
+          var b64=await redimensionarImagem(files[i], 1600, 0.85);
+          var r=await chamar('upload_foto', { base64:b64, ext:'jpg', contentType:'image/jpeg' });
+          if(r && r.url){ taFotos.value=(taFotos.value.trim()? taFotos.value.trim()+'\n':'')+r.url; ok++; }
+        }catch(err){ console.error('upload falhou', err); }
+      }
+      upStatus.textContent = ok+' de '+files.length+' imagem(ns) enviada(s). Agora toque em "Salvar" para guardar o produto.';
+      fileInput.value=''; upBtn.disabled=false;
+    });
     return el;
+  }
+  function redimensionarImagem(file, maxLado, qualidade){
+    return new Promise(function(resolve, reject){
+      var url=URL.createObjectURL(file), img=new Image();
+      img.onload=function(){
+        URL.revokeObjectURL(url);
+        var w=img.width, h=img.height;
+        if(w>=h && w>maxLado){ h=Math.round(h*maxLado/w); w=maxLado; }
+        else if(h>w && h>maxLado){ w=Math.round(w*maxLado/h); h=maxLado; }
+        var c=document.createElement('canvas'); c.width=w; c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        try{ resolve(c.toDataURL('image/jpeg', qualidade).split(',')[1]); }catch(e){ reject(e); }
+      };
+      img.onerror=function(){ URL.revokeObjectURL(url); reject(new Error('Não consegui ler a imagem.')); };
+      img.src=url;
+    });
   }
 
   // ===== Depoimentos =====
