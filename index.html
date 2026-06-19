@@ -1383,7 +1383,7 @@
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ fb.textContent='Confira o seu e-mail.'; fb.className='assinar-fb erro'; return; }
     var b=this; b.disabled=true; fb.textContent='A enviar…'; fb.className='assinar-fb';
     try{
-      await supaPost('/assinantes?on_conflict=email', { email: em }, 'resolution=ignore-duplicates');
+      await supaPost('/assinantes?on_conflict=email', { email: em }, 'return=minimal,resolution=ignore-duplicates');
       inp.value=''; fb.textContent='Pronto! Você receberá a antologia do mês. ✦'; fb.className='assinar-fb ok';
     }catch(e){ console.error('Falha ao assinar:', e); fb.textContent='Não consegui agora. Tente de novo em instantes.'; fb.className='assinar-fb erro'; }
     finally{ b.disabled=false; }
