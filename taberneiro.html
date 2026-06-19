@@ -142,6 +142,7 @@
           <button class="tab c-blue" data-aba="tema"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 9.5h16M8.5 3v4M15.5 3v4"/></svg><span>Tema do mês</span></button>
           <button class="tab c-blue" data-aba="depoimentos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 4.6-7 9-7 9z"/></svg><span>Depoimentos</span></button>
           <button class="tab c-blue" data-aba="textos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h4"/></svg><span>Textos</span></button>
+          <button class="tab c-blue" data-aba="assinantes"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M4 7l8 6 8-6"/></svg><span>Assinantes</span></button>
         </div>
         <button class="sair" id="sair">sair</button>
       </div>
@@ -227,6 +228,11 @@
         <p class="sub">aprove os novos e apague qualquer um — protege quem escreve de comentário maldoso</p>
         <div id="lista-comentarios"><div class="carregando">A carregar…</div></div>
       </section>
+      <section class="secao" id="aba-assinantes" style="display:none">
+        <h2>Assinantes</h2>
+        <p class="sub">e-mails que pediram a antologia do mês — copie a lista para enviar</p>
+        <div id="lista-assinantes"><div class="carregando">A carregar…</div></div>
+      </section>
     </div>
   </div>
 
@@ -297,7 +303,7 @@
   }
 
   // ===== Abas =====
-  var LOADERS={ resumo:carregarResumo, pendentes:carregarPendentes, aprovados:carregarAprovados, recusados:carregarRecusados, produtos:carregarProdutos, depoimentos:carregarDepoimentos, tema:carregarTemas, textos:carregarTextos, denuncias:carregarDenuncias, comentarios:carregarComentariosPainel };
+  var LOADERS={ resumo:carregarResumo, pendentes:carregarPendentes, aprovados:carregarAprovados, recusados:carregarRecusados, produtos:carregarProdutos, depoimentos:carregarDepoimentos, tema:carregarTemas, textos:carregarTextos, denuncias:carregarDenuncias, comentarios:carregarComentariosPainel, assinantes:carregarAssinantes };
   document.querySelectorAll('.tab').forEach(function(t){
     t.addEventListener('click', function(){
       document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
@@ -325,6 +331,31 @@
       else { dot.style.background='var(--ok)'; txt.textContent='Tudo em dia — a taverna está tranquila. ✦'; }
       document.title = total>0 ? ('('+total+') Painel do Taberneiro') : 'Painel do Taberneiro';
     }catch(err){ console.error('Falha no resumo:', err); txt.textContent='Não consegui carregar o resumo agora.'; }
+  }
+
+  async function carregarAssinantes(){
+    var box=document.getElementById('lista-assinantes');
+    box.innerHTML='<div class="carregando">A carregar…</div>';
+    try{
+      var rows=await chamar('tabela_listar',{tabela:'assinantes'});
+      if(!rows.length){ box.innerHTML='<div class="vazia">Ninguém inscrito ainda. ✦</div>'; return; }
+      var emails=rows.map(function(a){ return a.email; }).filter(Boolean);
+      box.innerHTML='';
+      var topo=document.createElement('div'); topo.style.cssText='display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px';
+      var cont=document.createElement('span'); cont.style.cssText="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--ink)"; cont.textContent=rows.length+(rows.length===1?' assinante':' assinantes');
+      var btn=document.createElement('button'); btn.className='b-ok'; btn.textContent='copiar todos os e-mails';
+      btn.addEventListener('click', function(){
+        var t=emails.join('; ');
+        if(navigator.clipboard){ navigator.clipboard.writeText(t).then(function(){ btn.textContent='copiado!'; setTimeout(function(){ btn.textContent='copiar todos os e-mails'; },1500); }).catch(function(){}); }
+      });
+      topo.appendChild(cont); topo.appendChild(btn); box.appendChild(topo);
+      rows.forEach(function(a){
+        var el=document.createElement('div'); el.className='item';
+        el.innerHTML='<div class="item-top"><span class="item-titulo" style="font-size:18px">'+esc(a.email)+'</span></div><div class="item-meta">'+quando(a.criado_em)+'</div><div class="acoes"><button class="b-danger">remover</button></div>';
+        el.querySelector('.b-danger').addEventListener('click', function(){ if(confirm('Remover este assinante?')) removerLinha(el,'assinantes',a.id); });
+        box.appendChild(el);
+      });
+    }catch(err){ tratarErro(err, box); }
   }
 
   function quando(iso){
