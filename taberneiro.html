@@ -58,6 +58,16 @@
   .c-red{--accent:var(--red)}
   .c-green{--accent:#8bb673}
   .c-blue{--accent:#6f9ec9}
+  .resumo-aviso{font-family:'Cormorant Garamond',serif;font-size:21px;color:var(--ink-soft);margin-bottom:22px;display:flex;align-items:center;gap:10px}
+  .resumo-aviso .dot{width:9px;height:9px;border-radius:50%;background:var(--gold);flex-shrink:0}
+  .resumo-cards{display:flex;gap:14px;flex-wrap:wrap}
+  .rcard{flex:1 1 170px;min-width:150px;background:var(--card);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:12px;padding:18px;cursor:pointer;transition:border-color .18s,transform .18s}
+  .rcard:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .rcard-top{display:flex;align-items:center;gap:8px;color:var(--accent)}
+  .rcard-top svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+  .rcard-label{font-family:'EB Garamond','Cormorant Garamond',serif;font-size:14px;color:var(--ink-soft);letter-spacing:.02em}
+  .rcard-num{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:40px;color:var(--ink);line-height:1;margin-top:12px}
+  .rcard-num.zero{color:var(--ink-faint)}
   .sair{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:15px;text-decoration:underline;text-underline-offset:3px}
   .sair:hover{color:var(--gold)}
 
@@ -118,7 +128,9 @@
         <span class="brand">Taverna · painel</span>
         <button class="sair" id="sair">sair</button>
         <div class="tabs">
-          <button class="tab c-gold active" data-aba="pendentes"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span>Pendentes</span><span class="badge" id="badge-pend"></span></button>
+          <button class="tab c-gold active" data-aba="resumo"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg><span>Resumo</span></button>
+          <span class="tab-div"></span>
+          <button class="tab c-gold" data-aba="pendentes"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span>Pendentes</span><span class="badge" id="badge-pend"></span></button>
           <button class="tab c-gold" data-aba="aprovados"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.3l2.4 2.4 4.6-5"/></svg><span>Aprovados</span></button>
           <button class="tab c-gold" data-aba="recusados"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M9 9l6 6M15 9l-6 6"/></svg><span>Recusados</span></button>
           <span class="tab-div"></span>
@@ -136,7 +148,26 @@
     </div>
 
     <div class="wrap">
-      <section class="secao" id="aba-pendentes">
+      <section class="secao" id="aba-resumo">
+        <h2>Resumo</h2>
+        <div class="resumo-aviso" id="resumo-aviso"><span class="dot"></span><span id="resumo-aviso-txt">A carregar…</span></div>
+        <div class="resumo-cards">
+          <div class="rcard c-gold" data-ir="pendentes">
+            <div class="rcard-top"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span class="rcard-label">Pergaminhos pendentes</span></div>
+            <div class="rcard-num" id="rnum-pend">—</div>
+          </div>
+          <div class="rcard c-red" data-ir="comentarios">
+            <div class="rcard-top"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H8l-4 4z"/></svg><span class="rcard-label">Comentários a aprovar</span></div>
+            <div class="rcard-num" id="rnum-com">—</div>
+          </div>
+          <div class="rcard c-red" data-ir="denuncias">
+            <div class="rcard-top"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4h12l-2.5 4L17 12H5"/></svg><span class="rcard-label">Denúncias</span></div>
+            <div class="rcard-num" id="rnum-den">—</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="secao" id="aba-pendentes" style="display:none">
         <h2>Pergaminhos à espera</h2>
         <p class="sub">leia e decida — aprovar coloca no mural; recusar guarda fora da vista</p>
         <div id="lista-pendentes"><div class="carregando">A abrir o livro…</div></div>
@@ -239,7 +270,7 @@
   function entrarApp(){
     elLogin.classList.add('hidden');
     elApp.classList.add('on');
-    carregarPendentes();
+    carregarResumo();
   }
   function sair(){
     senhaAtual=''; try{ sessionStorage.removeItem('tab_senha'); }catch(e){}
@@ -266,7 +297,7 @@
   }
 
   // ===== Abas =====
-  var LOADERS={ pendentes:carregarPendentes, aprovados:carregarAprovados, recusados:carregarRecusados, produtos:carregarProdutos, depoimentos:carregarDepoimentos, tema:carregarTemas, textos:carregarTextos, denuncias:carregarDenuncias, comentarios:carregarComentariosPainel };
+  var LOADERS={ resumo:carregarResumo, pendentes:carregarPendentes, aprovados:carregarAprovados, recusados:carregarRecusados, produtos:carregarProdutos, depoimentos:carregarDepoimentos, tema:carregarTemas, textos:carregarTextos, denuncias:carregarDenuncias, comentarios:carregarComentariosPainel };
   document.querySelectorAll('.tab').forEach(function(t){
     t.addEventListener('click', function(){
       document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
@@ -276,6 +307,25 @@
       var fn=LOADERS[aba]; if(fn) fn();
     });
   });
+  document.querySelectorAll('.rcard').forEach(function(c){
+    c.addEventListener('click', function(){ var ir=c.getAttribute('data-ir'); var t=document.querySelector('.tab[data-aba="'+ir+'"]'); if(t) t.click(); });
+  });
+
+  function setNum(id,n){ var el=document.getElementById(id); if(el){ el.textContent=n; el.classList.toggle('zero', n===0); } }
+  function pintarBadge(id,n){ var el=document.getElementById(id); if(el) el.textContent = n? '('+n+')' : ''; }
+  async function carregarResumo(){
+    var txt=document.getElementById('resumo-aviso-txt'); txt.textContent='A carregar…';
+    try{
+      var r=await chamar('resumo');
+      var p=r.pendentes||0, c=r.comentarios||0, d=r.denuncias||0, total=p+c+d;
+      setNum('rnum-pend',p); setNum('rnum-com',c); setNum('rnum-den',d);
+      pintarBadge('badge-pend',p); pintarBadge('badge-com',c); pintarBadge('badge-den',d);
+      var dot=document.querySelector('#resumo-aviso .dot');
+      if(total>0){ dot.style.background='var(--gold)'; txt.innerHTML='<b>'+total+'</b> '+(total===1?'item espera':'itens esperam')+' por você.'; }
+      else { dot.style.background='var(--ok)'; txt.textContent='Tudo em dia — a taverna está tranquila. ✦'; }
+      document.title = total>0 ? ('('+total+') Painel do Taberneiro') : 'Painel do Taberneiro';
+    }catch(err){ console.error('Falha no resumo:', err); txt.textContent='Não consegui carregar o resumo agora.'; }
+  }
 
   function quando(iso){
     try{ var d=new Date(iso); return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }catch(e){ return ''; }
