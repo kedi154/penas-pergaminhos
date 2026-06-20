@@ -692,6 +692,7 @@
     fb: document.getElementById('fb')
   };
   var textosAtuais = [];
+  var destaqueId = null;
   var vistaAtual = [];
   var filtroGenero = 'Todos';
   var ordenacao = 'recentes';
@@ -721,9 +722,11 @@
 
   function montarDestaque(){
     var hero=document.getElementById('destaque-hero');
+    destaqueId=null;
     var destaques=textosAtuais.filter(function(w){ return w.destaque; });
     if(!destaques.length){ hero.hidden=true; hero.innerHTML=''; return; }
     var w=destaques[Math.floor(Math.random()*destaques.length)];
+    destaqueId=w.id;
     var trecho=(w.content||'').replace(/\s+/g,' ').trim().slice(0,180);
     if((w.content||'').replace(/\s+/g,' ').trim().length>180) trecho+='…';
     hero.innerHTML='<div class="dh-label">✦ em destaque na taverna</div>'+
@@ -813,8 +816,8 @@
     if(filtroAutor) lista = lista.filter(function(w){ return (w.author||'Anónimo')===filtroAutor; });
     if(filtroGenero!=='Todos') lista = lista.filter(function(w){ return (w.genre||'Conto')===filtroGenero; });
     if(busca){ var q=busca.toLowerCase(); lista = lista.filter(function(w){ return ((w.title||'')+' '+(w.author||'')+' '+(w.content||'')).toLowerCase().indexOf(q)>=0; }); }
+    if(destaqueId!=null) lista = lista.filter(function(w){ return String(w.id)!==String(destaqueId); });
     lista.sort(function(a,b){
-      var d=(b.destaque?1:0)-(a.destaque?1:0); if(d) return d;
       if(ordenacao==='curtidos'){ var l=(b.likes||0)-(a.likes||0); if(l) return l; }
       return (b.id||0)-(a.id||0);
     });
@@ -878,12 +881,11 @@
     }
     lista.forEach(function(w,i){
       var card = document.createElement('div');
-      card.className='scroll'+(w.destaque?' is-destaque':'');
+      card.className='scroll';
       card.style.animationDelay=(i*0.06)+'s';
       var prev=(w.content||'').trim().slice(0,150);
       var liked=likedSet.has(String(w.id));
       card.innerHTML =
-        (w.destaque?'<div class="destaque-badge">em destaque</div>':'')+
         '<div class="s-meta"><span class="genre">'+esc(w.genre||'Conto')+'</span> · '+tempo(w.content)+' de leitura</div>'+
         '<div class="s-title">'+esc(w.title||'Sem título')+'</div>'+
         '<div class="s-preview">"'+esc(prev)+'…"</div>'+
