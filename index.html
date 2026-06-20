@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="alternate" type="application/rss+xml" title="Penas & Pergaminhos" href="https://mowrcqwxtmjuqtxbesfg.supabase.co/functions/v1/rss">
 <title>Penas & Pergaminhos</title>
 <meta name="description" content="Histórias que a taverna não esquece — contos, versos e fragmentos da comunidade da Taverna do Leitor.">
 <meta name="theme-color" content="#8f2d28">
@@ -428,7 +427,7 @@
         </a>
       </div>
       <div class="foot-note" id="contagem"></div>
-      <div class="foot-note"><span data-cfg="rodape">Cada pergaminho é lido antes de ser selado.</span> · <a id="abrir-sobre" style="cursor:pointer;color:var(--wax)">sobre a taverna</a> · <a id="abrir-legal" style="cursor:pointer;color:var(--wax)">termos · privacidade</a> · <a href="https://mowrcqwxtmjuqtxbesfg.supabase.co/functions/v1/rss" target="_blank" rel="noopener" style="color:var(--wax)">RSS</a></div>
+      <div class="foot-note"><span data-cfg="rodape">Cada pergaminho é lido antes de ser selado.</span> · <a id="abrir-sobre" style="cursor:pointer;color:var(--wax)">sobre a taverna</a> · <a id="abrir-legal" style="cursor:pointer;color:var(--wax)">termos · privacidade</a></div>
       <button class="btn btn-ghost" id="instalar-btn" hidden>instalar na tela inicial</button>
     </footer>
   </div>
@@ -722,7 +721,19 @@
 
   function montarDestaque(){
     var hero=document.getElementById('destaque-hero');
-    if(hero){ hero.hidden=true; hero.innerHTML=''; }
+    var destaques=textosAtuais.filter(function(w){ return w.destaque; });
+    if(!destaques.length){ hero.hidden=true; hero.innerHTML=''; return; }
+    var w=destaques[Math.floor(Math.random()*destaques.length)];
+    var trecho=(w.content||'').replace(/\s+/g,' ').trim().slice(0,180);
+    if((w.content||'').replace(/\s+/g,' ').trim().length>180) trecho+='…';
+    hero.innerHTML='<div class="dh-label">✦ em destaque na taverna</div>'+
+      '<div class="dh-genre">'+esc(w.genre||'Conto')+'</div>'+
+      '<h2 class="dh-title">'+esc(w.title||'Sem título')+'</h2>'+
+      '<p class="dh-excerpt">'+esc(trecho)+'</p>'+
+      '<div class="dh-by">por '+esc(w.author||'Anónimo')+'</div>'+
+      '<button class="btn btn-primary dh-open">Ler este pergaminho</button>';
+    hero.querySelector('.dh-open').addEventListener('click', function(){ abrirLeitor(w); });
+    hero.hidden=false;
   }
 
   function registrarLeitura(w){
@@ -1383,7 +1394,7 @@
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ fb.textContent='Confira o seu e-mail.'; fb.className='assinar-fb erro'; return; }
     var b=this; b.disabled=true; fb.textContent='A enviar…'; fb.className='assinar-fb';
     try{
-      await supaPost('/assinantes?on_conflict=email', { email: em }, 'return=minimal,resolution=ignore-duplicates');
+      await supaPost('/rpc/assinar_email', { p_email: em });
       inp.value=''; fb.textContent='Pronto! Você receberá a antologia do mês. ✦'; fb.className='assinar-fb ok';
     }catch(e){ console.error('Falha ao assinar:', e); fb.textContent='Não consegui agora. Tente de novo em instantes.'; fb.className='assinar-fb erro'; }
     finally{ b.disabled=false; }
