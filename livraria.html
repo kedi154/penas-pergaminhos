@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Livraria — Penas &amp; Pergaminhos</title>
+<link rel="icon" href="favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=EB+Garamond:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f4ecdd; --paper-2:#efe5d2; --ink:#2e2a22; --ink-soft:#5b5346; --ink-faint:#9a8e78;
+    --wax:#8f2d28; --line:#d8cdb8; --wood:#6b4a32; --wood-2:#876048; --gold:#b0863e;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:#efe5d2;
+    background-image:radial-gradient(circle at 50% 0%, rgba(176,134,62,.10), transparent 60%), radial-gradient(circle at 50% 120%, rgba(107,74,50,.10), transparent 55%);
+    color:var(--ink); font-family:'EB Garamond',Georgia,serif; line-height:1.6; min-height:100vh;
+  }
+  .ambient{position:fixed;inset:0;pointer-events:none;z-index:0;
+    box-shadow:inset 0 0 220px rgba(74,52,34,.35);}
+  .mote{position:fixed;bottom:-10px;width:4px;height:4px;border-radius:50%;background:rgba(176,134,62,.55);pointer-events:none;z-index:0;animation:flutua linear infinite}
+  @keyframes flutua{0%{transform:translateY(0);opacity:0}12%{opacity:.55}88%{opacity:.45}100%{transform:translateY(-108vh) translateX(20px);opacity:0}}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px;position:relative;z-index:1}
+
+  .topo{position:relative;z-index:2;border-bottom:1px solid var(--line);background:rgba(244,236,221,.7);backdrop-filter:blur(3px)}
+  .topo .wrap{display:flex;align-items:center;gap:16px;height:58px}
+  .topo a{color:var(--ink-soft);text-decoration:none;font-size:15px}
+  .topo a:hover{color:var(--wax)}
+  .topo .marca{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:20px;color:var(--ink);margin-right:auto}
+
+  .hero{text-align:center;padding:54px 22px 30px;position:relative;z-index:1}
+  .hero .sel{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--wax);margin-bottom:10px}
+  .hero h1{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(34px,6vw,52px);margin:0 0 10px;color:var(--ink)}
+  .hero p{color:var(--ink-soft);font-size:18px;font-style:italic;max-width:560px;margin:0 auto 22px}
+  .hero-acoes{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+  .btn{font-family:'Cormorant Garamond',serif;font-size:17px;border-radius:7px;padding:10px 22px;cursor:pointer;border:1px solid var(--wax);background:none;color:var(--wax);transition:all .18s}
+  .btn:hover{background:var(--wax);color:var(--paper)}
+  .btn-cheio{background:var(--wax);color:var(--paper)}
+  .btn-cheio:hover{background:#7a2622}
+  .btn-fraco{border-color:var(--line);color:var(--ink-soft)}
+  .btn-fraco:hover{background:var(--paper-2);color:var(--ink)}
+  .link-fraco{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-family:'EB Garamond',serif;font-size:14px;font-style:italic;text-decoration:underline;text-decoration-color:var(--line)}
+
+  .parede{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:22px;padding:24px 0 80px}
+  .carregando,.vazia{grid-column:1/-1;text-align:center;color:var(--ink-faint);font-style:italic;padding:50px 0}
+
+  /* cartão de estante */
+  .estante-card{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px 16px 14px;cursor:pointer;transition:transform .2s,box-shadow .2s,border-color .2s;opacity:0;animation:surge .5s ease both}
+  @keyframes surge{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .estante-card:hover{transform:translateY(-4px);box-shadow:0 12px 26px rgba(74,52,34,.18);border-color:var(--gold)}
+  .ec-shelf{background:linear-gradient(180deg,#7a573c,#6b4a32);border-radius:6px;padding:12px 12px 0;min-height:118px;display:flex;align-items:flex-end;gap:4px;justify-content:center;box-shadow:inset 0 -8px 0 rgba(0,0,0,.12)}
+  .mini-spine{width:13px;border-radius:2px 2px 0 0;border:1px solid rgba(0,0,0,.12)}
+  .mini-mais{color:#f4ecdd;font-size:13px;align-self:flex-end;padding-bottom:6px;font-style:italic}
+  .mini-vazia{color:#e8dcc4;font-style:italic;font-size:14px;align-self:center;padding-bottom:30px}
+  .ec-nome{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:21px;color:var(--ink);margin-top:12px;text-align:center}
+  .ec-meta{text-align:center;color:var(--ink-faint);font-size:14px;margin-top:2px}
+  .ec-selos{display:flex;gap:5px;justify-content:center;margin-top:8px;min-height:18px}
+  .selo{width:17px;height:17px;border-radius:50%;background:var(--gold);color:#3a2a10;font-size:10px;display:flex;align-items:center;justify-content:center;border:1px solid #8a6a2e}
+  .selo.eu{background:var(--wax);border-color:#6e201c;color:#f4ecdd}
+
+  /* overlay genérico */
+  .overlay{position:fixed;inset:0;z-index:60;background:rgba(33,24,15,.78);display:none;align-items:center;justify-content:center;padding:22px;opacity:0;transition:opacity .3s}
+  .overlay.on{display:flex;opacity:1}
+  .fechar{position:absolute;top:16px;right:18px;background:none;border:none;color:#f4ecdd;font-size:30px;cursor:pointer;line-height:1;z-index:5}
+
+  /* estante em destaque */
+  .foco{background:var(--paper);border:1px solid var(--gold);border-radius:14px;max-width:840px;width:100%;max-height:88vh;overflow:auto;padding:30px 30px 36px;transform:scale(.92);transition:transform .35s cubic-bezier(.2,.8,.3,1)}
+  .overlay.on .foco{transform:scale(1)}
+  .foco-cab{text-align:center;margin-bottom:6px}
+  .foco-cab .sel{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--wax)}
+  .foco-cab h2{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:34px;margin:6px 0 2px}
+  .foco-cab .meta{color:var(--ink-faint);font-style:italic}
+  .foco-selos{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:16px 0 6px}
+  .selo-pill{display:flex;align-items:center;gap:6px;background:var(--paper-2);border:1px solid var(--line);border-radius:20px;padding:5px 12px;font-size:14px;color:var(--ink-soft)}
+  .selo-pill .b{width:16px;height:16px;border-radius:50%;background:var(--gold);border:1px solid #8a6a2e}
+  .foco-prog{text-align:center;color:var(--ink-faint);font-size:14px;font-style:italic;margin-bottom:18px}
+  .premio{background:rgba(143,45,40,.07);border:1px solid rgba(143,45,40,.3);border-radius:8px;padding:12px 16px;text-align:center;color:var(--wax);margin:0 auto 18px;max-width:520px}
+
+  .prateleira-linha{margin-bottom:8px}
+  .spines{display:flex;align-items:flex-end;gap:6px;justify-content:flex-start;min-height:160px;padding:0 10px;flex-wrap:nowrap;overflow-x:auto}
+  .plank{height:14px;background:linear-gradient(180deg,#876048,#6b4a32);border-radius:2px;margin-top:-2px;box-shadow:0 4px 8px rgba(74,52,34,.25)}
+  .spine{flex:0 0 auto;width:38px;border-radius:3px 3px 0 0;border:1px solid rgba(0,0,0,.12);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:transform .18s, box-shadow .18s;animation:cair .5s both}
+  @keyframes cair{from{opacity:0;transform:translateY(-26px) rotate(-3deg)}to{opacity:1;transform:none}}
+  .spine:hover{transform:translateY(-8px);box-shadow:0 8px 16px rgba(0,0,0,.3);z-index:2}
+  .spine span{writing-mode:vertical-rl;transform:rotate(180deg);color:#f4ecdd;font-family:'Cormorant Garamond',serif;font-weight:500;font-size:13px;letter-spacing:.02em;white-space:nowrap;overflow:hidden;max-height:128px;padding:8px 0}
+  .foco-vazia{text-align:center;color:var(--ink-faint);font-style:italic;padding:30px 0}
+  .foco-acoes{text-align:center;margin-top:18px}
+
+  /* leitor — livro que abre */
+  #leitor{perspective:1700px}
+  .livro{position:relative;width:min(560px,94vw);height:min(74vh,700px)}
+  .livro-paginas{position:absolute;inset:0;background:var(--paper);border-radius:6px 10px 10px 6px;border:1px solid var(--line);box-shadow:0 20px 50px rgba(0,0,0,.4);padding:38px 38px 30px;overflow:auto;border-left:6px solid var(--wood)}
+  .pag-genero{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:6px}
+  .pag-titulo{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:30px;margin:0 0 4px;color:var(--ink)}
+  .pag-autor{color:var(--ink-faint);font-style:italic;margin-bottom:18px}
+  .pag-corpo{white-space:pre-wrap;font-size:17.5px;line-height:1.85;color:var(--ink-soft)}
+  .livro-capa{position:absolute;inset:0;background:linear-gradient(145deg,#8f2d28,#6e201c);border-radius:6px 10px 10px 6px;border:1px solid #5e1b18;box-shadow:0 20px 50px rgba(0,0,0,.45);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;transform-origin:left center;transition:transform 1s cubic-bezier(.3,.7,.2,1);backface-visibility:hidden;z-index:3}
+  .livro.aberto .livro-capa{transform:rotateY(-162deg)}
+  .capa-selo{width:52px;height:52px;border-radius:50%;background:#f4ecdd;color:var(--wax);font-size:26px;display:flex;align-items:center;justify-content:center;margin-bottom:18px;box-shadow:0 0 0 5px rgba(244,236,221,.18)}
+  .capa-titulo{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:28px;color:#f4ecdd;line-height:1.2}
+  .capa-autor{color:#e7c9b0;font-style:italic;margin-top:10px}
+  .capa-dica{position:absolute;bottom:22px;color:rgba(244,236,221,.6);font-size:13px;font-style:italic}
+
+  /* modais */
+  .modal-bg{position:fixed;inset:0;z-index:80;background:rgba(33,24,15,.74);display:none;align-items:center;justify-content:center;padding:22px}
+  .modal-bg.on{display:flex}
+  .modal{background:var(--paper);border:1px solid var(--gold);border-radius:12px;max-width:440px;width:100%;padding:28px 26px;text-align:center}
+  .modal h3{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:25px;margin:0 0 8px}
+  .modal p{color:var(--ink-soft);font-size:15.5px;margin:0 0 18px}
+  .modal input{width:100%;font-family:'EB Garamond',serif;font-size:16px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:7px;padding:11px 13px;text-align:center;margin-bottom:14px}
+  .modal-fb{font-size:14px;font-style:italic;min-height:20px;margin-bottom:6px}
+  .modal-fb.ok{color:var(--gold)} .modal-fb.erro{color:#b03b34}
+  .codigo-box{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:24px;letter-spacing:.04em;color:var(--wax);background:var(--paper-2);border:1px dashed var(--gold);border-radius:8px;padding:14px;margin:6px 0 14px;word-break:break-all}
+  .modal-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:4px}
+
+  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--paper);padding:11px 20px;border-radius:8px;font-size:15px;opacity:0;transition:all .3s;z-index:90;pointer-events:none}
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="ambient"></div>
+
+<header class="topo">
+  <div class="wrap">
+    <span class="marca">A Livraria</span>
+    <a href="index.html">← o mural</a>
+    <a href="loja.html">a loja</a>
+  </div>
+</header>
+
+<main>
+  <section class="hero wrap">
+    <div class="sel">a livraria da taverna</div>
+    <h1>As estantes da taverna</h1>
+    <p>Cada estante guarda os pergaminhos selados de um escritor. Monte a sua, resgatando os seus textos com o código que recebeu ao publicar.</p>
+    <div class="hero-acoes" id="hero-acoes"></div>
+  </section>
+
+  <section class="wrap">
+    <div class="parede" id="parede"><div class="carregando">A acender as luzes da livraria…</div></div>
+  </section>
+</main>
+
+<!-- estante em destaque -->
+<div class="overlay" id="foco-ov">
+  <button class="fechar" id="foco-fechar">×</button>
+  <div class="foco" id="foco"></div>
+</div>
+
+<!-- leitor -->
+<div class="overlay" id="leitor">
+  <button class="fechar" id="leitor-fechar">×</button>
+  <div class="livro" id="livro">
+    <div class="livro-paginas">
+      <div class="pag-genero" id="pag-genero"></div>
+      <h2 class="pag-titulo" id="pag-titulo"></h2>
+      <div class="pag-autor" id="pag-autor"></div>
+      <div class="pag-corpo" id="pag-corpo"></div>
+    </div>
+    <div class="livro-capa" id="livro-capa">
+      <div class="capa-selo">✦</div>
+      <div class="capa-titulo" id="capa-titulo"></div>
+      <div class="capa-autor" id="capa-autor"></div>
+      <div class="capa-dica">a abrir…</div>
+    </div>
+  </div>
+</div>
+
+<!-- criar estante -->
+<div class="modal-bg" id="criar-modal">
+  <div class="modal">
+    <h3>Criar a sua estante</h3>
+    <p>Dê um nome ou apelido — é como ela aparecerá na livraria.</p>
+    <input id="criar-nome" maxlength="40" placeholder="ex.: A estante de Fumaça">
+    <div class="modal-fb" id="criar-fb"></div>
+    <div class="modal-row">
+      <button class="btn btn-fraco" data-fecha="criar-modal">cancelar</button>
+      <button class="btn btn-cheio" id="criar-ok">criar estante</button>
+    </div>
+  </div>
+</div>
+
+<!-- código gerado -->
+<div class="modal-bg" id="codigo-modal">
+  <div class="modal">
+    <h3>A sua estante nasceu! ✦</h3>
+    <p>Guarde este código com carinho — é com ele que você abre e abastece a sua estante (inclusive noutro aparelho).</p>
+    <div class="codigo-box" id="codigo-valor"></div>
+    <div class="modal-row">
+      <button class="btn btn-fraco" id="codigo-copiar">copiar código</button>
+      <button class="btn btn-cheio" id="codigo-ok">guardei!</button>
+    </div>
+  </div>
+</div>
+
+<!-- resgatar livro -->
+<div class="modal-bg" id="resgatar-modal">
+  <div class="modal">
+    <h3>Resgatar um livro</h3>
+    <p>Cole o código do seu texto (a chave que você recebeu ao publicá-lo). Se estiver selado, ele vira um livro na sua estante.</p>
+    <input id="resgatar-chave" placeholder="TAVERNA-XXXX-XXXX-XXXX">
+    <div class="modal-fb" id="resgatar-fb"></div>
+    <div class="modal-row">
+      <button class="btn btn-fraco" data-fecha="resgatar-modal">fechar</button>
+      <button class="btn btn-cheio" id="resgatar-ok">resgatar</button>
+    </div>
+  </div>
+</div>
+
+<!-- recuperar por código -->
+<div class="modal-bg" id="recuperar-modal">
+  <div class="modal">
+    <h3>Abrir a minha estante</h3>
+    <p>Já tem uma estante? Cole o código dela para abri-la neste aparelho.</p>
+    <input id="recuperar-codigo" placeholder="ESTANTE-XXXX-XXXX">
+    <div class="modal-fb" id="recuperar-fb"></div>
+    <div class="modal-row">
+      <button class="btn btn-fraco" data-fecha="recuperar-modal">cancelar</button>
+      <button class="btn btn-cheio" id="recuperar-ok">abrir</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  var SUPABASE_URL = 'https://mowrcqwxtmjuqtxbesfg.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_gSMSa-F4C1FHkEpz1QHN3w_pIQ3epsc';
+  var REST = SUPABASE_URL + '/rest/v1';
+  var HEADERS = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' };
+
+  var SPINE_CORES = ['#8f2d28','#6f8a5e','#5b7a9a','#b0863e','#7a5a72','#a85a3e','#4f6b62','#9a6b3e'];
+  var MARCOS = [
+    { n:1,  nome:'Primeira pena' },
+    { n:3,  nome:'Contador de histórias' },
+    { n:5,  nome:'Bibliófilo da taverna' },
+    { n:10, nome:'Mestre bibliotecário', fisico:true }
+  ];
+
+  var estantes = [];
+  var minha = null;
+  try { minha = JSON.parse(localStorage.getItem('pp_minha_estante') || 'null'); } catch(e){ minha = null; }
+
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function salvarMinha(){ try{ localStorage.setItem('pp_minha_estante', JSON.stringify(minha)); }catch(e){} }
+
+  async function sha256hex(str){
+    var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
+  }
+  async function supaGet(path){ var r = await fetch(REST + path, { headers: HEADERS }); if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }
+  async function rpc(fn, body){
+    var r = await fetch(REST + '/rpc/' + fn, { method:'POST', headers:HEADERS, body: JSON.stringify(body||{}) });
+    var txt = await r.text();
+    if(!r.ok){ var msg=''; try{ msg = JSON.parse(txt).message; }catch(e){} throw new Error(msg || ('HTTP ' + r.status)); }
+    return txt ? JSON.parse(txt) : null;
+  }
+
+  function toast(msg){ var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(t._to); t._to=setTimeout(function(){ t.classList.remove('on'); },2600); }
+  function abrir(id){ document.getElementById(id).classList.add('on'); }
+  function fechar(id){ document.getElementById(id).classList.remove('on'); }
+
+  function selosDe(n){ return MARCOS.filter(function(m){ return n >= m.n; }); }
+  function proximoMarco(n){ for(var i=0;i<MARCOS.length;i++){ if(n < MARCOS[i].n) return MARCOS[i]; } return null; }
+
+  // ---- parede de estantes ----
+  function spinesPreview(n, seed){
+    if(n===0) return '<div class="mini-vazia">estante vazia</div>';
+    var cap = Math.min(n, 9), html = '';
+    for(var i=0;i<cap;i++){
+      var cor = SPINE_CORES[(seed + i) % SPINE_CORES.length];
+      var h = 64 + ((seed*7 + i*13) % 26);
+      html += '<div class="mini-spine" style="height:'+h+'px;background:'+cor+'"></div>';
+    }
+    if(n > cap) html += '<div class="mini-mais">+'+(n-cap)+'</div>';
+    return html;
+  }
+  function renderParede(){
+    var box = document.getElementById('parede');
+    if(!estantes.length){ box.innerHTML = '<div class="vazia">Ainda não há estantes na livraria. Seja o primeiro a montar a sua. ✦</div>'; return; }
+    box.innerHTML = '';
+    estantes.forEach(function(e, i){
+      var n = e.n_livros || 0;
+      var card = document.createElement('div');
+      card.className = 'estante-card';
+      card.style.animationDelay = (i*0.05)+'s';
+      var ehMinha = minha && String(minha.id) === String(e.id);
+      var selos = selosDe(n).map(function(){ return '<span class="selo'+(ehMinha?' eu':'')+'">✦</span>'; }).join('');
+      card.innerHTML =
+        '<div class="ec-shelf">'+spinesPreview(n, e.id)+'</div>'+
+        '<div class="ec-nome">'+esc(e.nome)+(ehMinha?' ·':'')+'</div>'+
+        '<div class="ec-meta">'+n+(n===1?' livro':' livros')+(ehMinha?' · a sua estante':'')+'</div>'+
+        '<div class="ec-selos">'+selos+'</div>';
+      card.addEventListener('click', function(){ abrirFoco(e); });
+      box.appendChild(card);
+    });
+  }
+
+  // ---- estante em destaque ----
+  function spineLivro(b, i){
+    var cor = SPINE_CORES[(b.pergaminho_id + i) % SPINE_CORES.length];
+    var h = 150 + ((b.pergaminho_id*7 + i*11) % 36);
+    return '<div class="spine" data-livro="'+b.pergaminho_id+'" style="height:'+h+'px;background:'+cor+';animation-delay:'+(i*0.06)+'s" title="'+esc(b.titulo)+'"><span>'+esc(b.titulo||'Sem título')+'</span></div>';
+  }
+  async function abrirFoco(e){
+    var foco = document.getElementById('foco');
+    var ehMinha = minha && String(minha.id) === String(e.id);
+    var n = e.n_livros || 0;
+    var selos = selosDe(n);
+    var prox = proximoMarco(n);
+    var selosHtml = selos.length ? '<div class="foco-selos">'+selos.map(function(m){ return '<span class="selo-pill"><span class="b"></span>'+esc(m.nome)+'</span>'; }).join('')+'</div>' : '';
+    var progHtml = prox ? '<div class="foco-prog">faltam '+(prox.n - n)+' '+((prox.n-n)===1?'livro':'livros')+' para o selo "'+esc(prox.nome)+'"</div>'
+                        : '<div class="foco-prog">todos os selos conquistados ✦</div>';
+    var premioHtml = (n >= 10) ? '<div class="premio">✦ Estante completa! Você desbloqueou a <b>mini-prateleira física</b> em impressão 3D — fale com o Taberneiro para resgatar.</div>' : '';
+    foco.innerHTML =
+      '<div class="foco-cab"><div class="sel">estante</div><h2>'+esc(e.nome)+'</h2>'+
+        '<div class="meta">'+n+(n===1?' livro selado':' livros selados')+'</div></div>'+
+      selosHtml + progHtml + premioHtml +
+      '<div id="foco-livros"><div class="foco-vazia">A procurar nas prateleiras…</div></div>'+
+      (ehMinha ? '<div class="foco-acoes"><button class="btn btn-cheio" id="foco-resgatar">resgatar um livro</button></div>'
+               : (minha ? '' : '<div class="foco-acoes"><button class="btn" id="foco-criar">montar a minha estante</button></div>'));
+    abrir('foco-ov');
+    if(ehMinha){ var fr=document.getElementById('foco-resgatar'); if(fr) fr.addEventListener('click', function(){ document.getElementById('resgatar-fb').textContent=''; document.getElementById('resgatar-chave').value=''; abrir('resgatar-modal'); }); }
+    else if(!minha){ var fc=document.getElementById('foco-criar'); if(fc) fc.addEventListener('click', function(){ fechar('foco-ov'); abrirCriar(); }); }
+
+    try {
+      var livros = await rpc('ler_prateleira', { p_id: e.id });
+      var alvo = document.getElementById('foco-livros');
+      if(!livros || !livros.length){ alvo.innerHTML = '<div class="foco-vazia">Esta estante ainda está vazia.</div>'; return; }
+      var html=''; var porLinha=6;
+      for(var r=0;r<livros.length;r+=porLinha){
+        var grupo = livros.slice(r, r+porLinha);
+        html += '<div class="prateleira-linha"><div class="spines">'+grupo.map(function(b,k){ return spineLivro(b, r+k); }).join('')+'</div><div class="plank"></div></div>';
+      }
+      alvo.innerHTML = html;
+      alvo.querySelectorAll('.spine').forEach(function(sp){
+        sp.addEventListener('click', function(){ abrirLivro(sp.getAttribute('data-livro')); });
+      });
+    } catch(err){ console.error(err); document.getElementById('foco-livros').innerHTML = '<div class="foco-vazia">Não consegui abrir as prateleiras agora.</div>'; }
+  }
+
+  // ---- leitor (livro que abre) ----
+  async function abrirLivro(id){
+    var livro = document.getElementById('livro');
+    livro.classList.remove('aberto');
+    document.getElementById('capa-titulo').textContent = '…';
+    document.getElementById('capa-autor').textContent = '';
+    document.getElementById('pag-genero').textContent = '';
+    document.getElementById('pag-titulo').textContent = '';
+    document.getElementById('pag-autor').textContent = '';
+    document.getElementById('pag-corpo').textContent = '';
+    abrir('leitor');
+    try {
+      var rows = await supaGet('/pergaminhos?id=eq.'+encodeURIComponent(id)+'&select=titulo,autor,genero,conteudo&limit=1');
+      var t = rows && rows[0];
+      if(!t){ toast('Não encontrei este texto.'); fechar('leitor'); return; }
+      document.getElementById('capa-titulo').textContent = t.titulo || 'Sem título';
+      document.getElementById('capa-autor').textContent = t.autor ? ('por ' + t.autor) : '';
+      document.getElementById('pag-genero').textContent = t.genero || 'Conto';
+      document.getElementById('pag-titulo').textContent = t.titulo || 'Sem título';
+      document.getElementById('pag-autor').textContent = t.autor ? ('por ' + t.autor) : '';
+      document.getElementById('pag-corpo').textContent = t.conteudo || '';
+      setTimeout(function(){ livro.classList.add('aberto'); }, 280);
+    } catch(err){ console.error(err); toast('Não consegui abrir o livro agora.'); fechar('leitor'); }
+  }
+
+  // ---- criar / resgatar / recuperar ----
+  function abrirCriar(){ document.getElementById('criar-fb').textContent=''; document.getElementById('criar-nome').value=''; abrir('criar-modal'); }
+
+  document.getElementById('criar-ok').addEventListener('click', async function(){
+    var nome = (document.getElementById('criar-nome').value||'').trim();
+    var fb = document.getElementById('criar-fb');
+    if(nome.length < 2){ fb.className='modal-fb erro'; fb.textContent='Dê um nome com pelo menos 2 letras.'; return; }
+    var b=this; b.disabled=true; fb.className='modal-fb'; fb.textContent='A erguer as prateleiras…';
+    try {
+      var res = await rpc('criar_prateleira', { p_nome: nome });
+      var row = res && res[0];
+      minha = { id: row.id, codigo: row.codigo, nome: nome };
+      salvarMinha();
+      fechar('criar-modal');
+      document.getElementById('codigo-valor').textContent = row.codigo;
+      abrir('codigo-modal');
+      await carregar();
+    } catch(err){ fb.className='modal-fb erro'; fb.textContent = err.message || 'Não consegui criar agora.'; }
+    finally{ b.disabled=false; }
+  });
+
+  document.getElementById('codigo-copiar').addEventListener('click', function(){
+    var v = document.getElementById('codigo-valor').textContent, b=this;
+    if(navigator.clipboard) navigator.clipboard.writeText(v).then(function(){ b.textContent='copiado!'; setTimeout(function(){ b.textContent='copiar código'; },1500); }).catch(function(){});
+  });
+  document.getElementById('codigo-ok').addEventListener('click', function(){ fechar('codigo-modal'); montarHero(); });
+
+  document.getElementById('resgatar-ok').addEventListener('click', async function(){
+    var fb = document.getElementById('resgatar-fb');
+    if(!minha){ fb.className='modal-fb erro'; fb.textContent='Crie a sua estante primeiro.'; return; }
+    var chave = (document.getElementById('resgatar-chave').value||'').trim().toUpperCase();
+    if(chave.length < 6){ fb.className='modal-fb erro'; fb.textContent='Cole o código do seu texto.'; return; }
+    var b=this; b.disabled=true; fb.className='modal-fb'; fb.textContent='A procurar o seu texto…';
+    try {
+      var hash = await sha256hex(chave);
+      var res = await rpc('resgatar_livro', { p_codigo: minha.codigo, p_chave_hash: hash });
+      var row = res && res[0];
+      if(row && row.novo){ fb.className='modal-fb ok'; fb.textContent='"'+(row.titulo||'texto')+'" entrou na sua estante! ✦'; toast('Novo livro na estante ✦'); }
+      else { fb.className='modal-fb ok'; fb.textContent='Esse livro já estava na sua estante.'; }
+      document.getElementById('resgatar-chave').value='';
+      await carregar();
+      var atual = estantes.find(function(x){ return String(x.id)===String(minha.id); });
+      if(atual && document.getElementById('foco-ov').classList.contains('on')) abrirFoco(atual);
+    } catch(err){ fb.className='modal-fb erro'; fb.textContent = err.message || 'Não consegui resgatar agora.'; }
+    finally{ b.disabled=false; }
+  });
+
+  document.getElementById('recuperar-ok').addEventListener('click', async function(){
+    var cod = (document.getElementById('recuperar-codigo').value||'').trim().toUpperCase();
+    var fb = document.getElementById('recuperar-fb');
+    if(cod.length < 6){ fb.className='modal-fb erro'; fb.textContent='Cole o código da estante.'; return; }
+    var b=this; b.disabled=true; fb.className='modal-fb'; fb.textContent='A procurar…';
+    try {
+      var res = await rpc('prateleira_por_codigo', { p_codigo: cod });
+      var row = res && res[0];
+      if(!row){ fb.className='modal-fb erro'; fb.textContent='Não encontrei uma estante com esse código.'; return; }
+      minha = { id: row.id, codigo: cod, nome: row.nome };
+      salvarMinha();
+      fechar('recuperar-modal');
+      toast('Estante aberta ✦');
+      montarHero();
+      await carregar();
+      var atual = estantes.find(function(x){ return String(x.id)===String(minha.id); });
+      if(atual) abrirFoco(atual);
+    } catch(err){ fb.className='modal-fb erro'; fb.textContent = err.message || 'Não consegui agora.'; }
+    finally{ b.disabled=false; }
+  });
+
+  // ---- hero (ações dependem de ter estante ou não) ----
+  function montarHero(){
+    var h = document.getElementById('hero-acoes');
+    if(minha){
+      h.innerHTML = '<button class="btn btn-cheio" id="h-abrir">abrir a minha estante</button>'+
+                    '<button class="btn" id="h-resgatar">resgatar um livro</button>';
+      document.getElementById('h-abrir').addEventListener('click', function(){
+        var atual = estantes.find(function(x){ return String(x.id)===String(minha.id); });
+        if(atual) abrirFoco(atual); else toast('A sua estante está a carregar…');
+      });
+      document.getElementById('h-resgatar').addEventListener('click', function(){ document.getElementById('resgatar-fb').textContent=''; document.getElementById('resgatar-chave').value=''; abrir('resgatar-modal'); });
+    } else {
+      h.innerHTML = '<button class="btn btn-cheio" id="h-criar">criar a minha estante</button>'+
+                    '<button class="link-fraco" id="h-recuperar">já tenho um código de estante</button>';
+      document.getElementById('h-criar').addEventListener('click', abrirCriar);
+      document.getElementById('h-recuperar').addEventListener('click', function(){ document.getElementById('recuperar-fb').textContent=''; document.getElementById('recuperar-codigo').value=''; abrir('recuperar-modal'); });
+    }
+  }
+
+  // ---- fechar overlays/modais ----
+  document.getElementById('foco-fechar').addEventListener('click', function(){ fechar('foco-ov'); });
+  document.getElementById('foco-ov').addEventListener('click', function(e){ if(e.target===this) fechar('foco-ov'); });
+  document.getElementById('leitor-fechar').addEventListener('click', function(){ document.getElementById('livro').classList.remove('aberto'); fechar('leitor'); });
+  document.getElementById('leitor').addEventListener('click', function(e){ if(e.target===this){ document.getElementById('livro').classList.remove('aberto'); fechar('leitor'); } });
+  document.querySelectorAll('[data-fecha]').forEach(function(b){ b.addEventListener('click', function(){ fechar(b.getAttribute('data-fecha')); }); });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ ['foco-ov','leitor'].forEach(function(id){ if(document.getElementById(id).classList.contains('on')){ if(id==='leitor') document.getElementById('livro').classList.remove('aberto'); fechar(id); } }); ['criar-modal','codigo-modal','resgatar-modal','recuperar-modal'].forEach(fechar); } });
+
+  // ---- carregar ----
+  async function carregar(){
+    try {
+      estantes = await rpc('listar_prateleiras') || [];
+    } catch(err){ console.error(err); document.getElementById('parede').innerHTML = '<div class="vazia">Não consegui falar com a livraria. Veja o console (F12).</div>'; return; }
+    renderParede();
+    montarHero();
+  }
+
+  // ---- poeira dourada ----
+  (function motes(){
+    for(var i=0;i<14;i++){
+      var m=document.createElement('div'); m.className='mote';
+      m.style.left=(Math.random()*100)+'vw';
+      m.style.animationDuration=(11+Math.random()*12)+'s';
+      m.style.animationDelay=(-Math.random()*16)+'s';
+      var s=2+Math.random()*3; m.style.width=s+'px'; m.style.height=s+'px';
+      document.body.appendChild(m);
+    }
+  })();
+
+  carregar();
+</script>
+</body>
+</html>
