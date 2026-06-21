@@ -506,7 +506,9 @@
                     '<button class="btn" id="h-resgatar">resgatar um livro</button>';
       document.getElementById('h-abrir').addEventListener('click', function(){
         var atual = estantes.find(function(x){ return String(x.id)===String(minha.id); });
-        if(atual) abrirFoco(atual); else toast('A sua estante está a carregar…');
+        if(atual){ abrirFoco(atual); return; }
+        toast('A sua estante está adormecida — resgate um livro para reacendê-la ✦');
+        document.getElementById('resgatar-fb').textContent=''; document.getElementById('resgatar-chave').value=''; abrir('resgatar-modal');
       });
       document.getElementById('h-resgatar').addEventListener('click', function(){ document.getElementById('resgatar-fb').textContent=''; document.getElementById('resgatar-chave').value=''; abrir('resgatar-modal'); });
     } else {
