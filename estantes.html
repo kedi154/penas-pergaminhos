@@ -42,6 +42,13 @@
   .hero h1{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(34px,6vw,52px);margin:0 0 10px;color:var(--ink)}
   .hero p{color:var(--ink-soft);font-size:18px;font-style:italic;max-width:560px;margin:0 auto 22px}
   .hero-acoes{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .suas-estantes{display:flex;flex-direction:column;align-items:center;gap:12px}
+  .suas-rotulo{font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:.05em;color:var(--ink-soft)}
+  .suas-chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:560px}
+  .estante-chip{font-family:'Cormorant Garamond',serif;font-size:16px;display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:30px;border:1px solid var(--line);background:var(--paper-2);color:var(--ink);cursor:pointer;transition:all .18s}
+  .estante-chip svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;opacity:.7}
+  .estante-chip:hover{border-color:var(--wax);color:var(--wax);transform:translateY(-1px)}
+  .suas-acoes{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center;margin-top:2px}
 
   .btn{font-family:'Cormorant Garamond',serif;font-size:17px;border-radius:7px;padding:10px 20px;cursor:pointer;border:1px solid var(--wax);background:none;color:var(--wax);transition:all .18s;display:inline-flex;align-items:center;justify-content:center;gap:8px}
   .btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
@@ -258,13 +265,13 @@
 <!-- recuperar por código -->
 <div class="modal-bg" id="recuperar-modal">
   <div class="modal">
-    <h3>Abrir a minha estante</h3>
-    <p>Já tem uma estante? Cole o código dela para abri-la neste aparelho.</p>
+    <h3>Recuperar uma estante</h3>
+    <p>Tem o código de uma estante? Cole-o para adicioná-la às suas neste aparelho.</p>
     <input id="recuperar-codigo" placeholder="ESTANTE-XXXX-XXXX">
     <div class="modal-fb" id="recuperar-fb"></div>
     <div class="modal-row">
       <button class="btn btn-fraco" data-fecha="recuperar-modal">cancelar</button>
-      <button class="btn btn-cheio" id="recuperar-ok">abrir</button>
+      <button class="btn btn-cheio" id="recuperar-ok">adicionar</button>
     </div>
   </div>
 </div>
@@ -385,27 +392,66 @@
   var CAPACIDADE = 20;
 
   var estantes = [];
-  var minha = null;
-  try { minha = JSON.parse(localStorage.getItem('pp_minha_estante') || 'null'); } catch(e){ minha = null; }
-
-  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-  function salvarMinha(){ try{ localStorage.setItem('pp_minha_estante', JSON.stringify(minha)); }catch(e){} }
-  function limparMinha(avisar){
-    try{ localStorage.removeItem('pp_minha_estante'); }catch(_){}
-    minha = null;
-    if(avisar) toast('A sua estante anterior não existe mais — crie uma nova ✦');
+  // ===== minhas estantes (lista no navegador; sem login, o código de cada uma é a chave) =====
+  function salvarMinhas(arr){ try{ localStorage.setItem('pp_minhas_estantes', JSON.stringify(arr||minhas)); }catch(e){} }
+  function carregarMinhas(){
+    var arr=null; try{ arr = JSON.parse(localStorage.getItem('pp_minhas_estantes')||'null'); }catch(e){}
+    if(!Array.isArray(arr)){
+      // migração do formato antigo (uma estante só) → lista
+      var velha=null; try{ velha = JSON.parse(localStorage.getItem('pp_minha_estante')||'null'); }catch(e){}
+      arr = (velha && velha.codigo) ? [velha] : [];
+      salvarMinhas(arr);
+      try{ localStorage.removeItem('pp_minha_estante'); }catch(e){}
+    }
+    return arr;
+  }
+  var minhas = carregarMinhas();
+  var focoAtual=null, regCodigo=null, renCodigo=null;
+  function acharMinha(id){ return minhas.find(function(m){ return String(m.id)===String(id); }) || null; }
+  function acharMinhaPorCodigo(cod){ return minhas.find(function(m){ return m.codigo===cod; }) || null; }
+  function ehMinhaId(id){ return !!acharMinha(id); }
+  function adicionarMinha(ent){
+    var i = minhas.findIndex(function(m){ return m.codigo===ent.codigo || String(m.id)===String(ent.id); });
+    if(i>=0) minhas[i]=ent; else minhas.push(ent);
+    salvarMinhas();
+  }
+  function removerMinhaPorCodigo(cod){ minhas = minhas.filter(function(m){ return m.codigo!==cod; }); salvarMinhas(); }
+  function limparMinhaPorCodigo(cod, avisar){
+    removerMinhaPorCodigo(cod);
+    if(avisar) toast('Essa estante não existe mais — ela foi removida ✦');
     montarHero();
   }
-  async function verificarMinha(){
-    if(!minha || !minha.codigo) return;
-    try{
-      var r = await rpc('minha_estante', { p_codigo: minha.codigo });
-      if(!r || !r.length){ limparMinha(true); return; }   // apagada no painel → limpa o estado preso
-      var mudou=false;
-      if(r[0].nome && r[0].nome !== minha.nome){ minha.nome = r[0].nome; mudou=true; }
-      if(r[0].id && String(r[0].id) !== String(minha.id)){ minha.id = r[0].id; mudou=true; }
-      if(mudou){ salvarMinha(); montarHero(); }
-    }catch(e){ /* rede instável: não limpa por engano */ }
+  function abrirRegistrar(codigo){ regCodigo=codigo; document.getElementById('resgatar-fb').textContent=''; document.getElementById('resgatar-chave').value=''; abrir('resgatar-modal'); }
+  function abrirRenomear(codigo, nomeAtual){ renCodigo=codigo; document.getElementById('renomear-fb').textContent=''; document.getElementById('renomear-nome').value=nomeAtual||''; abrir('renomear-modal'); }
+  function abrirMinhaPorId(id){
+    var alvo = estantes.find(function(x){ return String(x.id)===String(id); });
+    if(alvo){ abrirFoco(alvo); return; }
+    var m = acharMinha(id); if(!m) return;
+    toast('Essa estante está adormecida — registre um livro para reacendê-la ✦');
+    abrirRegistrar(m.codigo);
+  }
+
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  async function verificarMinhas(){
+    if(!minhas.length) return;
+    var checagens = minhas.slice().map(function(m){
+      return rpc('minha_estante', { p_codigo: m.codigo })
+        .then(function(r){ return { m:m, ok:true, row:(r&&r[0])||null }; })
+        .catch(function(){ return { m:m, ok:false }; });
+    });
+    var results = await Promise.all(checagens);
+    var mudou=false, removidas=0, novas=[];
+    results.forEach(function(res){
+      if(!res.ok){ novas.push(res.m); return; }            // erro de rede → mantém
+      if(!res.row){ removidas++; mudou=true; return; }     // confirmada apagada → remove
+      var m=res.m, row=res.row;
+      if(row.nome && row.nome!==m.nome){ m.nome=row.nome; mudou=true; }
+      if(row.id && String(row.id)!==String(m.id)){ m.id=row.id; mudou=true; }
+      novas.push(m);
+    });
+    if(mudou){ minhas = novas; salvarMinhas(); montarHero(); }
+    if(removidas){ toast(removidas===1 ? 'Uma estante sua foi removida pelo Taberneiro ✦' : (removidas+' estantes suas foram removidas ✦')); }
   }
 
   async function sha256hex(str){
@@ -460,7 +506,7 @@
       var card = document.createElement('div');
       card.className = 'estante-card';
       card.style.animationDelay = (i*0.05)+'s';
-      var ehMinha = minha && String(minha.id) === String(e.id);
+      var ehMinha = ehMinhaId(e.id);
       var selos = selosDe(n).map(function(){ return '<span class="selo'+(ehMinha?' eu':'')+'">✦</span>'; }).join('');
       card.innerHTML =
         '<div class="ec-shelf">'+spinesPreview(n, e.id)+'</div>'+
@@ -480,7 +526,8 @@
   }
   async function abrirFoco(e){
     var foco = document.getElementById('foco');
-    var ehMinha = minha && String(minha.id) === String(e.id);
+    focoAtual = e;
+    var ehMinha = ehMinhaId(e.id);
     var n = e.n_livros || 0;
     var prox = proximoMarco(n);
     var selosHtml = trilhaHtml(n);
@@ -492,7 +539,7 @@
     if(ehMinha){ acoes += '<button class="btn btn-cheio" id="foco-resgatar">'+IC.registrar+'Registrar um livro</button>'
                         + '<button class="btn" id="foco-renomear">'+IC.renomear+'Renomear</button>';
                  if(n >= CAPACIDADE && !jaPegou){ acoes += '<button class="btn btn-brinde" id="foco-brinde">🎁 resgatar o brinde</button>'; } }
-    else if(!minha){ acoes += '<button class="btn" id="foco-criar">'+IC.estante+'montar a minha estante</button>'; }
+    else if(!minhas.length){ acoes += '<button class="btn" id="foco-criar">'+IC.estante+'montar a minha estante</button>'; }
     acoes += '<button class="btn btn-fraco" id="foco-partilhar">'+IC.compartilhar+'Compartilhar</button></div>';
     foco.innerHTML =
       '<div class="foco-cab"><div class="sel">✦</div><h2>'+esc(tituloEstante(e.nome))+'</h2>'+
@@ -502,10 +549,11 @@
       acoes;
     abrir('foco-ov');
     if(ehMinha){
-      var fr=document.getElementById('foco-resgatar'); if(fr) fr.addEventListener('click', function(){ document.getElementById('resgatar-fb').textContent=''; document.getElementById('resgatar-chave').value=''; abrir('resgatar-modal'); });
-      var fn2=document.getElementById('foco-renomear'); if(fn2) fn2.addEventListener('click', function(){ document.getElementById('renomear-fb').textContent=''; document.getElementById('renomear-nome').value=minha.nome||''; abrir('renomear-modal'); });
+      var cod = (acharMinha(e.id)||{}).codigo;
+      var fr=document.getElementById('foco-resgatar'); if(fr) fr.addEventListener('click', function(){ abrirRegistrar(cod); });
+      var fn2=document.getElementById('foco-renomear'); if(fn2) fn2.addEventListener('click', function(){ abrirRenomear(cod, e.nome); });
       var fb2=document.getElementById('foco-brinde'); if(fb2) fb2.addEventListener('click', abrirBrinde);
-    } else if(!minha){ var fc=document.getElementById('foco-criar'); if(fc) fc.addEventListener('click', function(){ fechar('foco-ov'); abrirCriar(); }); }
+    } else if(!minhas.length){ var fc=document.getElementById('foco-criar'); if(fc) fc.addEventListener('click', function(){ fechar('foco-ov'); abrirCriar(); }); }
     var fp=document.getElementById('foco-partilhar'); if(fp) fp.addEventListener('click', function(){ partilharEstante(e); });
 
     try {
@@ -561,8 +609,7 @@
     try {
       var res = await rpc('criar_prateleira', { p_nome: nome });
       var row = res && res[0];
-      minha = { id: row.id, codigo: row.codigo, nome: nome };
-      salvarMinha();
+      adicionarMinha({ id: row.id, codigo: row.codigo, nome: nome });
       fechar('criar-modal');
       document.getElementById('codigo-valor').textContent = row.codigo;
       abrir('codigo-modal');
@@ -579,23 +626,24 @@
 
   document.getElementById('resgatar-ok').addEventListener('click', async function(){
     var fb = document.getElementById('resgatar-fb');
-    if(!minha){ fb.className='modal-fb erro'; fb.textContent='Crie a sua estante primeiro.'; return; }
+    if(!regCodigo){ fb.className='modal-fb erro'; fb.textContent='Abra a sua estante primeiro.'; return; }
     var chave = (document.getElementById('resgatar-chave').value||'').trim().toUpperCase();
     if(chave.length < 6){ fb.className='modal-fb erro'; fb.textContent='Cole o código do seu texto.'; return; }
     var b=this; b.disabled=true; fb.className='modal-fb'; fb.textContent='A procurar o seu texto…';
     try {
       var hash = await sha256hex(chave);
-      var res = await rpc('resgatar_livro', { p_codigo: minha.codigo, p_chave_hash: hash });
+      var res = await rpc('resgatar_livro', { p_codigo: regCodigo, p_chave_hash: hash });
       var row = res && res[0];
       if(row && row.novo){ fb.className='modal-fb ok'; fb.textContent='"'+(row.titulo||'texto')+'" entrou na sua estante! ✦'; toast('Novo livro na estante ✦'); }
       else { fb.className='modal-fb ok'; fb.textContent='Esse livro já estava na sua estante.'; }
       document.getElementById('resgatar-chave').value='';
       await carregar();
-      var atual = estantes.find(function(x){ return String(x.id)===String(minha.id); });
+      var ent = acharMinhaPorCodigo(regCodigo);
+      var atual = ent && estantes.find(function(x){ return String(x.id)===String(ent.id); });
       if(atual && document.getElementById('foco-ov').classList.contains('on')) abrirFoco(atual);
     } catch(err){
       var msg = err && err.message ? err.message : 'Não consegui registrar agora.';
-      if(/estante n[ãa]o encontrada/i.test(msg)){ fechar('resgatar-modal'); limparMinha(true); return; }
+      if(/estante n[ãa]o encontrada/i.test(msg)){ fechar('resgatar-modal'); limparMinhaPorCodigo(regCodigo, true); return; }
       fb.className='modal-fb erro'; fb.textContent = msg;
     }
     finally{ b.disabled=false; }
@@ -610,13 +658,12 @@
       var res = await rpc('prateleira_por_codigo', { p_codigo: cod });
       var row = res && res[0];
       if(!row){ fb.className='modal-fb erro'; fb.textContent='Não encontrei uma estante com esse código.'; return; }
-      minha = { id: row.id, codigo: cod, nome: row.nome };
-      salvarMinha();
+      adicionarMinha({ id: row.id, codigo: cod, nome: row.nome });
       fechar('recuperar-modal');
-      toast('Estante aberta ✦');
+      toast('Estante adicionada ✦');
       montarHero();
       await carregar();
-      var atual = estantes.find(function(x){ return String(x.id)===String(minha.id); });
+      var atual = estantes.find(function(x){ return String(x.id)===String(row.id); });
       if(atual) abrirFoco(atual);
     } catch(err){ fb.className='modal-fb erro'; fb.textContent = err.message || 'Não consegui agora.'; }
     finally{ b.disabled=false; }
@@ -631,16 +678,16 @@
 
   document.getElementById('renomear-ok').addEventListener('click', async function(){
     var fb = document.getElementById('renomear-fb');
-    if(!minha){ fb.className='modal-fb erro'; fb.textContent='Abra a sua estante primeiro.'; return; }
+    if(!renCodigo){ fb.className='modal-fb erro'; fb.textContent='Abra a sua estante primeiro.'; return; }
     var nome = (document.getElementById('renomear-nome').value||'').trim();
     if(nome.length < 2){ fb.className='modal-fb erro'; fb.textContent='Diga um nome com ao menos 2 letras.'; return; }
     var b=this; b.disabled=true; fb.className='modal-fb'; fb.textContent='A gravar…';
     try {
-      await rpc('renomear_prateleira', { p_codigo: minha.codigo, p_nome: nome });
-      minha.nome = nome; salvarMinha();
+      await rpc('renomear_prateleira', { p_codigo: renCodigo, p_nome: nome });
+      var ent = acharMinhaPorCodigo(renCodigo); if(ent){ ent.nome = nome; salvarMinhas(); }
       fechar('renomear-modal'); toast('Estante renomeada ✦');
       await carregar();
-      var atual = estantes.find(function(x){ return String(x.id)===String(minha.id); });
+      var atual = ent && estantes.find(function(x){ return String(x.id)===String(ent.id); });
       if(atual && document.getElementById('foco-ov').classList.contains('on')) abrirFoco(atual);
     } catch(err){ fb.className='modal-fb erro'; fb.textContent = err.message || 'Não consegui agora.'; }
     finally{ b.disabled=false; }
@@ -648,7 +695,7 @@
 
   // ---- brinde do Escritor Fiel ----
   function abrirBrinde(){
-    if(!minha) return;
+    if(!focoAtual) return;
     document.getElementById('brinde-titulo').textContent = CFG.estante_brinde_titulo;
     document.getElementById('brinde-agradecimento').textContent = CFG.estante_brinde_agradecimento;
     document.getElementById('brinde-pergunta').textContent = CFG.estante_brinde_pergunta;
@@ -664,7 +711,8 @@
   });
   document.getElementById('brinde-enviar').addEventListener('click', async function(){
     var fb=document.getElementById('brinde-fb'); fb.className='modal-fb';
-    if(!minha){ fb.classList.add('erro'); fb.textContent='Abra a sua estante primeiro.'; return; }
+    var ent = focoAtual && acharMinha(focoAtual.id);
+    if(!ent){ fb.classList.add('erro'); fb.textContent='Abra a sua estante primeiro.'; return; }
     var g=function(id){ return (document.getElementById(id).value||'').trim(); };
     var nome=g('br-nome'), tel=g('br-telefone'), cep=g('br-cep'), end=g('br-endereco'),
         num=g('br-numero'), comp=g('br-complemento'), bairro=g('br-bairro'), cidade=g('br-cidade'),
@@ -672,27 +720,35 @@
     if(!nome || !cep || !end || !num || !cidade || !uf){ fb.classList.add('erro'); fb.textContent='Preencha nome, CEP, endereço, número, cidade e UF.'; return; }
     var btn=this; btn.disabled=true; var orig=btn.textContent; btn.textContent='enviando…';
     try{
-      await rpc('solicitar_brinde', { p_codigo:minha.codigo, p_nome:nome, p_telefone:tel, p_cep:cep, p_endereco:end, p_numero:num, p_complemento:comp, p_bairro:bairro, p_cidade:cidade, p_uf:uf });
-      try{ localStorage.setItem('pp_brinde_'+minha.id, '1'); }catch(_){}
+      await rpc('solicitar_brinde', { p_codigo:ent.codigo, p_nome:nome, p_telefone:tel, p_cep:cep, p_endereco:end, p_numero:num, p_complemento:comp, p_bairro:bairro, p_cidade:cidade, p_uf:uf });
+      try{ localStorage.setItem('pp_brinde_'+ent.id, '1'); }catch(_){}
       fechar('brinde-modal');
       toast('Pedido recebido! O Taberneiro vai preparar o seu brinde ✦');
       var fb3=document.getElementById('foco-brinde'); if(fb3) fb3.remove();
     }catch(err){ btn.disabled=false; btn.textContent=orig; fb.classList.add('erro'); fb.textContent = (err && err.message) ? err.message : 'Não consegui enviar. Tente de novo.'; }
   });
 
-  // ---- hero (ações dependem de ter estante ou não) ----
+  // ---- hero (as suas estantes) ----
   function montarHero(){
     var h = document.getElementById('hero-acoes');
-    if(minha){
-      h.innerHTML = '<button class="btn btn-cheio" id="h-abrir">'+IC.abrir+'abrir a minha estante</button>'+
-                    '<button class="btn" id="h-resgatar">'+IC.registrar+'Registrar um livro</button>';
-      document.getElementById('h-abrir').addEventListener('click', function(){
-        var atual = estantes.find(function(x){ return String(x.id)===String(minha.id); });
-        if(atual){ abrirFoco(atual); return; }
-        toast('A sua estante está adormecida — registre um livro para reacendê-la ✦');
-        document.getElementById('resgatar-fb').textContent=''; document.getElementById('resgatar-chave').value=''; abrir('resgatar-modal');
+    if(minhas.length){
+      var chips = minhas.map(function(m){
+        return '<button class="estante-chip" data-id="'+esc(m.id)+'">'+IC.estante+'<span>'+esc(m.nome)+'</span></button>';
+      }).join('');
+      h.innerHTML =
+        '<div class="suas-estantes">'+
+          '<div class="suas-rotulo">'+(minhas.length===1?'a sua estante':'as suas estantes')+'</div>'+
+          '<div class="suas-chips">'+chips+'</div>'+
+          '<div class="suas-acoes">'+
+            '<button class="btn btn-cheio" id="h-criar">'+IC.estante+'criar outra estante</button>'+
+            '<button class="link-fraco" id="h-recuperar">recuperar pelo código</button>'+
+          '</div>'+
+        '</div>';
+      Array.prototype.forEach.call(h.querySelectorAll('.estante-chip'), function(ch){
+        ch.addEventListener('click', function(){ abrirMinhaPorId(ch.getAttribute('data-id')); });
       });
-      document.getElementById('h-resgatar').addEventListener('click', function(){ document.getElementById('resgatar-fb').textContent=''; document.getElementById('resgatar-chave').value=''; abrir('resgatar-modal'); });
+      document.getElementById('h-criar').addEventListener('click', abrirCriar);
+      document.getElementById('h-recuperar').addEventListener('click', function(){ document.getElementById('recuperar-fb').textContent=''; document.getElementById('recuperar-codigo').value=''; abrir('recuperar-modal'); });
     } else {
       h.innerHTML = '<button class="btn btn-cheio" id="h-criar">'+IC.estante+'criar a minha estante</button>'+
                     '<button class="link-fraco" id="h-recuperar">já tenho um código de estante</button>';
@@ -723,7 +779,7 @@
     renderParede();
     montarHero();
     atualizarPulso();
-    verificarMinha();
+    verificarMinhas();
     if(aAbrir){ var alvo = estantes.find(function(x){ return String(x.id)===String(aAbrir); }); aAbrir=null; if(alvo) abrirFoco(alvo); }
   }
 
