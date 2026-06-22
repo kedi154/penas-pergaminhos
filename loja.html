@@ -38,7 +38,7 @@
   .wrap{max-width:900px;margin:0 auto;padding:0 26px}
   ::selection{background:rgba(143,45,40,.18)}
 
-  .topnav{position:fixed;top:16px;right:18px;z-index:40;display:flex;gap:14px;align-items:center;
+  .topnav{position:fixed;top:16px;right:26px;z-index:40;display:flex;gap:14px;align-items:center;max-width:calc(100% - 36px);
     background:rgba(246,239,225,.72);backdrop-filter:blur(5px);padding:8px 13px;border-radius:30px;border:1px solid var(--line)}
   .topnav a{display:inline-flex;color:var(--ink-soft);transition:color .2s,transform .2s}
   .topnav a:hover{color:var(--wax);transform:translateY(-1px)}
@@ -188,6 +188,9 @@
     </a>
     <a id="top-home" href="index.html" aria-label="Voltar ao mural" title="Voltar ao mural">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M4 5 a2 2 0 0 1 2-2 h6 v17 h-6 a2 2 0 0 1-2-2 z"/><path d="M20 5 a2 2 0 0 0-2-2 h-6 v17 h6 a2 2 0 0 0 2-2 z"/></svg>
+    </a>
+    <a id="top-estantes" href="estantes.html" aria-label="As estantes" title="Estantes">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4v15M9 4v15M13.5 5l3 14M18 5v14"/><path d="M3 19.5h18"/></svg>
     </a>
   </nav>
 
@@ -418,7 +421,7 @@
   function render(lista){
     var box = document.getElementById('produtos');
     if(!lista.length){
-      box.innerHTML = '<div class="vazia"><div class="big">A loja abre em breve</div>Rumores dizem que o mercador clandestino partiu antes do amanhecer e ainda não retornou.</div>';
+      box.innerHTML = '<div class="vazia"><div class="big">A loja abre em breve</div>As primeiras peças estão a caminho.</div>';
       return;
     }
     box.innerHTML = '';
