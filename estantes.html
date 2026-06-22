@@ -86,9 +86,25 @@
   .selo-pill.off{opacity:.5;color:var(--ink-faint)}
   .selo-pill.off .b{background:transparent;border-color:var(--ink-faint);color:var(--ink-faint)}
   .selo-pill.prox{opacity:1;border-color:var(--gold)}
+  .selo-pill.comum.on .b{background:#b8893f;border-color:#7a5a28}
+  .selo-pill.rara.on .b{background:#5b7a9a;border-color:#3f5f7e;color:#eaf1f7}
+  .selo-pill.epica.on .b{background:#caa86a;border-color:#8a6a2e}
+  .selo-pill.epica{border-color:var(--gold)}
   .selo-pill .fis{font-size:9.5px;letter-spacing:.04em;background:var(--wax);color:#f4ecdd;border-radius:8px;padding:1px 5px;margin-left:1px}
   .foco-prog{text-align:center;color:var(--ink-faint);font-size:14px;font-style:italic;margin-bottom:18px}
   .premio{background:rgba(143,45,40,.07);border:1px solid rgba(143,45,40,.3);border-radius:8px;padding:12px 16px;text-align:center;color:var(--wax);margin:0 auto 18px;max-width:520px}
+  .btn-brinde{background:var(--gold);color:#3a2a10;border-color:#8a6a2e;font-weight:600}
+  .btn-brinde:hover{filter:brightness(1.05)}
+  .modal-brinde{max-width:460px}
+  .brinde-sel{font-size:34px;text-align:center;margin-bottom:6px}
+  .brinde-texto{font-size:15.5px;line-height:1.65;color:var(--ink-soft);text-align:center;margin-bottom:18px}
+  .brinde-pergunta{text-align:center;font-family:'Cormorant Garamond',serif;font-size:21px;color:var(--ink);margin-bottom:14px}
+  .brinde-aviso{background:rgba(176,134,62,.12);border:1px solid var(--line);border-radius:7px;padding:9px 12px;text-align:center;font-size:13.5px;color:var(--ink-soft);margin-bottom:14px}
+  .brinde-form input,.brinde-form select{width:100%;font-family:'EB Garamond',serif;font-size:15px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:7px;padding:10px 12px;text-align:left;margin-bottom:10px}
+  body.noite .brinde-form input,body.noite .brinde-form select{background:var(--paper-2);color:var(--ink)}
+  .brinde-2col{display:flex;gap:10px}
+  .brinde-2col>*{flex:1}
+  .brinde-2col #br-uf{flex:0 0 84px}
 
   .prateleira-linha{margin-bottom:8px}
   .spines{display:flex;align-items:flex-end;gap:6px;justify-content:flex-start;min-height:160px;padding:0 10px;flex-wrap:nowrap;overflow-x:auto}
@@ -264,6 +280,48 @@
   </div>
 </div>
 
+<!-- resgatar o brinde (Escritor Fiel) -->
+<div class="modal-bg" id="brinde-modal">
+  <div class="modal modal-brinde">
+    <div class="brinde-sel">🎁</div>
+    <h3 id="brinde-titulo">Escritor Fiel</h3>
+    <p class="brinde-texto" id="brinde-agradecimento"></p>
+    <div id="brinde-passo1">
+      <p class="brinde-pergunta" id="brinde-pergunta"></p>
+      <div class="modal-row">
+        <button class="btn btn-fraco" data-fecha="brinde-modal">agora não</button>
+        <button class="btn btn-cheio" id="brinde-sim">sim, quero receber</button>
+      </div>
+    </div>
+    <div id="brinde-passo2" style="display:none">
+      <div class="brinde-aviso" id="brinde-aviso"></div>
+      <div class="brinde-form">
+        <input id="br-nome" placeholder="Nome completo">
+        <input id="br-telefone" placeholder="Telefone / WhatsApp">
+        <input id="br-cep" placeholder="CEP">
+        <input id="br-endereco" placeholder="Endereço (rua, av.)">
+        <div class="brinde-2col">
+          <input id="br-numero" placeholder="Número">
+          <input id="br-complemento" placeholder="Complemento (opcional)">
+        </div>
+        <input id="br-bairro" placeholder="Bairro">
+        <div class="brinde-2col">
+          <input id="br-cidade" placeholder="Cidade">
+          <select id="br-uf">
+            <option value="">UF</option>
+            <option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option><option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option><option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option><option>SE</option><option>TO</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-fb" id="brinde-fb"></div>
+      <div class="modal-row">
+        <button class="btn btn-fraco" data-fecha="brinde-modal">cancelar</button>
+        <button class="btn btn-cheio" id="brinde-enviar">confirmar envio</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -275,16 +333,35 @@
   // ===== Links sociais (os mesmos do site) =====
   var LINKS = { telegram:'https://t.me/SEU_GRUPO', instagram:'https://instagram.com/SEU_PERFIL', loja:'loja.html' };
 
+  // ===== Textos do brinde (editáveis no painel via site_config; estes são os padrões) =====
+  var CFG = {
+    estante_brinde_teaser: '🎁 brinde surpresa',
+    estante_brinde_titulo: 'Escritor Fiel ✦',
+    estante_brinde_agradecimento: 'Vinte pergaminhos. Vinte vezes você acendeu uma vela e confiou uma história a esta taverna — e nós a selamos, uma por uma. Poucos enchem uma estante inteira; você é um deles. Como gratidão não cabe só em palavras, queremos te mandar uma lembrança da casa: uma pequena prateleira, feita à mão, para guardar lá fora o que você ergueu aqui dentro. Sem custo nenhum — é um presente nosso. Obrigado por escrever. A taverna tem orgulho da sua estante.',
+    estante_brinde_pergunta: 'Quer receber o brinde em casa?',
+    estante_brinde_aviso_brasil: 'O brinde é enviado apenas para endereços no Brasil 🇧🇷'
+  };
+  async function carregarCfg(){
+    try {
+      var chaves = Object.keys(CFG).map(function(k){ return '"'+k+'"'; }).join(',');
+      var rows = await supaGet('/site_config?select=chave,valor&chave=in.('+chaves+')');
+      (rows||[]).forEach(function(r){ if(r && r.valor) CFG[r.chave] = r.valor; });
+    } catch(e){ /* mantém os padrões */ }
+  }
+
   function tituloEstante(nome){ return 'Estante de ' + (nome || '—'); }
   var aAbrir = (new URLSearchParams(location.search)).get('estante');
 
   var SPINE_CORES = ['#8f2d28','#6f8a5e','#5b7a9a','#b0863e','#7a5a72','#a85a3e','#4f6b62','#9a6b3e'];
   var MARCOS = [
-    { n:1,  nome:'Primeira pena' },
-    { n:3,  nome:'Contador de histórias' },
-    { n:5,  nome:'Bibliófilo da taverna' },
-    { n:10, nome:'Mestre bibliotecário', fisico:true }
+    { n:1,  nome:'Primeira pena',         tier:'comum' },
+    { n:3,  nome:'Contador de histórias',  tier:'comum' },
+    { n:6,  nome:'Pena constante',         tier:'comum' },
+    { n:12, nome:'Meia-estante',           tier:'comum' },
+    { n:18, nome:'Bibliófilo da taverna',  tier:'rara'  },
+    { n:20, nome:'Escritor Fiel',          tier:'epica', brinde:true }
   ];
+  var CAPACIDADE = 20;
 
   var estantes = [];
   var minha = null;
@@ -316,8 +393,10 @@
     return '<div class="foco-selos">'+ MARCOS.map(function(m){
       var ganho = n >= m.n;
       var ehProx = prox && prox.n === m.n;
-      return '<span class="selo-pill'+(ganho?' on':' off')+(ehProx?' prox':'')+'" title="'+esc(m.nome)+' · '+m.n+(m.n===1?' livro':' livros')+'">'+
-               '<span class="b">'+(ganho?'✦':m.n)+'</span>'+esc(m.nome)+(m.fisico?' <span class="fis">3D</span>':'')+
+      var cls = 'selo-pill '+(m.tier||'comum')+(ganho?' on':' off')+(ehProx?' prox':'');
+      var teaser = m.brinde ? ' <span class="fis">'+esc(CFG.estante_brinde_teaser)+'</span>' : '';
+      return '<span class="'+cls+'" title="'+esc(m.nome)+' · '+m.n+(m.n===1?' livro':' livros')+'">'+
+               '<span class="b">'+(ganho?'✦':m.n)+'</span>'+esc(m.nome)+teaser+
              '</span>';
     }).join('') + '</div>';
   }
@@ -369,10 +448,12 @@
     var selosHtml = trilhaHtml(n);
     var progHtml = prox ? '<div class="foco-prog">faltam '+(prox.n - n)+' '+((prox.n-n)===1?'livro':'livros')+' para o selo "'+esc(prox.nome)+'"</div>'
                         : '<div class="foco-prog">todos os selos conquistados ✦</div>';
-    var premioHtml = (n >= 10) ? '<div class="premio">✦ Estante completa! Você desbloqueou a <b>mini-prateleira física</b> em impressão 3D — fale com o Taberneiro para resgatar.</div>' : '';
+    var jaPegou = false; try{ jaPegou = localStorage.getItem('pp_brinde_'+e.id)==='1'; }catch(_){}
+    var premioHtml = (n >= CAPACIDADE) ? '<div class="premio">✦ Estante cheia! Você é um <b>'+esc(CFG.estante_brinde_titulo)+'</b> — e isso dá direito a um <b>'+esc(CFG.estante_brinde_teaser)+'</b>.</div>' : '';
     var acoes = '<div class="foco-acoes">';
     if(ehMinha){ acoes += '<button class="btn btn-cheio" id="foco-resgatar">resgatar um livro</button>'
-                        + '<button class="btn" id="foco-renomear">renomear</button>'; }
+                        + '<button class="btn" id="foco-renomear">renomear</button>';
+                 if(n >= CAPACIDADE && !jaPegou){ acoes += '<button class="btn btn-brinde" id="foco-brinde">🎁 resgatar o brinde</button>'; } }
     else if(!minha){ acoes += '<button class="btn" id="foco-criar">montar a minha estante</button>'; }
     acoes += '<button class="btn btn-fraco" id="foco-partilhar">partilhar</button></div>';
     foco.innerHTML =
@@ -385,6 +466,7 @@
     if(ehMinha){
       var fr=document.getElementById('foco-resgatar'); if(fr) fr.addEventListener('click', function(){ document.getElementById('resgatar-fb').textContent=''; document.getElementById('resgatar-chave').value=''; abrir('resgatar-modal'); });
       var fn2=document.getElementById('foco-renomear'); if(fn2) fn2.addEventListener('click', function(){ document.getElementById('renomear-fb').textContent=''; document.getElementById('renomear-nome').value=minha.nome||''; abrir('renomear-modal'); });
+      var fb2=document.getElementById('foco-brinde'); if(fb2) fb2.addEventListener('click', abrirBrinde);
     } else if(!minha){ var fc=document.getElementById('foco-criar'); if(fc) fc.addEventListener('click', function(){ fechar('foco-ov'); abrirCriar(); }); }
     var fp=document.getElementById('foco-partilhar'); if(fp) fp.addEventListener('click', function(){ partilharEstante(e); });
 
@@ -522,6 +604,40 @@
     finally{ b.disabled=false; }
   });
 
+  // ---- brinde do Escritor Fiel ----
+  function abrirBrinde(){
+    if(!minha) return;
+    document.getElementById('brinde-titulo').textContent = CFG.estante_brinde_titulo;
+    document.getElementById('brinde-agradecimento').textContent = CFG.estante_brinde_agradecimento;
+    document.getElementById('brinde-pergunta').textContent = CFG.estante_brinde_pergunta;
+    document.getElementById('brinde-aviso').textContent = CFG.estante_brinde_aviso_brasil;
+    document.getElementById('brinde-passo1').style.display = '';
+    document.getElementById('brinde-passo2').style.display = 'none';
+    document.getElementById('brinde-fb').textContent = '';
+    abrir('brinde-modal');
+  }
+  document.getElementById('brinde-sim').addEventListener('click', function(){
+    document.getElementById('brinde-passo1').style.display = 'none';
+    document.getElementById('brinde-passo2').style.display = '';
+  });
+  document.getElementById('brinde-enviar').addEventListener('click', async function(){
+    var fb=document.getElementById('brinde-fb'); fb.className='modal-fb';
+    if(!minha){ fb.classList.add('erro'); fb.textContent='Abra a sua estante primeiro.'; return; }
+    var g=function(id){ return (document.getElementById(id).value||'').trim(); };
+    var nome=g('br-nome'), tel=g('br-telefone'), cep=g('br-cep'), end=g('br-endereco'),
+        num=g('br-numero'), comp=g('br-complemento'), bairro=g('br-bairro'), cidade=g('br-cidade'),
+        uf=document.getElementById('br-uf').value;
+    if(!nome || !cep || !end || !num || !cidade || !uf){ fb.classList.add('erro'); fb.textContent='Preencha nome, CEP, endereço, número, cidade e UF.'; return; }
+    var btn=this; btn.disabled=true; var orig=btn.textContent; btn.textContent='enviando…';
+    try{
+      await rpc('solicitar_brinde', { p_codigo:minha.codigo, p_nome:nome, p_telefone:tel, p_cep:cep, p_endereco:end, p_numero:num, p_complemento:comp, p_bairro:bairro, p_cidade:cidade, p_uf:uf });
+      try{ localStorage.setItem('pp_brinde_'+minha.id, '1'); }catch(_){}
+      fechar('brinde-modal');
+      toast('Pedido recebido! O Taberneiro vai preparar o seu brinde ✦');
+      var fb3=document.getElementById('foco-brinde'); if(fb3) fb3.remove();
+    }catch(err){ btn.disabled=false; btn.textContent=orig; fb.classList.add('erro'); fb.textContent = (err && err.message) ? err.message : 'Não consegui enviar. Tente de novo.'; }
+  });
+
   // ---- hero (ações dependem de ter estante ou não) ----
   function montarHero(){
     var h = document.getElementById('hero-acoes');
@@ -549,7 +665,7 @@
   document.getElementById('leitor-fechar').addEventListener('click', function(){ document.getElementById('livro').classList.remove('aberto'); fechar('leitor'); });
   document.getElementById('leitor').addEventListener('click', function(e){ if(e.target===this){ document.getElementById('livro').classList.remove('aberto'); fechar('leitor'); } });
   document.querySelectorAll('[data-fecha]').forEach(function(b){ b.addEventListener('click', function(){ fechar(b.getAttribute('data-fecha')); }); });
-  document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ ['foco-ov','leitor'].forEach(function(id){ if(document.getElementById(id).classList.contains('on')){ if(id==='leitor') document.getElementById('livro').classList.remove('aberto'); fechar(id); } }); ['criar-modal','codigo-modal','resgatar-modal','recuperar-modal','renomear-modal'].forEach(fechar); } });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ ['foco-ov','leitor'].forEach(function(id){ if(document.getElementById(id).classList.contains('on')){ if(id==='leitor') document.getElementById('livro').classList.remove('aberto'); fechar(id); } }); ['criar-modal','codigo-modal','resgatar-modal','recuperar-modal','renomear-modal','brinde-modal'].forEach(fechar); } });
 
   // ---- carregar ----
   function atualizarPulso(){
@@ -589,6 +705,7 @@
     }
   })();
 
+  carregarCfg();
   carregar();
 </script>
 </body>
