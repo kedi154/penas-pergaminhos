@@ -388,6 +388,23 @@
 
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   function salvarMinha(){ try{ localStorage.setItem('pp_minha_estante', JSON.stringify(minha)); }catch(e){} }
+  function limparMinha(avisar){
+    try{ localStorage.removeItem('pp_minha_estante'); }catch(_){}
+    minha = null;
+    if(avisar) toast('A sua estante anterior não existe mais — crie uma nova ✦');
+    montarHero();
+  }
+  async function verificarMinha(){
+    if(!minha || !minha.codigo) return;
+    try{
+      var r = await rpc('minha_estante', { p_codigo: minha.codigo });
+      if(!r || !r.length){ limparMinha(true); return; }   // apagada no painel → limpa o estado preso
+      var mudou=false;
+      if(r[0].nome && r[0].nome !== minha.nome){ minha.nome = r[0].nome; mudou=true; }
+      if(r[0].id && String(r[0].id) !== String(minha.id)){ minha.id = r[0].id; mudou=true; }
+      if(mudou){ salvarMinha(); montarHero(); }
+    }catch(e){ /* rede instável: não limpa por engano */ }
+  }
 
   async function sha256hex(str){
     var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
@@ -574,7 +591,11 @@
       await carregar();
       var atual = estantes.find(function(x){ return String(x.id)===String(minha.id); });
       if(atual && document.getElementById('foco-ov').classList.contains('on')) abrirFoco(atual);
-    } catch(err){ fb.className='modal-fb erro'; fb.textContent = err.message || 'Não consegui registrar agora.'; }
+    } catch(err){
+      var msg = err && err.message ? err.message : 'Não consegui registrar agora.';
+      if(/estante n[ãa]o encontrada/i.test(msg)){ fechar('resgatar-modal'); limparMinha(true); return; }
+      fb.className='modal-fb erro'; fb.textContent = msg;
+    }
     finally{ b.disabled=false; }
   });
 
@@ -700,6 +721,7 @@
     renderParede();
     montarHero();
     atualizarPulso();
+    verificarMinha();
     if(aAbrir){ var alvo = estantes.find(function(x){ return String(x.id)===String(aAbrir); }); aAbrir=null; if(alvo) abrirFoco(alvo); }
   }
 
