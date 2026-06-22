@@ -830,36 +830,51 @@
     {grupo:'Estante', chave:'estante_brinde_aviso_brasil', rotulo:'Brinde — aviso de envio só Brasil', multi:false}
   ];
   var GRUPOS_TEXTO=[
-    {grupo:'Global',  titulo:'Global',                 desc:'aparecem no site inteiro (links sociais)'},
-    {grupo:'Inicial', titulo:'Página inicial (mural)',  desc:'a página de entrada / o mural'},
-    {grupo:'Loja',    titulo:'Loja',                    desc:'a página da loja'},
-    {grupo:'Estante', titulo:'Estantes',                desc:'a página das estantes e o brinde'}
+    {grupo:'Inicial', aba:'Mural',    desc:'a página inicial / o mural'},
+    {grupo:'Loja',    aba:'Loja',     desc:'a página da loja'},
+    {grupo:'Estante', aba:'Estantes', desc:'a página das estantes e o brinde'},
+    {grupo:'Global',  aba:'Global',   desc:'o site inteiro (links sociais)'}
   ];
+  var TEXTO_MAPA={}, TEXTO_GRUPO_ATIVO=null;
   async function carregarTextos(){
     var box=document.getElementById('lista-textos'); box.innerHTML='<div class="carregando">A carregar…</div>';
     try{
-      var rows=await chamar('config_listar'); var mapa={}; (rows||[]).forEach(function(r){ mapa[r.chave]=r.valor; });
-      box.innerHTML='';
-      GRUPOS_TEXTO.forEach(function(g){
-        var defs=TEXTOS_DEF.filter(function(d){ return d.grupo===g.grupo; });
-        if(!defs.length) return;
-        var cab=document.createElement('div'); cab.style.cssText='margin:22px 0 10px';
-        cab.innerHTML='<div style="font-family:\'Cormorant Garamond\',serif;font-size:22px;color:var(--ink)">'+esc(g.titulo)+'</div><div style="font-size:13.5px;color:var(--ink-faint);font-style:italic">'+esc(g.desc)+'</div>';
-        box.appendChild(cab);
-        defs.forEach(function(def){
-          var el=document.createElement('div'); el.className='item';
-          var atual=mapa[def.chave]!=null?mapa[def.chave]:'';
-          if(def.chave==='generos' && !String(atual).trim()) atual='Conto\nPoesia\nCrónica\nEnsaio\nFragmento\nOutro';
-          var campo=def.multi?'<textarea data-f="valor">'+esc(atual)+'</textarea>':'<input data-f="valor" value="'+esc(atual)+'">';
-          el.innerHTML='<label class="campo"><span>'+esc(def.rotulo)+'</span>'+campo+'</label><div class="acoes"><button class="b-ok">Salvar</button></div>';
-          el.querySelector('.b-ok').addEventListener('click', async function(){
-            try{ await chamar('config_salvar',{ chave:def.chave, valor: el.querySelector('[data-f="valor"]').value }); toast('Salvo.'); }
-            catch(err){ tratarErro(err); }
-          });
-          box.appendChild(el);
-        });
-      });
+      var rows=await chamar('config_listar'); TEXTO_MAPA={}; (rows||[]).forEach(function(r){ TEXTO_MAPA[r.chave]=r.valor; });
+      if(!TEXTO_GRUPO_ATIVO) TEXTO_GRUPO_ATIVO = GRUPOS_TEXTO[0].grupo;
+      renderTextos();
     }catch(err){ tratarErro(err, box); }
+  }
+  function renderTextos(){
+    var box=document.getElementById('lista-textos'); box.innerHTML='';
+    var bar=document.createElement('div'); bar.style.cssText='display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 16px';
+    GRUPOS_TEXTO.forEach(function(g){
+      var ativo=(g.grupo===TEXTO_GRUPO_ATIVO);
+      var n=TEXTOS_DEF.filter(function(d){return d.grupo===g.grupo;}).length;
+      var b=document.createElement('button');
+      b.style.cssText='font-family:inherit;font-size:14px;padding:7px 15px;border-radius:20px;cursor:pointer;transition:all .15s;border:1px solid '+(ativo?'var(--ink)':'var(--line)')+';background:'+(ativo?'var(--ink)':'transparent')+';color:'+(ativo?'var(--paper)':'var(--ink-soft)');
+      b.textContent=g.aba+' · '+n;
+      b.addEventListener('click', function(){ TEXTO_GRUPO_ATIVO=g.grupo; renderTextos(); });
+      bar.appendChild(b);
+    });
+    box.appendChild(bar);
+    var g=GRUPOS_TEXTO.find(function(x){return x.grupo===TEXTO_GRUPO_ATIVO;})||GRUPOS_TEXTO[0];
+    var desc=document.createElement('div'); desc.style.cssText='font-size:13.5px;color:var(--ink-faint);font-style:italic;margin:0 0 16px';
+    desc.textContent='estes textos aparecem em: '+g.desc;
+    box.appendChild(desc);
+    var defs=TEXTOS_DEF.filter(function(d){return d.grupo===g.grupo;});
+    defs.forEach(function(def){
+      var el=document.createElement('div'); el.className='item';
+      var atual=TEXTO_MAPA[def.chave]!=null?TEXTO_MAPA[def.chave]:'';
+      if(def.chave==='generos' && !String(atual).trim()) atual='Conto\nPoesia\nCrónica\nEnsaio\nFragmento\nOutro';
+      var campo=def.multi?'<textarea data-f="valor">'+esc(atual)+'</textarea>':'<input data-f="valor" value="'+esc(atual)+'">';
+      el.innerHTML='<label class="campo"><span>'+esc(def.rotulo)+'</span>'+campo+'</label><div class="acoes"><button class="b-ok">Salvar</button></div>';
+      el.querySelector('.b-ok').addEventListener('click', async function(){
+        var v=el.querySelector('[data-f="valor"]').value;
+        try{ await chamar('config_salvar',{ chave:def.chave, valor:v }); TEXTO_MAPA[def.chave]=v; toast('Salvo.'); }
+        catch(err){ tratarErro(err); }
+      });
+      box.appendChild(el);
+    });
   }
 
   function tratarErro(err, box){
