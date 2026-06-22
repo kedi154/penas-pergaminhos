@@ -43,7 +43,8 @@
   .hero p{color:var(--ink-soft);font-size:18px;font-style:italic;max-width:560px;margin:0 auto 22px}
   .hero-acoes{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 
-  .btn{font-family:'Cormorant Garamond',serif;font-size:17px;border-radius:7px;padding:10px 22px;cursor:pointer;border:1px solid var(--wax);background:none;color:var(--wax);transition:all .18s}
+  .btn{font-family:'Cormorant Garamond',serif;font-size:17px;border-radius:7px;padding:10px 20px;cursor:pointer;border:1px solid var(--wax);background:none;color:var(--wax);transition:all .18s;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+  .btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
   .btn:hover{background:var(--wax);color:var(--paper)}
   .btn-cheio{background:var(--wax);color:var(--paper)}
   .btn-cheio:hover{background:#7a2622}
@@ -173,9 +174,9 @@
 
 <main>
   <section class="hero wrap">
-    <div class="sel">a coleção da taverna</div>
-    <h1>As estantes da taverna</h1>
-    <p>Cada estante guarda os pergaminhos selados de um escritor. Monte a sua, resgatando os seus textos com o código que recebeu ao publicar.</p>
+    <div class="sel" id="hero-eyebrow">a coleção da taverna</div>
+    <h1 id="hero-titulo">As estantes da taverna</h1>
+    <p id="hero-subtitulo">Cada estante guarda os pergaminhos selados de um escritor. Monte a sua, registrando os seus textos com o código que recebeu ao publicar.</p>
     <div class="hero-acoes" id="hero-acoes"></div>
     <div class="pulso" id="pulso" style="text-align:center;margin-top:18px"></div>
   </section>
@@ -241,13 +242,13 @@
 <!-- resgatar livro -->
 <div class="modal-bg" id="resgatar-modal">
   <div class="modal">
-    <h3>Resgatar um livro</h3>
+    <h3>Registrar um livro</h3>
     <p>Cole o código do seu texto (a chave que você recebeu ao publicá-lo). Se estiver selado, ele vira um livro na sua estante.</p>
     <input id="resgatar-chave" placeholder="TAVERNA-XXXX-XXXX-XXXX">
     <div class="modal-fb" id="resgatar-fb"></div>
     <div class="modal-row">
       <button class="btn btn-fraco" data-fecha="resgatar-modal">fechar</button>
-      <button class="btn btn-cheio" id="resgatar-ok">resgatar</button>
+      <button class="btn btn-cheio" id="resgatar-ok">registrar</button>
     </div>
   </div>
 </div>
@@ -333,8 +334,20 @@
   // ===== Links sociais (os mesmos do site) =====
   var LINKS = { telegram:'https://t.me/SEU_GRUPO', instagram:'https://instagram.com/SEU_PERFIL', loja:'loja.html' };
 
-  // ===== Textos do brinde (editáveis no painel via site_config; estes são os padrões) =====
+  // ===== Ícones dos botões (espírito da taverna) =====
+  var IC = {
+    registrar:'<svg viewBox="0 0 24 24"><path d="M5 5a2 2 0 0 1 2-2h9v16H7a2 2 0 0 0-2 2z"/><path d="M12 8.5v5M9.5 11h5"/></svg>',
+    renomear:'<svg viewBox="0 0 24 24"><path d="M4 20h4L18 10l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>',
+    compartilhar:'<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="M8.4 13.4l7.2 4.2M15.6 6.4l-7.2 4.2"/></svg>',
+    estante:'<svg viewBox="0 0 24 24"><path d="M5 4v15M9 4v15M13.5 5l3 14M18 5v14"/><path d="M3 19.5h18"/></svg>',
+    abrir:'<svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>'
+  };
+
+  // ===== Textos editáveis no painel via site_config (estes são os padrões) =====
   var CFG = {
+    estante_eyebrow: 'a coleção da taverna',
+    estante_titulo: 'As estantes da taverna',
+    estante_subtitulo: 'Cada estante guarda os pergaminhos selados de um escritor. Monte a sua, registrando os seus textos com o código que recebeu ao publicar.',
     estante_brinde_teaser: '🎁 brinde surpresa',
     estante_brinde_titulo: 'Escritor Fiel ✦',
     estante_brinde_agradecimento: 'Vinte pergaminhos. Vinte vezes você acendeu uma vela e confiou uma história a esta taverna — e nós a selamos, uma por uma. Poucos enchem uma estante inteira; você é um deles. Como gratidão não cabe só em palavras, queremos te mandar uma lembrança da casa: uma pequena prateleira, feita à mão, para guardar lá fora o que você ergueu aqui dentro. Sem custo nenhum — é um presente nosso. Obrigado por escrever. A taverna tem orgulho da sua estante.',
@@ -347,6 +360,12 @@
       var rows = await supaGet('/site_config?select=chave,valor&chave=in.('+chaves+')');
       (rows||[]).forEach(function(r){ if(r && r.valor) CFG[r.chave] = r.valor; });
     } catch(e){ /* mantém os padrões */ }
+    aplicarTextos();
+  }
+  function aplicarTextos(){
+    var e=document.getElementById('hero-eyebrow'); if(e) e.textContent=CFG.estante_eyebrow;
+    var t=document.getElementById('hero-titulo'); if(t) t.textContent=CFG.estante_titulo;
+    var s=document.getElementById('hero-subtitulo'); if(s) s.textContent=CFG.estante_subtitulo;
   }
 
   function tituloEstante(nome){ return 'Estante de ' + (nome || '—'); }
@@ -451,11 +470,11 @@
     var jaPegou = false; try{ jaPegou = localStorage.getItem('pp_brinde_'+e.id)==='1'; }catch(_){}
     var premioHtml = (n >= CAPACIDADE) ? '<div class="premio">✦ Estante cheia! Você é um <b>'+esc(CFG.estante_brinde_titulo)+'</b> — e isso dá direito a um <b>'+esc(CFG.estante_brinde_teaser)+'</b>.</div>' : '';
     var acoes = '<div class="foco-acoes">';
-    if(ehMinha){ acoes += '<button class="btn btn-cheio" id="foco-resgatar">resgatar um livro</button>'
-                        + '<button class="btn" id="foco-renomear">renomear</button>';
+    if(ehMinha){ acoes += '<button class="btn btn-cheio" id="foco-resgatar">'+IC.registrar+'Registrar um livro</button>'
+                        + '<button class="btn" id="foco-renomear">'+IC.renomear+'Renomear</button>';
                  if(n >= CAPACIDADE && !jaPegou){ acoes += '<button class="btn btn-brinde" id="foco-brinde">🎁 resgatar o brinde</button>'; } }
-    else if(!minha){ acoes += '<button class="btn" id="foco-criar">montar a minha estante</button>'; }
-    acoes += '<button class="btn btn-fraco" id="foco-partilhar">partilhar</button></div>';
+    else if(!minha){ acoes += '<button class="btn" id="foco-criar">'+IC.estante+'montar a minha estante</button>'; }
+    acoes += '<button class="btn btn-fraco" id="foco-partilhar">'+IC.compartilhar+'Compartilhar</button></div>';
     foco.innerHTML =
       '<div class="foco-cab"><div class="sel">✦</div><h2>'+esc(tituloEstante(e.nome))+'</h2>'+
         '<div class="meta">'+n+(n===1?' livro selado':' livros selados')+'</div></div>'+
@@ -555,7 +574,7 @@
       await carregar();
       var atual = estantes.find(function(x){ return String(x.id)===String(minha.id); });
       if(atual && document.getElementById('foco-ov').classList.contains('on')) abrirFoco(atual);
-    } catch(err){ fb.className='modal-fb erro'; fb.textContent = err.message || 'Não consegui resgatar agora.'; }
+    } catch(err){ fb.className='modal-fb erro'; fb.textContent = err.message || 'Não consegui registrar agora.'; }
     finally{ b.disabled=false; }
   });
 
@@ -642,17 +661,17 @@
   function montarHero(){
     var h = document.getElementById('hero-acoes');
     if(minha){
-      h.innerHTML = '<button class="btn btn-cheio" id="h-abrir">abrir a minha estante</button>'+
-                    '<button class="btn" id="h-resgatar">resgatar um livro</button>';
+      h.innerHTML = '<button class="btn btn-cheio" id="h-abrir">'+IC.abrir+'abrir a minha estante</button>'+
+                    '<button class="btn" id="h-resgatar">'+IC.registrar+'Registrar um livro</button>';
       document.getElementById('h-abrir').addEventListener('click', function(){
         var atual = estantes.find(function(x){ return String(x.id)===String(minha.id); });
         if(atual){ abrirFoco(atual); return; }
-        toast('A sua estante está adormecida — resgate um livro para reacendê-la ✦');
+        toast('A sua estante está adormecida — registre um livro para reacendê-la ✦');
         document.getElementById('resgatar-fb').textContent=''; document.getElementById('resgatar-chave').value=''; abrir('resgatar-modal');
       });
       document.getElementById('h-resgatar').addEventListener('click', function(){ document.getElementById('resgatar-fb').textContent=''; document.getElementById('resgatar-chave').value=''; abrir('resgatar-modal'); });
     } else {
-      h.innerHTML = '<button class="btn btn-cheio" id="h-criar">criar a minha estante</button>'+
+      h.innerHTML = '<button class="btn btn-cheio" id="h-criar">'+IC.estante+'criar a minha estante</button>'+
                     '<button class="link-fraco" id="h-recuperar">já tenho um código de estante</button>';
       document.getElementById('h-criar').addEventListener('click', abrirCriar);
       document.getElementById('h-recuperar').addEventListener('click', function(){ document.getElementById('recuperar-fb').textContent=''; document.getElementById('recuperar-codigo').value=''; abrir('recuperar-modal'); });
