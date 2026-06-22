@@ -807,41 +807,57 @@
 
   // ===== Textos do site =====
   var TEXTOS_DEF=[
-    {chave:'link_telegram', rotulo:'Links · Telegram (URL do grupo/canal — usado no site e na loja)', multi:false},
-    {chave:'link_instagram', rotulo:'Links · Instagram (URL do perfil — usado no site e na loja)', multi:false},
-    {chave:'generos', rotulo:'Mural · géneros do site (um por linha)', multi:true},
-    {chave:'tagline', rotulo:'Site · slogan (abaixo do título)', multi:false},
-    {chave:'cta', rotulo:'Site · botão principal ("Confiar o seu texto")', multi:false},
-    {chave:'sobre', rotulo:'Site · texto "sobre a taverna"', multi:true},
-    {chave:'boasvindas', rotulo:'Site · texto de boas-vindas (1ª visita)', multi:true},
-    {chave:'rodape', rotulo:'Site · nota do rodapé', multi:false},
-    {chave:'loja_lema', rotulo:'Loja · lema', multi:false},
-    {chave:'loja_nota', rotulo:'Loja · nota (impressão 3D / envio)', multi:false},
-    {chave:'loja_passo1', rotulo:'Loja · "como funciona" passo 1', multi:true},
-    {chave:'loja_passo2', rotulo:'Loja · "como funciona" passo 2', multi:true},
-    {chave:'loja_passo3', rotulo:'Loja · "como funciona" passo 3', multi:true},
-    {chave:'estante_brinde_teaser', rotulo:'Estantes · brinde — rótulo "teaser" (ex.: 🎁 brinde surpresa)', multi:false},
-    {chave:'estante_brinde_titulo', rotulo:'Estantes · brinde — título do troféu (ex.: Escritor Fiel)', multi:false},
-    {chave:'estante_brinde_agradecimento', rotulo:'Estantes · brinde — texto de agradecimento', multi:true},
-    {chave:'estante_brinde_pergunta', rotulo:'Estantes · brinde — pergunta ("Quer receber o brinde em casa?")', multi:false},
-    {chave:'estante_brinde_aviso_brasil', rotulo:'Estantes · brinde — aviso de envio só Brasil', multi:false}
+    {grupo:'Global', chave:'link_telegram', rotulo:'Telegram (URL do grupo/canal)', multi:false},
+    {grupo:'Global', chave:'link_instagram', rotulo:'Instagram (URL do perfil)', multi:false},
+    {grupo:'Inicial', chave:'generos', rotulo:'Mural · géneros (um por linha)', multi:true},
+    {grupo:'Inicial', chave:'tagline', rotulo:'Slogan (abaixo do título)', multi:false},
+    {grupo:'Inicial', chave:'cta', rotulo:'Botão principal ("Confiar o seu texto")', multi:false},
+    {grupo:'Inicial', chave:'sobre', rotulo:'Texto "sobre a taverna"', multi:true},
+    {grupo:'Inicial', chave:'boasvindas', rotulo:'Boas-vindas (1ª visita)', multi:true},
+    {grupo:'Inicial', chave:'rodape', rotulo:'Nota do rodapé', multi:false},
+    {grupo:'Loja', chave:'loja_lema', rotulo:'Lema', multi:false},
+    {grupo:'Loja', chave:'loja_nota', rotulo:'Nota (impressão 3D / envio)', multi:false},
+    {grupo:'Loja', chave:'loja_passo1', rotulo:'"Como funciona" passo 1', multi:true},
+    {grupo:'Loja', chave:'loja_passo2', rotulo:'"Como funciona" passo 2', multi:true},
+    {grupo:'Loja', chave:'loja_passo3', rotulo:'"Como funciona" passo 3', multi:true},
+    {grupo:'Estante', chave:'estante_eyebrow', rotulo:'Olho (acima do título)', multi:false},
+    {grupo:'Estante', chave:'estante_titulo', rotulo:'Título da página', multi:false},
+    {grupo:'Estante', chave:'estante_subtitulo', rotulo:'Subtítulo', multi:true},
+    {grupo:'Estante', chave:'estante_brinde_teaser', rotulo:'Brinde — teaser (ex.: 🎁 brinde surpresa)', multi:false},
+    {grupo:'Estante', chave:'estante_brinde_titulo', rotulo:'Brinde — título do troféu (ex.: Escritor Fiel)', multi:false},
+    {grupo:'Estante', chave:'estante_brinde_agradecimento', rotulo:'Brinde — texto de agradecimento', multi:true},
+    {grupo:'Estante', chave:'estante_brinde_pergunta', rotulo:'Brinde — pergunta ("Quer receber o brinde em casa?")', multi:false},
+    {grupo:'Estante', chave:'estante_brinde_aviso_brasil', rotulo:'Brinde — aviso de envio só Brasil', multi:false}
+  ];
+  var GRUPOS_TEXTO=[
+    {grupo:'Global',  titulo:'Global',                 desc:'aparecem no site inteiro (links sociais)'},
+    {grupo:'Inicial', titulo:'Página inicial (mural)',  desc:'a página de entrada / o mural'},
+    {grupo:'Loja',    titulo:'Loja',                    desc:'a página da loja'},
+    {grupo:'Estante', titulo:'Estantes',                desc:'a página das estantes e o brinde'}
   ];
   async function carregarTextos(){
     var box=document.getElementById('lista-textos'); box.innerHTML='<div class="carregando">A carregar…</div>';
     try{
       var rows=await chamar('config_listar'); var mapa={}; (rows||[]).forEach(function(r){ mapa[r.chave]=r.valor; });
       box.innerHTML='';
-      TEXTOS_DEF.forEach(function(def){
-        var el=document.createElement('div'); el.className='item';
-        var atual=mapa[def.chave]!=null?mapa[def.chave]:'';
-        if(def.chave==='generos' && !String(atual).trim()) atual='Conto\nPoesia\nCrónica\nEnsaio\nFragmento\nOutro';
-        var campo=def.multi?'<textarea data-f="valor">'+esc(atual)+'</textarea>':'<input data-f="valor" value="'+esc(atual)+'">';
-        el.innerHTML='<label class="campo"><span>'+esc(def.rotulo)+'</span>'+campo+'</label><div class="acoes"><button class="b-ok">Salvar</button></div>';
-        el.querySelector('.b-ok').addEventListener('click', async function(){
-          try{ await chamar('config_salvar',{ chave:def.chave, valor: el.querySelector('[data-f="valor"]').value }); toast('Salvo.'); }
-          catch(err){ tratarErro(err); }
+      GRUPOS_TEXTO.forEach(function(g){
+        var defs=TEXTOS_DEF.filter(function(d){ return d.grupo===g.grupo; });
+        if(!defs.length) return;
+        var cab=document.createElement('div'); cab.style.cssText='margin:22px 0 10px';
+        cab.innerHTML='<div style="font-family:\'Cormorant Garamond\',serif;font-size:22px;color:var(--ink)">'+esc(g.titulo)+'</div><div style="font-size:13.5px;color:var(--ink-faint);font-style:italic">'+esc(g.desc)+'</div>';
+        box.appendChild(cab);
+        defs.forEach(function(def){
+          var el=document.createElement('div'); el.className='item';
+          var atual=mapa[def.chave]!=null?mapa[def.chave]:'';
+          if(def.chave==='generos' && !String(atual).trim()) atual='Conto\nPoesia\nCrónica\nEnsaio\nFragmento\nOutro';
+          var campo=def.multi?'<textarea data-f="valor">'+esc(atual)+'</textarea>':'<input data-f="valor" value="'+esc(atual)+'">';
+          el.innerHTML='<label class="campo"><span>'+esc(def.rotulo)+'</span>'+campo+'</label><div class="acoes"><button class="b-ok">Salvar</button></div>';
+          el.querySelector('.b-ok').addEventListener('click', async function(){
+            try{ await chamar('config_salvar',{ chave:def.chave, valor: el.querySelector('[data-f="valor"]').value }); toast('Salvo.'); }
+            catch(err){ tratarErro(err); }
+          });
+          box.appendChild(el);
         });
-        box.appendChild(el);
       });
     }catch(err){ tratarErro(err, box); }
   }
