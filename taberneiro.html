@@ -144,6 +144,7 @@
           <button class="tab c-blue" data-aba="textos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h4"/></svg><span>Textos</span></button>
           <button class="tab c-blue" data-aba="assinantes"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M4 7l8 6 8-6"/></svg><span>Assinantes</span></button>
           <button class="tab c-blue" data-aba="estantes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4v15M9 4v15M13.5 5l3 14M18 5v14"/><path d="M3 19.5h18"/></svg><span>Estantes</span></button>
+          <button class="tab c-gold" data-aba="brindes"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="8" width="18" height="13" rx="1"/><path d="M3 12h18M12 8v13"/><path d="M12 8C12 8 10.5 4 8 4.5 5.5 5 7 8 12 8zM12 8C12 8 13.5 4 16 4.5 18.5 5 17 8 12 8z"/></svg><span>Brindes</span></button>
         </div>
         <button class="sair" id="sair">sair</button>
       </div>
@@ -238,7 +239,14 @@
       <section class="secao" id="aba-estantes" style="display:none">
         <h2>Estantes</h2>
         <p class="sub">as estantes dos escritores — oculte as abandonadas/vazias (o dono a reacende ao voltar a resgatar) ou apague de vez</p>
+        <div id="ranking-estantes"></div>
         <div id="lista-estantes"><div class="carregando">A carregar…</div></div>
+      </section>
+
+      <section class="secao" id="aba-brindes" style="display:none">
+        <h2>Brindes</h2>
+        <p class="sub">escritores que encheram a estante (20 livros) e pediram o brinde físico — confira os dados de postagem e marque como enviado</p>
+        <div id="lista-brindes"><div class="carregando">A carregar…</div></div>
       </section>
     </div>
   </div>
@@ -310,7 +318,7 @@
   }
 
   // ===== Abas =====
-  var LOADERS={ resumo:carregarResumo, pendentes:carregarPendentes, aprovados:carregarAprovados, recusados:carregarRecusados, produtos:carregarProdutos, depoimentos:carregarDepoimentos, tema:carregarTemas, textos:carregarTextos, denuncias:carregarDenuncias, comentarios:carregarComentariosPainel, assinantes:carregarAssinantes, estantes:carregarEstantes };
+  var LOADERS={ resumo:carregarResumo, pendentes:carregarPendentes, aprovados:carregarAprovados, recusados:carregarRecusados, produtos:carregarProdutos, depoimentos:carregarDepoimentos, tema:carregarTemas, textos:carregarTextos, denuncias:carregarDenuncias, comentarios:carregarComentariosPainel, assinantes:carregarAssinantes, estantes:carregarEstantes, brindes:carregarBrindes };
   document.querySelectorAll('.tab').forEach(function(t){
     t.addEventListener('click', function(){
       document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
@@ -370,6 +378,7 @@
     box.innerHTML='<div class="carregando">A carregar…</div>';
     try{
       var rows=await chamar('estantes_listar');
+      renderRankingEstantes(rows);
       if(!rows.length){ box.innerHTML='<div class="vazia">Nenhuma estante ainda. ✦</div>'; return; }
       box.innerHTML='';
       var ocultas=rows.filter(function(e){ return e.oculta; }).length;
@@ -400,6 +409,72 @@
   async function acaoEstante(acao, id, btn){
     var orig=btn.textContent; btn.disabled=true; btn.textContent='…';
     try{ await chamar(acao, { id:id }); carregarEstantes(); }
+    catch(err){ btn.disabled=false; btn.textContent=orig; alert('Não consegui: '+(err && err.message || 'erro')); }
+  }
+
+  function renderRankingEstantes(rows){
+    var box=document.getElementById('ranking-estantes'); if(!box) return;
+    var ord=(rows||[]).slice().filter(function(e){ return (e.n_livros||0)>0; }).sort(function(a,b){ return (b.n_livros||0)-(a.n_livros||0); }).slice(0,10);
+    if(!ord.length){ box.innerHTML=''; return; }
+    var medal=['🥇','🥈','🥉'];
+    var h='<div style="font-family:\'Cormorant Garamond\',serif;font-size:20px;color:var(--ink);margin:0 0 8px">Ranking de escritores</div><ol style="list-style:none;padding:0;margin:0 0 24px">';
+    ord.forEach(function(e,i){
+      var n=e.n_livros||0;
+      var cheia = n>=20 ? ' <span style="color:#b0863e;font-size:12.5px">· estante cheia ✦</span>' : '';
+      h+='<li style="display:flex;align-items:center;gap:10px;padding:7px 2px;border-bottom:1px solid var(--line)">'+
+         '<span style="width:30px;text-align:center;font-weight:600">'+(medal[i]||((i+1)+'º'))+'</span>'+
+         '<span style="flex:1;color:var(--ink)">Estante de '+esc(e.nome)+cheia+'</span>'+
+         '<span style="color:var(--ink-faint);font-size:14px">'+n+(n===1?' livro':' livros')+'</span></li>';
+    });
+    box.innerHTML=h+'</ol>';
+  }
+
+  // ===== Brindes (Escritor Fiel) =====
+  async function carregarBrindes(){
+    var box=document.getElementById('lista-brindes');
+    box.innerHTML='<div class="carregando">A carregar…</div>';
+    try{
+      var rows=await chamar('brindes_listar');
+      if(!rows.length){ box.innerHTML='<div class="vazia">Nenhum brinde pedido ainda. ✦</div>'; return; }
+      box.innerHTML='';
+      var pend=rows.filter(function(b){ return b.status!=='enviado'; }).length;
+      var topo=document.createElement('div');
+      topo.style.cssText="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--ink);margin-bottom:16px";
+      topo.textContent=rows.length+(rows.length===1?' pedido':' pedidos')+(pend?(' · '+pend+' a enviar'):' · todos enviados');
+      box.appendChild(topo);
+      rows.forEach(function(b){
+        var enviado=b.status==='enviado';
+        var el=document.createElement('div'); el.className='item'; if(enviado) el.style.opacity='0.6';
+        var end=[b.endereco, b.numero, b.complemento].filter(Boolean).join(', ');
+        var loc=[b.bairro, b.cidade, b.uf].filter(Boolean).join(' · ');
+        var tag=enviado
+          ? ' <span style="font-size:12px;color:#3f8f5e;border:1px solid #3f8f5e;border-radius:10px;padding:1px 9px;margin-left:8px">enviado</span>'
+          : ' <span style="font-size:12px;color:#b0863e;border:1px solid #b0863e;border-radius:10px;padding:1px 9px;margin-left:8px">a enviar</span>';
+        var linhas=
+          '<div class="item-meta"><b>'+esc(b.nome||'—')+'</b>'+(b.telefone?(' · '+esc(b.telefone)):'')+'</div>'+
+          '<div class="item-meta">'+esc(end||'—')+'</div>'+
+          '<div class="item-meta">'+esc(loc)+(b.cep?(' · CEP '+esc(b.cep)):'')+'</div>'+
+          '<div class="item-meta" style="color:var(--ink-faint)">estante de '+esc(b.estante_nome||'—')+' · pedido em '+quando(b.criado_em)+(enviado&&b.enviado_em?(' · enviado em '+quando(b.enviado_em)):'')+'</div>';
+        el.innerHTML='<div class="item-top"><span class="item-titulo" style="font-size:18px">🎁 Brinde — '+esc(b.estante_nome||'estante')+'</span>'+tag+'</div>'+linhas+'<div class="acoes"></div>';
+        var acoes=el.querySelector('.acoes');
+        var bCopiar=document.createElement('button'); bCopiar.className='b-ghost'; bCopiar.textContent='copiar endereço';
+        bCopiar.addEventListener('click', function(){
+          var txt=[b.nome, (b.telefone||''), end, loc, (b.cep?('CEP '+b.cep):'')].filter(Boolean).join('\n');
+          if(navigator.clipboard) navigator.clipboard.writeText(txt);
+          toast('Endereço copiado.');
+        });
+        acoes.appendChild(bCopiar);
+        var bAcao=document.createElement('button');
+        if(enviado){ bAcao.className='b-ghost'; bAcao.textContent='reabrir'; bAcao.addEventListener('click', function(){ acaoBrinde('brinde_reabrir', b.id, bAcao); }); }
+        else { bAcao.className='b-ok'; bAcao.textContent='marcar como enviado'; bAcao.addEventListener('click', function(){ acaoBrinde('brinde_marcar_enviado', b.id, bAcao); }); }
+        acoes.appendChild(bAcao);
+        box.appendChild(el);
+      });
+    }catch(err){ tratarErro(err, box); }
+  }
+  async function acaoBrinde(acao, id, btn){
+    var orig=btn.textContent; btn.disabled=true; btn.textContent='…';
+    try{ await chamar(acao, { id:id }); carregarBrindes(); }
     catch(err){ btn.disabled=false; btn.textContent=orig; alert('Não consegui: '+(err && err.message || 'erro')); }
   }
 
@@ -744,7 +819,12 @@
     {chave:'loja_nota', rotulo:'Loja · nota (impressão 3D / envio)', multi:false},
     {chave:'loja_passo1', rotulo:'Loja · "como funciona" passo 1', multi:true},
     {chave:'loja_passo2', rotulo:'Loja · "como funciona" passo 2', multi:true},
-    {chave:'loja_passo3', rotulo:'Loja · "como funciona" passo 3', multi:true}
+    {chave:'loja_passo3', rotulo:'Loja · "como funciona" passo 3', multi:true},
+    {chave:'estante_brinde_teaser', rotulo:'Estantes · brinde — rótulo "teaser" (ex.: 🎁 brinde surpresa)', multi:false},
+    {chave:'estante_brinde_titulo', rotulo:'Estantes · brinde — título do troféu (ex.: Escritor Fiel)', multi:false},
+    {chave:'estante_brinde_agradecimento', rotulo:'Estantes · brinde — texto de agradecimento', multi:true},
+    {chave:'estante_brinde_pergunta', rotulo:'Estantes · brinde — pergunta ("Quer receber o brinde em casa?")', multi:false},
+    {chave:'estante_brinde_aviso_brasil', rotulo:'Estantes · brinde — aviso de envio só Brasil', multi:false}
   ];
   async function carregarTextos(){
     var box=document.getElementById('lista-textos'); box.innerHTML='<div class="carregando">A carregar…</div>';
