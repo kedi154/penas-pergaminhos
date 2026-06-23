@@ -88,17 +88,16 @@
   .foco-cab .sel{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--wax)}
   .foco-cab h2{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:34px;margin:6px 0 2px}
   .foco-cab .meta{color:var(--ink-faint);font-style:italic}
-  .foco-selos{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:16px 0 6px}
-  .selo-pill{display:flex;align-items:center;gap:6px;background:var(--paper-2);border:1px solid var(--line);border-radius:20px;padding:5px 12px;font-size:14px;color:var(--ink-soft);transition:opacity .2s,border-color .2s}
-  .selo-pill .b{width:16px;height:16px;border-radius:50%;background:var(--gold);border:1px solid #8a6a2e;display:flex;align-items:center;justify-content:center;font-size:9px;line-height:1;color:#3a2a10}
-  .selo-pill.off{opacity:.5;color:var(--ink-faint)}
-  .selo-pill.off .b{background:transparent;border-color:var(--ink-faint);color:var(--ink-faint)}
-  .selo-pill.prox{opacity:1;border-color:var(--gold)}
-  .selo-pill.comum.on .b{background:#b8893f;border-color:#7a5a28}
-  .selo-pill.rara.on .b{background:#5b7a9a;border-color:#3f5f7e;color:#eaf1f7}
-  .selo-pill.epica.on .b{background:#caa86a;border-color:#8a6a2e}
-  .selo-pill.epica{border-color:var(--gold)}
-  .selo-pill .fis{font-size:9.5px;letter-spacing:.04em;background:var(--wax);color:#f4ecdd;border-radius:8px;padding:1px 5px;margin-left:1px}
+  .selos-fila{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin:16px 0 8px}
+  .selo-dot{position:relative;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:13px;line-height:1;cursor:pointer;border:1px solid var(--ink-faint);background:transparent;color:var(--ink-faint);transition:transform .15s,box-shadow .15s}
+  .selo-dot.comum.on{background:#b8893f;border-color:#7a5a28;color:#fff}
+  .selo-dot.rara.on{background:#5b7a9a;border-color:#3f5f7e;color:#eaf1f7}
+  .selo-dot.epica.on{background:#caa86a;border-color:#8a6a2e;color:#3a2a10}
+  .selo-dot.off{opacity:.55}
+  .selo-dot.prox{border-color:var(--gold);box-shadow:0 0 0 2px rgba(176,134,62,.22)}
+  .selo-dot.brinde::after{content:"";position:absolute;top:-2px;right:-2px;width:7px;height:7px;border-radius:50%;background:var(--wax);border:1px solid var(--paper)}
+  .selo-dot:hover{transform:translateY(-1px)}
+  .selo-dot.sel{box-shadow:0 0 0 2px var(--wax)}
   .foco-prog{text-align:center;color:var(--ink-faint);font-size:14px;font-style:italic;margin-bottom:18px}
   .premio{background:rgba(143,45,40,.07);border:1px solid rgba(143,45,40,.3);border-radius:8px;padding:12px 16px;text-align:center;color:var(--wax);margin:0 auto 18px;max-width:520px}
   .btn-brinde{background:var(--gold);color:#3a2a10;border-color:#8a6a2e;font-weight:600}
@@ -139,6 +138,11 @@
   .leitor-fonte button{background:none;border:1px solid rgba(244,236,221,.35);color:#f4ecdd;font-family:'Cormorant Garamond',serif;font-size:15px;width:36px;height:32px;border-radius:7px;cursor:pointer;line-height:1;transition:all .18s}
   .leitor-fonte button:hover{border-color:#f4ecdd;background:rgba(244,236,221,.12)}
   .leitor-fonte button:disabled{opacity:.32;cursor:default}
+  @media(max-width:600px){
+    .leitor-fonte{top:11px;left:11px;gap:5px}
+    .leitor-fonte button{width:29px;height:27px;font-size:12.5px;border-radius:6px}
+    .fechar{top:11px;right:13px;font-size:26px}
+  }
   .livro-capa{position:absolute;inset:0;background:linear-gradient(145deg,#8f2d28,#6e201c);border-radius:6px 10px 10px 6px;border:1px solid #5e1b18;box-shadow:0 20px 50px rgba(0,0,0,.45);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;transform-origin:left center;transition:transform 1s cubic-bezier(.3,.7,.2,1);backface-visibility:hidden;z-index:3}
   .livro.aberto .livro-capa{transform:rotateY(-162deg)}
   .capa-selo{width:52px;height:52px;border-radius:50%;background:#f4ecdd;color:var(--wax);font-size:26px;display:flex;align-items:center;justify-content:center;margin-bottom:18px;box-shadow:0 0 0 5px rgba(244,236,221,.18)}
@@ -190,7 +194,6 @@
 
 <main>
   <section class="hero wrap">
-    <div class="sel" id="hero-eyebrow">a coleção da taverna</div>
     <h1 id="hero-titulo">As estantes da taverna</h1>
     <p id="hero-subtitulo">Cada estante guarda os pergaminhos selados de um escritor. Monte a sua, registrando os seus textos com o código que recebeu ao publicar.</p>
     <div class="hero-acoes" id="hero-acoes"></div>
@@ -384,7 +387,6 @@
     aplicarTextos();
   }
   function aplicarTextos(){
-    var e=document.getElementById('hero-eyebrow'); if(e) e.textContent=CFG.estante_eyebrow;
     var t=document.getElementById('hero-titulo'); if(t) t.textContent=CFG.estante_titulo;
     var s=document.getElementById('hero-subtitulo'); if(s) s.textContent=CFG.estante_subtitulo;
   }
@@ -485,16 +487,19 @@
 
   function selosDe(n){ return MARCOS.filter(function(m){ return n >= m.n; }); }
   function proximoMarco(n){ for(var i=0;i<MARCOS.length;i++){ if(n < MARCOS[i].n) return MARCOS[i]; } return null; }
+  function legendaMarco(m, n){
+    var teaser = m.brinde ? ' · '+esc(CFG.estante_brinde_teaser) : '';
+    if(n >= m.n) return '<b>'+esc(m.nome)+'</b> · '+m.n+(m.n===1?' livro':' livros')+' · conquistado ✦'+teaser;
+    var falta = m.n - n;
+    return '<b>'+esc(m.nome)+'</b> · '+m.n+(m.n===1?' livro':' livros')+' · faltam '+falta+(falta===1?' livro':' livros')+teaser;
+  }
   function trilhaHtml(n){
     var prox = proximoMarco(n);
-    return '<div class="foco-selos">'+ MARCOS.map(function(m){
+    return '<div class="selos-fila">'+ MARCOS.map(function(m,idx){
       var ganho = n >= m.n;
       var ehProx = prox && prox.n === m.n;
-      var cls = 'selo-pill '+(m.tier||'comum')+(ganho?' on':' off')+(ehProx?' prox':'');
-      var teaser = m.brinde ? ' <span class="fis">'+esc(CFG.estante_brinde_teaser)+'</span>' : '';
-      return '<span class="'+cls+'" title="'+esc(m.nome)+' · '+m.n+(m.n===1?' livro':' livros')+'">'+
-               '<span class="b">'+(ganho?'✦':m.n)+'</span>'+esc(m.nome)+teaser+
-             '</span>';
+      var cls = 'selo-dot '+(m.tier||'comum')+(ganho?' on':' off')+(ehProx?' prox':'')+(m.brinde?' brinde':'');
+      return '<button type="button" class="'+cls+'" data-i="'+idx+'" title="'+esc(m.nome)+'">'+(ganho?'✦':m.n)+'</button>';
     }).join('') + '</div>';
   }
 
@@ -544,8 +549,8 @@
     var n = e.n_livros || 0;
     var prox = proximoMarco(n);
     var selosHtml = trilhaHtml(n);
-    var progHtml = prox ? '<div class="foco-prog">faltam '+(prox.n - n)+' '+((prox.n-n)===1?'livro':'livros')+' para o selo "'+esc(prox.nome)+'"</div>'
-                        : '<div class="foco-prog">todos os selos conquistados ✦</div>';
+    var progHtml = prox ? '<div class="foco-prog" id="foco-prog">faltam '+(prox.n - n)+' '+((prox.n-n)===1?'livro':'livros')+' para o selo "'+esc(prox.nome)+'" · toque num selo para ver o que é</div>'
+                        : '<div class="foco-prog" id="foco-prog">todos os selos conquistados ✦ · toque num selo para ver o que é</div>';
     var jaPegou = false; try{ jaPegou = localStorage.getItem('pp_brinde_'+e.id)==='1'; }catch(_){}
     var premioHtml = (n >= CAPACIDADE) ? '<div class="premio">✦ Estante cheia! Você é um <b>'+esc(CFG.estante_brinde_titulo)+'</b> — e isso dá direito a um <b>'+esc(CFG.estante_brinde_teaser)+'</b>.</div>' : '';
     var acoes = '<div class="foco-acoes">';
@@ -568,6 +573,14 @@
       var fb2=document.getElementById('foco-brinde'); if(fb2) fb2.addEventListener('click', abrirBrinde);
     } else if(!minhas.length){ var fc=document.getElementById('foco-criar'); if(fc) fc.addEventListener('click', function(){ fechar('foco-ov'); abrirCriar(); }); }
     var fp=document.getElementById('foco-partilhar'); if(fp) fp.addEventListener('click', function(){ partilharEstante(e); });
+    Array.prototype.forEach.call(foco.querySelectorAll('.selo-dot'), function(dot){
+      dot.addEventListener('click', function(){
+        var m = MARCOS[+dot.getAttribute('data-i')]; if(!m) return;
+        Array.prototype.forEach.call(foco.querySelectorAll('.selo-dot'), function(d){ d.classList.remove('sel'); });
+        dot.classList.add('sel');
+        var pp=document.getElementById('foco-prog'); if(pp) pp.innerHTML = legendaMarco(m, n);
+      });
+    });
 
     try {
       var livros = await rpc('ler_prateleira', { p_id: e.id });
