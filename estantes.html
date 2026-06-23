@@ -132,6 +132,13 @@
   .pag-titulo{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:30px;margin:0 0 4px;color:var(--ink)}
   .pag-autor{color:var(--ink-faint);font-style:italic;margin-bottom:18px}
   .pag-corpo{white-space:pre-wrap;font-size:17.5px;line-height:1.85;color:var(--ink-soft)}
+  .leitor-prog{position:absolute;top:0;left:0;right:0;height:3px;background:rgba(0,0,0,.10);border-radius:6px 6px 0 0;overflow:hidden;z-index:4;opacity:0;transition:opacity .4s}
+  .livro.aberto .leitor-prog{opacity:1}
+  .leitor-prog i{display:block;height:100%;width:0;background:var(--wax);transition:width .12s linear}
+  .leitor-fonte{position:absolute;top:16px;left:18px;z-index:5;display:flex;gap:6px}
+  .leitor-fonte button{background:none;border:1px solid rgba(244,236,221,.35);color:#f4ecdd;font-family:'Cormorant Garamond',serif;font-size:15px;width:36px;height:32px;border-radius:7px;cursor:pointer;line-height:1;transition:all .18s}
+  .leitor-fonte button:hover{border-color:#f4ecdd;background:rgba(244,236,221,.12)}
+  .leitor-fonte button:disabled{opacity:.32;cursor:default}
   .livro-capa{position:absolute;inset:0;background:linear-gradient(145deg,#8f2d28,#6e201c);border-radius:6px 10px 10px 6px;border:1px solid #5e1b18;box-shadow:0 20px 50px rgba(0,0,0,.45);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;transform-origin:left center;transition:transform 1s cubic-bezier(.3,.7,.2,1);backface-visibility:hidden;z-index:3}
   .livro.aberto .livro-capa{transform:rotateY(-162deg)}
   .capa-selo{width:52px;height:52px;border-radius:50%;background:#f4ecdd;color:var(--wax);font-size:26px;display:flex;align-items:center;justify-content:center;margin-bottom:18px;box-shadow:0 0 0 5px rgba(244,236,221,.18)}
@@ -204,7 +211,12 @@
 <!-- leitor -->
 <div class="overlay" id="leitor">
   <button class="fechar" id="leitor-fechar">×</button>
+  <div class="leitor-fonte" id="leitor-fonte">
+    <button id="fonte-menos" aria-label="Diminuir o texto">A−</button>
+    <button id="fonte-mais" aria-label="Aumentar o texto">A+</button>
+  </div>
   <div class="livro" id="livro">
+    <div class="leitor-prog"><i id="leitor-prog-fill"></i></div>
     <div class="livro-paginas">
       <div class="pag-genero" id="pag-genero"></div>
       <h2 class="pag-titulo" id="pag-titulo"></h2>
@@ -379,6 +391,7 @@
 
   function tituloEstante(nome){ return 'Estante de ' + (nome || '—'); }
   var aAbrir = (new URLSearchParams(location.search)).get('estante');
+  var brindePreview = (new URLSearchParams(location.search)).get('brinde') === 'preview';
 
   var SPINE_CORES = ['#8f2d28','#6f8a5e','#5b7a9a','#b0863e','#7a5a72','#a85a3e','#4f6b62','#9a6b3e'];
   var MARCOS = [
@@ -573,6 +586,22 @@
   }
 
   // ---- leitor (livro que abre) ----
+  var FONTES = [15.5, 16.5, 17.5, 19, 21];
+  var fonteIdx = (function(){ try{ var v=parseInt(localStorage.getItem('pp_fonte_estante'),10); return isNaN(v)?2:Math.max(0,Math.min(FONTES.length-1,v)); }catch(e){ return 2; } })();
+  function aplicarFonte(){
+    var s=FONTES[fonteIdx], c=document.getElementById('pag-corpo');
+    if(c){ c.style.fontSize=s+'px'; c.style.lineHeight = s>=19 ? '1.8' : '1.85'; }
+    var bMenos=document.getElementById('fonte-menos'), bMais=document.getElementById('fonte-mais');
+    if(bMenos) bMenos.disabled = fonteIdx<=0;
+    if(bMais) bMais.disabled = fonteIdx>=FONTES.length-1;
+  }
+  function mudarFonte(d){ fonteIdx=Math.max(0,Math.min(FONTES.length-1,fonteIdx+d)); try{ localStorage.setItem('pp_fonte_estante', String(fonteIdx)); }catch(e){} aplicarFonte(); }
+  function atualizarProgresso(){
+    var pg=document.querySelector('.livro-paginas'); if(!pg) return;
+    var max=pg.scrollHeight-pg.clientHeight;
+    var p = max>8 ? (pg.scrollTop/max*100) : 0;
+    var f=document.getElementById('leitor-prog-fill'); if(f) f.style.width=p.toFixed(1)+'%';
+  }
   async function abrirLivro(id){
     var livro = document.getElementById('livro');
     livro.classList.remove('aberto');
@@ -593,6 +622,8 @@
       document.getElementById('pag-titulo').textContent = t.titulo || 'Sem título';
       document.getElementById('pag-autor').textContent = t.autor ? ('por ' + t.autor) : '';
       document.getElementById('pag-corpo').textContent = t.conteudo || '';
+      aplicarFonte();
+      var pg=document.querySelector('.livro-paginas'); if(pg) pg.scrollTop=0; atualizarProgresso();
       setTimeout(function(){ livro.classList.add('aberto'); }, 280);
     } catch(err){ console.error(err); toast('Não consegui abrir o livro agora.'); fechar('leitor'); }
   }
@@ -695,7 +726,7 @@
 
   // ---- brinde do Escritor Fiel ----
   function abrirBrinde(){
-    if(!focoAtual) return;
+    if(!focoAtual && !brindePreview) return;
     document.getElementById('brinde-titulo').textContent = CFG.estante_brinde_titulo;
     document.getElementById('brinde-agradecimento').textContent = CFG.estante_brinde_agradecimento;
     document.getElementById('brinde-pergunta').textContent = CFG.estante_brinde_pergunta;
@@ -712,12 +743,13 @@
   document.getElementById('brinde-enviar').addEventListener('click', async function(){
     var fb=document.getElementById('brinde-fb'); fb.className='modal-fb';
     var ent = focoAtual && acharMinha(focoAtual.id);
-    if(!ent){ fb.classList.add('erro'); fb.textContent='Abra a sua estante primeiro.'; return; }
+    if(!ent && !brindePreview){ fb.classList.add('erro'); fb.textContent='Abra a sua estante primeiro.'; return; }
     var g=function(id){ return (document.getElementById(id).value||'').trim(); };
     var nome=g('br-nome'), tel=g('br-telefone'), cep=g('br-cep'), end=g('br-endereco'),
         num=g('br-numero'), comp=g('br-complemento'), bairro=g('br-bairro'), cidade=g('br-cidade'),
         uf=document.getElementById('br-uf').value;
     if(!nome || !cep || !end || !num || !cidade || !uf){ fb.classList.add('erro'); fb.textContent='Preencha nome, CEP, endereço, número, cidade e UF.'; return; }
+    if(brindePreview){ fechar('brinde-modal'); toast('Pré-visualização — em produção, isto enviaria o seu endereço ao Taberneiro ✦'); return; }
     var btn=this; btn.disabled=true; var orig=btn.textContent; btn.textContent='enviando…';
     try{
       await rpc('solicitar_brinde', { p_codigo:ent.codigo, p_nome:nome, p_telefone:tel, p_cep:cep, p_endereco:end, p_numero:num, p_complemento:comp, p_bairro:bairro, p_cidade:cidade, p_uf:uf });
@@ -762,6 +794,9 @@
   document.getElementById('foco-ov').addEventListener('click', function(e){ if(e.target===this) fechar('foco-ov'); });
   document.getElementById('leitor-fechar').addEventListener('click', function(){ document.getElementById('livro').classList.remove('aberto'); fechar('leitor'); });
   document.getElementById('leitor').addEventListener('click', function(e){ if(e.target===this){ document.getElementById('livro').classList.remove('aberto'); fechar('leitor'); } });
+  document.getElementById('fonte-menos').addEventListener('click', function(){ mudarFonte(-1); });
+  document.getElementById('fonte-mais').addEventListener('click', function(){ mudarFonte(1); });
+  (function(){ var pg=document.querySelector('.livro-paginas'); if(pg) pg.addEventListener('scroll', atualizarProgresso); })();
   document.querySelectorAll('[data-fecha]').forEach(function(b){ b.addEventListener('click', function(){ fechar(b.getAttribute('data-fecha')); }); });
   document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ ['foco-ov','leitor'].forEach(function(id){ if(document.getElementById(id).classList.contains('on')){ if(id==='leitor') document.getElementById('livro').classList.remove('aberto'); fechar(id); } }); ['criar-modal','codigo-modal','resgatar-modal','recuperar-modal','renomear-modal','brinde-modal'].forEach(fechar); } });
 
@@ -804,7 +839,7 @@
     }
   })();
 
-  carregarCfg();
+  carregarCfg().then(function(){ if(brindePreview) abrirBrinde(); });
   carregar();
 </script>
 </body>
