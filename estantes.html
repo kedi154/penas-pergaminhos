@@ -40,6 +40,8 @@
   .hero{text-align:center;padding:54px 22px 30px;position:relative;z-index:1}
   .hero .sel{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--wax);margin-bottom:10px}
   .hero-rotulo{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px}
+  .voltar{display:inline-flex;align-items:center;gap:5px;font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--ink-soft);text-decoration:none;transition:color .18s}
+  .voltar:hover{color:var(--wax)}
   .hero h1{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(34px,6vw,52px);margin:0 0 10px;color:var(--ink)}
   .hero p{color:var(--ink-soft);font-size:18px;font-style:italic;max-width:560px;margin:0 auto 22px}
   .hero-acoes{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
@@ -205,6 +207,7 @@
 </header>
 
 <main>
+  <div class="wrap" style="padding-top:16px"><a class="voltar" href="index.html">‹ voltar ao mural</a></div>
   <section class="hero wrap">
     <div class="hero-rotulo">as estantes</div>
     <h1 id="hero-titulo">Ala Leste</h1>
@@ -502,9 +505,9 @@
   function proximoMarco(n){ for(var i=0;i<MARCOS.length;i++){ if(n < MARCOS[i].n) return MARCOS[i]; } return null; }
   function legendaMarco(m, n){
     var teaser = m.brinde ? ' · '+esc(CFG.estante_brinde_teaser) : '';
-    if(n >= m.n) return '<b>'+esc(m.nome)+'</b> · '+m.n+(m.n===1?' livro':' livros')+' · conquistado ✦'+teaser;
+    if(n >= m.n) return '<b>'+esc(m.nome)+'</b> · '+m.n+(m.n===1?' pergaminho':' pergaminhos')+' · conquistado ✦'+teaser;
     var falta = m.n - n;
-    return '<b>'+esc(m.nome)+'</b> · '+m.n+(m.n===1?' livro':' livros')+' · faltam '+falta+(falta===1?' livro':' livros')+teaser;
+    return '<b>'+esc(m.nome)+'</b> · '+m.n+(m.n===1?' pergaminho':' pergaminhos')+' · faltam '+falta+(falta===1?' pergaminho':' pergaminhos')+teaser;
   }
   function trilhaHtml(n){
     var prox = proximoMarco(n);
@@ -542,7 +545,7 @@
       card.innerHTML =
         '<div class="ec-shelf">'+spinesPreview(n, e.id)+'</div>'+
         '<div class="ec-nome">'+esc(tituloEstante(e.nome))+'</div>'+
-        '<div class="ec-meta">'+n+(n===1?' livro':' livros')+(ehMinha?' · a sua estante':'')+'</div>'+
+        '<div class="ec-meta">'+n+(n===1?' pergaminho':' pergaminhos')+(ehMinha?' · a sua estante':'')+'</div>'+
         '<div class="ec-selos">'+selos+'</div>';
       card.addEventListener('click', function(){ abrirFoco(e); });
       box.appendChild(card);
@@ -553,7 +556,7 @@
   function romano(n){ var r=['','I','II','III','IV','V','VI','VII','VIII','IX','X']; return r[n] || String(n); }
   function premioTexto(vol, dono){
     if(!dono) return '✦ Uma estante e tanto — selada por um <b>'+esc(CFG.estante_brinde_titulo)+'</b>.';
-    var fim = vol ? 'Daqui em diante, cada 20 livros abre um novo <b>volume</b>.'
+    var fim = vol ? 'Daqui em diante, cada 20 pergaminhos abre um novo <b>volume</b>.'
                   : 'Sua estante segue <b>contínua</b> — e você pode organizá-la em <b>volumes</b> quando quiser.';
     return '✦ Que estante! Você é um <b>'+esc(CFG.estante_brinde_titulo)+'</b> — isso dá direito a um <b>'+esc(CFG.estante_brinde_teaser)+'</b>. '+fim;
   }
@@ -618,7 +621,7 @@
     var n = e.n_livros || 0;
     var prox = proximoMarco(n);
     var selosHtml = trilhaHtml(n);
-    var progHtml = prox ? '<div class="foco-prog" id="foco-prog">faltam '+(prox.n - n)+' '+((prox.n-n)===1?'livro':'livros')+' para o selo "'+esc(prox.nome)+'" · toque num selo para ver o que é</div>'
+    var progHtml = prox ? '<div class="foco-prog" id="foco-prog">faltam '+(prox.n - n)+' '+((prox.n-n)===1?'pergaminho':'pergaminhos')+' para o selo "'+esc(prox.nome)+'" · toque num selo para ver o que é</div>'
                         : '<div class="foco-prog" id="foco-prog">todos os selos conquistados ✦ · toque num selo para ver o que é</div>';
     var jaPegou = false; try{ jaPegou = localStorage.getItem('pp_brinde_'+e.id)==='1'; }catch(_){}
     var premioHtml = (n >= CAPACIDADE) ? '<div class="premio" id="foco-premio">'+premioTexto(!!e.volumes, ehMinha)+'</div>' : '';
@@ -630,7 +633,7 @@
     acoes += '<button class="btn btn-fraco" id="foco-partilhar">'+IC.compartilhar+'Compartilhar</button></div>';
     foco.innerHTML =
       '<div class="foco-cab"><div class="sel">✦</div><h2>'+esc(tituloEstante(e.nome))+'</h2>'+
-        '<div class="meta">'+n+(n===1?' livro selado':' livros selados')+'</div></div>'+
+        '<div class="meta">'+n+(n===1?' pergaminho selado':' pergaminhos selados')+'</div></div>'+
       selosHtml + progHtml + premioHtml +
       '<div id="foco-livros"><div class="foco-vazia">A procurar nas prateleiras…</div></div>'+
       acoes;
@@ -880,7 +883,7 @@
     var p = document.getElementById('pulso');
     if(!estantes.length){ p.textContent=''; return; }
     var livros = estantes.reduce(function(s,e){ return s + (e.n_livros||0); }, 0);
-    p.textContent = estantes.length + (estantes.length===1?' estante':' estantes') + ' · ' + livros + (livros===1?' livro selado':' livros selados');
+    p.textContent = estantes.length + (estantes.length===1?' estante':' estantes') + ' · ' + livros + (livros===1?' pergaminho selado':' pergaminhos selados');
   }
   async function carregar(){
     try {

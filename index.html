@@ -268,6 +268,18 @@
   .verif-result{font-style:italic;font-size:16px;min-height:1px}
   .verif-result.ok{color:var(--gold)}
   .verif-result.no{color:var(--wax)}
+  .saudacao{display:none;align-items:center;justify-content:center;gap:10px;margin:0 0 22px;font-family:'EB Garamond',serif;font-style:italic;color:var(--wax);font-size:16px}
+  .saudacao.on{display:flex}
+  .saudacao-x{background:none;border:none;color:var(--ink-faint);font-size:18px;line-height:1;cursor:pointer;padding:0 2px}
+  .saudacao-x:hover{color:var(--wax)}
+  .verif-estante{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+  .verif-estante:empty{display:none}
+  .verif-estante .btn-mini{font-family:'EB Garamond',serif;font-size:15px;border:1px solid var(--wax);color:var(--wax);background:none;border-radius:4px;padding:7px 14px;cursor:pointer;transition:all .18s}
+  .verif-estante .btn-mini:hover{background:var(--wax);color:#f4ecdd}
+  .verif-estante select{background:rgba(255,255,255,.45);border:1px solid var(--line);border-radius:3px;padding:7px 10px;font-family:'EB Garamond',serif;font-size:15px;color:var(--ink)}
+  .verif-estante .ve-nota{font-style:italic;color:var(--ink-faint);font-size:15px}
+  .verif-estante .ve-nota a{color:var(--wax)}
+  body.noite .verif-estante select{background:rgba(255,255,255,.06);color:var(--ink)}
   .rascunho-nota{font-size:14px;color:var(--ink-faint);font-style:italic;margin:-2px 0 12px}
   .rascunho-nota a{color:var(--wax)}
   .aviso-box{background:rgba(143,45,40,.07);border:1px solid rgba(143,45,40,.25);border-left:3px solid var(--wax);border-radius:4px;padding:15px 17px;margin:6px 0 4px}
@@ -381,6 +393,8 @@
       <div class="flourish"></div>
     </header>
 
+    <div class="saudacao" id="saudacao"><span id="saudacao-txt"></span><button class="saudacao-x" id="saudacao-x" aria-label="Fechar">×</button></div>
+
     <div class="cta-row"><button class="btn btn-primary" id="abrir-publicar" data-cfg="cta">Confiar o seu texto</button></div>
 
     <div class="top-actions">
@@ -461,6 +475,7 @@
         <input id="verif-chave" placeholder="cole aqui a sua chave de autoria">
         <button class="btn btn-primary" id="verif-btn" style="align-self:flex-start">Verificar</button>
         <div class="verif-result" id="verif-result"></div>
+        <div class="verif-estante" id="verif-estante"></div>
       </div>
       <div class="r-nav">
         <button id="r-prev">‹ anterior</button>
@@ -482,7 +497,7 @@
   <div class="coletanea" id="coletanea">
     <div class="reader-bar"><div class="wrap">
       <button class="back" id="coletanea-voltar">‹ voltar</button>
-      <span style="font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--ink-faint)">Coletâneas</span>
+      <span style="font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--ink-faint)">Coletâneas da taverna</span>
     </div></div>
     <div class="wrap col-body">
       <div id="col-lista"></div>
@@ -1204,8 +1219,42 @@
     var v=document.getElementById('chave-valor').textContent, b=this;
     if(navigator.clipboard){ navigator.clipboard.writeText(v).then(function(){ b.textContent='copiado!'; setTimeout(function(){b.textContent='copiar';},1500); }); }
   });
+  var ultimoHashVerificado=null;
+  function lerMinhasEstantes(){
+    var out=[];
+    try{ var l=JSON.parse(localStorage.getItem('pp_minhas_estantes')||'[]'); if(Array.isArray(l)) out=l; }catch(e){}
+    if(!out.length){ try{ var o=JSON.parse(localStorage.getItem('pp_minha_estante')||'null'); if(o && o.codigo) out=[o]; }catch(e){} }
+    return out;
+  }
+  async function registrarNaEstante(codigo, nome){
+    if(!ultimoHashVerificado) return;
+    try{
+      var r=await supaPost('/rpc/resgatar_livro', { p_codigo: codigo, p_chave_hash: ultimoHashVerificado }, 'return=representation');
+      var novo = (Array.isArray(r) && r[0]) ? r[0].novo : null;
+      ppToast(novo===false ? 'Este pergaminho já estava na estante '+nome+'.' : 'Adicionado à estante '+nome+'! 📚');
+    }catch(e){ console.error('Falha ao adicionar à estante:', e); ppToast('Não consegui adicionar agora. Tente de novo daqui a pouco.'); }
+  }
+  function mostrarAddEstante(){
+    var ve=document.getElementById('verif-estante'); if(!ve) return;
+    var minhas=lerMinhasEstantes();
+    if(!minhas.length){
+      ve.innerHTML='<span class="ve-nota">Tem uma estante? <a href="estantes.html">crie a sua</a> e registre este pergaminho lá.</span>';
+    } else if(minhas.length===1){
+      ve.innerHTML='<button class="btn-mini" id="ve-add">📚 adicionar à estante '+esc(minhas[0].nome||'')+'</button>';
+      document.getElementById('ve-add').addEventListener('click', function(){ registrarNaEstante(minhas[0].codigo, minhas[0].nome||'a sua estante'); });
+    } else {
+      ve.innerHTML='<select id="ve-sel">'+minhas.map(function(m,i){ return '<option value="'+i+'">'+esc(m.nome||('estante '+(i+1)))+'</option>'; }).join('')+'</select> <button class="btn-mini" id="ve-add">📚 adicionar</button>';
+      document.getElementById('ve-add').addEventListener('click', function(){ var i=+document.getElementById('ve-sel').value; registrarNaEstante(minhas[i].codigo, minhas[i].nome||'a sua estante'); });
+    }
+  }
+  function limparVerif(){
+    ultimoHashVerificado=null;
+    var vr=document.getElementById('verif-result'); if(vr){ vr.textContent=''; vr.className='verif-result'; }
+    var ve=document.getElementById('verif-estante'); if(ve) ve.innerHTML='';
+  }
   document.getElementById('abrir-verificar').addEventListener('click', function(){
     document.getElementById('verificar-area').classList.toggle('open');
+    limparVerif();
   });
   document.getElementById('verif-btn').addEventListener('click', async function(){
     var chave=document.getElementById('verif-chave').value.trim(), res=document.getElementById('verif-result');
@@ -1214,11 +1263,19 @@
     try{
       var hash=await sha256hex(chave);
       var ok=await supaPost('/rpc/verificar_autoria', { p_id: currentReaderId, p_chave_hash: hash }, 'return=representation');
-      if(ok===true){ res.textContent='✓ Confere — este pergaminho é seu.'; res.className='verif-result ok'; }
-      else { res.textContent='✗ Não confere com este pergaminho.'; res.className='verif-result no'; }
-    }catch(e){ console.error('Falha ao verificar:', e); res.textContent='Não consegui verificar agora. Tente de novo daqui a pouco.'; res.className='verif-result no'; }
+      if(ok===true){ res.textContent='✓ Confere — este pergaminho é seu.'; res.className='verif-result ok'; ultimoHashVerificado=hash; mostrarAddEstante(); }
+      else { res.textContent='✗ Não confere com este pergaminho.'; res.className='verif-result no'; ultimoHashVerificado=null; var ven=document.getElementById('verif-estante'); if(ven) ven.innerHTML=''; }
+    }catch(e){ console.error('Falha ao verificar:', e); res.textContent='Não consegui verificar agora. Tente de novo daqui a pouco.'; res.className='verif-result no'; ultimoHashVerificado=null; var vee=document.getElementById('verif-estante'); if(vee) vee.innerHTML=''; }
     finally{ b.disabled=false; b.textContent='Verificar'; }
   });
+
+  // ===== Saudação (lembra a última assinatura) =====
+  (function(){
+    var nome=''; try{ nome=localStorage.getItem('pp_autor')||''; }catch(e){}
+    var s=document.getElementById('saudacao'), t=document.getElementById('saudacao-txt');
+    if(nome && s && t){ t.textContent='Bem-vinda(o) de volta, '+nome+' ✦'; s.classList.add('on'); }
+    var x=document.getElementById('saudacao-x'); if(x) x.addEventListener('click', function(){ if(s) s.classList.remove('on'); });
+  })();
 
   // ===== Modo noturno =====
   (function(){
