@@ -154,6 +154,14 @@
   .fab-escrever{position:fixed;right:18px;bottom:20px;z-index:35;width:54px;height:54px;border-radius:50%;background:var(--wax);color:var(--paper);border:none;box-shadow:0 6px 18px rgba(143,45,40,.4);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s,background .2s}
   .fab-escrever:hover{transform:translateY(-2px);background:#7a2521}
   .fab-escrever svg{width:24px;height:24px}
+  .fab-explorar{position:fixed;left:18px;bottom:20px;z-index:35;width:54px;height:54px;border-radius:50%;background:var(--paper-2);color:var(--wax);border:1px solid var(--wax);box-shadow:0 6px 18px rgba(40,33,26,.22);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s}
+  .fab-explorar:hover{transform:translateY(-2px)}
+  .fab-explorar svg{width:23px;height:23px}
+  .fab-menu{position:fixed;left:18px;bottom:84px;z-index:35;display:flex;flex-direction:column;gap:8px;animation:fade .2s ease}
+  .fab-menu[hidden]{display:none}
+  .fab-menu-item{display:inline-flex;align-items:center;gap:9px;background:var(--paper);border:1px solid var(--line);border-radius:24px;padding:9px 16px 9px 14px;font-family:'EB Garamond',serif;font-size:15px;color:var(--ink-soft);cursor:pointer;box-shadow:0 4px 14px rgba(40,33,26,.16);transition:color .18s,border-color .18s,transform .18s}
+  .fab-menu-item:hover{color:var(--wax);border-color:var(--wax);transform:translateX(2px)}
+  .fab-menu-item svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
   .ao-acaso{display:block;margin:0 auto 16px;background:none;border:none;cursor:pointer;font-family:'EB Garamond',serif;font-style:italic;font-size:15px;color:var(--gold)}
   .ao-acaso:hover{color:var(--wax);text-decoration:underline;text-underline-offset:3px}
   .sparks{margin:2px 0 14px;text-align:center}
@@ -268,10 +276,6 @@
   .verif-result{font-style:italic;font-size:16px;min-height:1px}
   .verif-result.ok{color:var(--gold)}
   .verif-result.no{color:var(--wax)}
-  .saudacao{display:none;align-items:center;justify-content:center;gap:10px;margin:0 0 22px;font-family:'EB Garamond',serif;font-style:italic;color:var(--wax);font-size:16px}
-  .saudacao.on{display:flex}
-  .saudacao-x{background:none;border:none;color:var(--ink-faint);font-size:18px;line-height:1;cursor:pointer;padding:0 2px}
-  .saudacao-x:hover{color:var(--wax)}
   .verif-estante{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
   .verif-estante:empty{display:none}
   .verif-estante .btn-mini{font-family:'EB Garamond',serif;font-size:15px;border:1px solid var(--wax);color:var(--wax);background:none;border-radius:4px;padding:7px 14px;cursor:pointer;transition:all .18s}
@@ -392,8 +396,6 @@
       <p class="intro">Aqui repousam histórias escritas à mão e à alma — contos, versos, fragmentos. Cada uma traz uma marca única de quem ousou escrevê-la. Deixe a sua no livro dos dias da taverna.</p>
       <div class="flourish"></div>
     </header>
-
-    <div class="saudacao" id="saudacao"><span id="saudacao-txt"></span><button class="saudacao-x" id="saudacao-x" aria-label="Fechar">×</button></div>
 
     <div class="cta-row"><button class="btn btn-primary" id="abrir-publicar" data-cfg="cta">Confiar o seu texto</button></div>
 
@@ -581,7 +583,22 @@
     </div>
   </div>
 
+  <div class="modal" id="saudacao-modal">
+    <div class="sheet">
+      <h3 id="saudacao-titulo"></h3>
+      <p class="note" style="font-size:17px;line-height:1.85;color:var(--ink-soft)">Que bom te ver de novo na taverna. O seu canto ficou guardado — entre e fique à vontade.</p>
+      <div class="actions"><button class="btn btn-primary" id="saudacao-ok">Voltar ao mural</button></div>
+    </div>
+  </div>
+
   <button class="fab-escrever" id="fab-escrever" title="Escrever" aria-label="Escrever um texto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.2 4.8a5.5 5.5 0 0 0-7.8 0L4 13.2V20h6.8l8.4-8.4a5.5 5.5 0 0 0 0-7.8z"/><path d="M16 8 8 16"/><path d="M4 20l5-5"/></svg></button>
+
+  <div class="fab-menu" id="fab-menu" hidden>
+    <button class="fab-menu-item" id="fm-buscar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.7-4.7"/></svg>buscar textos</button>
+    <button class="fab-menu-item" id="fm-acompanhar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h9l5 5v11H5z"/><path d="M9 13h6M9 16.5h6"/></svg>acompanhar o seu texto</button>
+    <button class="fab-menu-item" id="fm-coletaneas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>coletâneas</button>
+  </div>
+  <button class="fab-explorar" id="fab-explorar" title="Explorar" aria-label="Explorar: buscar, acompanhar, coletâneas" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.7-4.7"/></svg></button>
 
   <div class="modal" id="citar-modal">
     <div class="sheet" style="max-width:560px">
@@ -1269,13 +1286,8 @@
     finally{ b.disabled=false; b.textContent='Verificar'; }
   });
 
-  // ===== Saudação (lembra a última assinatura) =====
-  (function(){
-    var nome=''; try{ nome=localStorage.getItem('pp_autor')||''; }catch(e){}
-    var s=document.getElementById('saudacao'), t=document.getElementById('saudacao-txt');
-    if(nome && s && t){ t.textContent='Bem-vinda(o) de volta, '+nome+' ✦'; s.classList.add('on'); }
-    var x=document.getElementById('saudacao-x'); if(x) x.addEventListener('click', function(){ if(s) s.classList.remove('on'); });
-  })();
+  // ===== Saudação =====
+
 
   // ===== Modo noturno =====
   (function(){
@@ -1497,11 +1509,32 @@
   });
 
   (function(){
-    var visto=false; try{ visto=!!localStorage.getItem('pp_visto'); }catch(e){}
-    var bm=document.getElementById('bemvindo-modal');
-    if(!visto && bm){ setTimeout(function(){ abrir(bm); }, 500); }
+    var bm=document.getElementById('bemvindo-modal'), sm=document.getElementById('saudacao-modal');
     var ok=document.getElementById('bemvindo-ok');
     if(ok) ok.addEventListener('click', function(){ fechar(bm); try{ localStorage.setItem('pp_visto','1'); }catch(e){} });
+    var sok=document.getElementById('saudacao-ok'); if(sok) sok.addEventListener('click', function(){ if(sm) fechar(sm); });
+    var visto=false; try{ visto=!!localStorage.getItem('pp_visto'); }catch(e){}
+    var nome=''; try{ nome=localStorage.getItem('pp_autor')||''; }catch(e){}
+    var jaSaudado=false; try{ jaSaudado=!!sessionStorage.getItem('pp_saudado'); }catch(e){}
+    if(!visto && bm){ setTimeout(function(){ abrir(bm); }, 500); }
+    else if(nome && sm && !jaSaudado){
+      var st=document.getElementById('saudacao-titulo'); if(st) st.textContent='Bem-vinda(o) de volta, '+nome+' ✦';
+      setTimeout(function(){ abrir(sm); }, 500);
+      try{ sessionStorage.setItem('pp_saudado','1'); }catch(e){}
+    }
+  })();
+
+  // ===== FAB explorar (buscar · acompanhar · coletâneas) =====
+  (function(){
+    var fabEx=document.getElementById('fab-explorar'), menu=document.getElementById('fab-menu');
+    if(!fabEx || !menu) return;
+    function fecharMenu(){ menu.hidden=true; fabEx.setAttribute('aria-expanded','false'); }
+    fabEx.addEventListener('click', function(e){ e.stopPropagation(); var ab=menu.hidden; menu.hidden=!ab; fabEx.setAttribute('aria-expanded', String(ab)); });
+    document.addEventListener('click', function(e){ if(!menu.hidden && !menu.contains(e.target) && e.target!==fabEx){ fecharMenu(); } });
+    var fb=document.getElementById('fm-buscar');
+    if(fb) fb.addEventListener('click', function(){ fecharMenu(); var bu=document.getElementById('busca'); if(bu){ bu.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(function(){ try{ bu.focus(); }catch(e){} }, 350); } });
+    var fa=document.getElementById('fm-acompanhar'); if(fa) fa.addEventListener('click', function(){ fecharMenu(); abrirAcompanhar(); });
+    var fc=document.getElementById('fm-coletaneas'); if(fc) fc.addEventListener('click', function(){ fecharMenu(); abrirColetaneas(); });
   })();
 
   function abrirColetaneas(){
