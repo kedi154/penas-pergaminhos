@@ -552,17 +552,17 @@
 
   <div class="modal" id="sobre-modal">
     <div class="sheet">
-      <h3>A taverna</h3>
-      <p class="note" data-cfg="sobre" style="font-size:17px;line-height:1.85;color:var(--ink-soft)">Penas &amp; Pergaminhos é o mural de histórias da Taverna do Leitor — um canto para guardar o que se escreve à mão e à alma. Aqui não há nome a provar nem conta a criar: você chega, deixa o seu conto, verso ou fragmento, e o taberneiro o sela no livro dos dias. Cada texto fica marcado por uma chave só sua. Escreva sem medo — a taverna não esquece.</p>
+      <h3>Penas &amp; Pergaminhos</h3>
+      <p class="note" data-cfg="sobre" style="font-size:17px;line-height:1.85;color:var(--ink-soft)">Penas &amp; Pergaminhos é o mural de histórias da Taverna do Leitor — um lugar para guardar o que se escreve à mão e à alma. Aqui não há nome a provar nem conta a criar: você chega, deixa o seu conto, verso ou fragmento, e o taberneiro o sela no livro dos dias. Cada texto fica marcado por uma chave só sua. Escreva sem medo — a taverna não esquece.</p>
       <div class="actions"><button class="btn btn-primary" id="sobre-ok">Fechar</button></div>
     </div>
   </div>
 
   <div class="modal" id="bemvindo-modal">
     <div class="sheet">
-      <h3>Bem-vindo à taverna</h3>
+      <h3>Bem-vindos a Penas &amp; Pergaminhos</h3>
       <p class="note" data-cfg="boasvindas" style="font-size:17px;line-height:1.85;color:var(--ink-soft)">Aqui você deixa o que escreve — um conto, um verso, um fragmento — sem criar conta e, se quiser, sem dizer o seu nome. O taberneiro lê cada texto com cuidado antes de selá-lo no mural. Não há nota a tirar nem regra a decorar: escreva sem medo, e a taverna guarda.</p>
-      <div class="actions"><button class="btn btn-primary" id="bemvindo-ok">Entrar na taverna</button></div>
+      <div class="actions"><button class="btn btn-primary" id="bemvindo-ok">Entrar em Penas &amp; Pergaminhos</button></div>
     </div>
   </div>
 
@@ -621,7 +621,7 @@
       <p class="note" style="text-align:left">Quer remover um texto já selado? Guarde sua chave de autoria — é com ela que você prova que o texto é seu — e fale com o Taberneiro pelos canais do rodapé.</p>
       <p class="note" style="font-weight:600;color:var(--ink);margin-top:14px;text-align:left">Privacidade</p>
       <p class="note" style="text-align:left">Não criamos conta nem pedimos cadastro. Guardamos apenas o que você digita (o nome ou pseudónimo, se quiser, e o texto) e estatísticas de acesso anônimas, sem cookies de rastreamento.</p>
-      <p class="note" style="text-align:left">Sua chave de autoria é guardada apenas como um código embaralhado (hash): nem a taverna consegue ver a chave original. Não vendemos nem compartilhamos seus dados.</p>
+      <p class="note" style="text-align:left">Sua chave de autoria é guardada apenas como um código embaralhado (hash): nem mesmo o administrador consegue ver a chave original. Não vendemos nem compartilhamos seus dados.</p>
       <p class="note" style="text-align:left">Para remover seu texto ou tirar dúvidas, fale com o Taberneiro pelos canais no rodapé. Este é um resumo em linguagem simples e não substitui aconselhamento jurídico.</p>
       <div class="actions"><button class="btn btn-primary" id="legal-ok">Fechar</button></div>
     </div>
@@ -732,7 +732,7 @@
     destaqueId=w.id;
     var trecho=(w.content||'').replace(/\s+/g,' ').trim().slice(0,180);
     if((w.content||'').replace(/\s+/g,' ').trim().length>180) trecho+='…';
-    hero.innerHTML='<div class="dh-label">✦ em destaque na taverna</div>'+
+    hero.innerHTML='<div class="dh-label">✦ em destaque no mural</div>'+
       '<div class="dh-genre">'+esc(w.genre||'Conto')+'</div>'+
       '<h2 class="dh-title">'+esc(w.title||'Sem título')+'</h2>'+
       '<p class="dh-excerpt">'+esc(trecho)+'</p>'+
