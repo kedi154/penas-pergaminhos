@@ -292,6 +292,8 @@
   .topnav button{background:none;border:none;padding:0;cursor:pointer;color:var(--ink-soft);display:inline-flex;transition:color .2s,transform .2s}
   .topnav button:hover{color:var(--wax);transform:translateY(-1px)}
   .topnav button svg{width:22px;height:22px;display:block}
+  .topnav button[hidden]{display:none}
+  .topnav button.tocando{color:var(--wax)}
   body.noite{--paper:#1f1a13;--paper-2:#2a2318;--ink:#ece3d2;--ink-soft:#c4b8a1;--ink-faint:#8c8068;--wax:#d98b6a;--wax-deep:#c2704f;--line:rgba(236,227,210,.14);--gold:#caa86a}
   body.noite .topnav{background:rgba(31,26,19,.72)}
   body.noite .c-input,
@@ -351,6 +353,10 @@
     <button id="toggle-noite" aria-label="Alternar modo noturno" title="Modo noturno" aria-pressed="false">
       <svg class="ic-noite" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8z"/></svg>
     </button>
+    <button id="toggle-ambiente" aria-label="Música de ambiente" title="Música de ambiente" aria-pressed="false" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>
+    </button>
+    <audio id="ambiente-audio" preload="metadata"></audio>
     <a id="top-telegram" href="#" target="_blank" rel="noopener" aria-label="Telegram da Taverna" title="Telegram">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.9 4.3c-.2-.2-.5-.3-.9-.2L3.3 11c-.5.2-.5.9 0 1.1l4.5 1.6 1.7 5.4c.1.4.6.5.9.2l2.6-2.4 4.6 3.4c.4.3.9.1 1-.4L22 4.9c.1-.2 0-.5-.1-.6zM9.4 14.2l-.3 3.3-1-3.5 8.6-5.6-7.3 5.8z"/></svg>
     </a>
@@ -1535,6 +1541,61 @@
     if(fb) fb.addEventListener('click', function(){ fecharMenu(); var bu=document.getElementById('busca'); if(bu){ bu.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(function(){ try{ bu.focus(); }catch(e){} }, 350); } });
     var fa=document.getElementById('fm-acompanhar'); if(fa) fa.addEventListener('click', function(){ fecharMenu(); abrirAcompanhar(); });
     var fc=document.getElementById('fm-coletaneas'); if(fc) fc.addEventListener('click', function(){ fecharMenu(); abrirColetaneas(); });
+  })();
+
+  // ===== Música de ambiente (playlist) =====
+  (function(){
+    // —— para acrescentar músicas, basta adicionar o caminho do arquivo aqui ——
+    var TRILHAS = [
+      'audio/taverna-1.mp3'
+      // , 'audio/taverna-2.mp3'
+      // , 'audio/taverna-3.mp3'
+    ];
+    var EMBARALHAR = true;   // tocar em ordem aleatória
+    var VOLUME = 0.35;       // volume baixo, de fundo
+    // ———————————————————————————————————————————————————————————————
+
+    var btn = document.getElementById('toggle-ambiente');
+    var audio = document.getElementById('ambiente-audio');
+    if(!btn || !audio || !TRILHAS.length) return;
+
+    audio.volume = VOLUME;
+    var ordem = TRILHAS.slice();
+    if(EMBARALHAR){ for(var i=ordem.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=ordem[i]; ordem[i]=ordem[j]; ordem[j]=t; } }
+    var idx = 0, revelado = false, falhas = 0;
+
+    function ligado(){ try{ return localStorage.getItem('pp_ambiente')==='1'; }catch(e){ return false; } }
+    function setLigado(v){ try{ localStorage.setItem('pp_ambiente', v?'1':'0'); }catch(e){} }
+    function refletir(t){ btn.classList.toggle('tocando', !!t); btn.setAttribute('aria-pressed', t?'true':'false'); btn.title = t ? 'Música de ambiente (tocando)' : 'Música de ambiente'; }
+    function carregar(i){ idx = (i+ordem.length)%ordem.length; audio.src = ordem[idx]; audio.load(); }
+
+    function ok(){ falhas = 0; if(!revelado){ revelado = true; btn.hidden = false; } }
+    audio.addEventListener('loadedmetadata', ok);
+    audio.addEventListener('canplay', ok);
+    audio.addEventListener('play', function(){ refletir(true); });
+    audio.addEventListener('pause', function(){ refletir(false); });
+    audio.addEventListener('ended', function(){ carregar(idx+1); if(ligado()) audio.play().catch(function(){}); });
+    audio.addEventListener('error', function(){
+      falhas++;
+      if(falhas < ordem.length){ carregar(idx+1); if(ligado()) audio.play().catch(function(){}); }
+      // se todas as faixas falharem (nenhum arquivo ainda), o botão fica escondido
+    });
+
+    btn.addEventListener('click', function(){
+      if(audio.paused){ setLigado(true); audio.play().catch(function(){}); }
+      else { setLigado(false); audio.pause(); }
+    });
+
+    carregar(0);  // só pra detectar se existe áudio (não toca sozinho)
+
+    // se você tinha deixado ligado, retoma assim que tocar a tela (navegadores bloqueiam som automático)
+    if(ligado()){
+      audio.play().catch(function(){
+        var retomar = function(){ if(ligado() && audio.paused){ audio.play().catch(function(){}); } document.removeEventListener('click', retomar); document.removeEventListener('keydown', retomar); };
+        document.addEventListener('click', retomar);
+        document.addEventListener('keydown', retomar);
+      });
+    }
   })();
 
   function abrirColetaneas(){
