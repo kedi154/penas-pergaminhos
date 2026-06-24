@@ -100,6 +100,17 @@
   .selo-dot.sel{box-shadow:0 0 0 2px var(--wax)}
   .foco-prog{text-align:center;color:var(--ink-faint);font-size:14px;font-style:italic;margin-bottom:18px}
   .premio{background:rgba(143,45,40,.07);border:1px solid rgba(143,45,40,.3);border-radius:8px;padding:12px 16px;text-align:center;color:var(--wax);margin:0 auto 18px;max-width:520px}
+  .vol-nav{display:flex;align-items:center;justify-content:center;gap:14px;margin:4px 0 12px}
+  .vol-seta{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--paper-2);color:var(--ink-soft);font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+  .vol-seta:hover:not(:disabled){border-color:var(--wax);color:var(--wax)}
+  .vol-seta:disabled{opacity:.3;cursor:default}
+  .vol-rotulo{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--ink);letter-spacing:.02em;min-width:120px;text-align:center}
+  .vol-rotulo i{color:var(--ink-faint);font-style:italic;font-size:14px}
+  .vol-corpo{animation:volFade .25s ease}
+  @keyframes volFade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  .modo-linha{display:flex;justify-content:center;margin:4px 0 12px}
+  .modo-btn{font-family:'Cormorant Garamond',serif;font-size:14.5px;background:none;border:1px dashed var(--line);color:var(--ink-soft);border-radius:18px;padding:5px 16px;cursor:pointer;transition:all .15s}
+  .modo-btn:hover{border-color:var(--wax);color:var(--wax)}
   .btn-brinde{background:var(--gold);color:#3a2a10;border-color:#8a6a2e;font-weight:600}
   .btn-brinde:hover{filter:brightness(1.05)}
   .modal-brinde{max-width:460px}
@@ -422,6 +433,7 @@
   }
   var minhas = carregarMinhas();
   var focoAtual=null, regCodigo=null, renCodigo=null;
+  var focoLivros=[], focoVolume=0;
   function acharMinha(id){ return minhas.find(function(m){ return String(m.id)===String(id); }) || null; }
   function acharMinhaPorCodigo(cod){ return minhas.find(function(m){ return m.codigo===cod; }) || null; }
   function ehMinhaId(id){ return !!acharMinha(id); }
@@ -537,12 +549,68 @@
   }
 
   // ---- estante em destaque ----
+  function romano(n){ var r=['','I','II','III','IV','V','VI','VII','VIII','IX','X']; return r[n] || String(n); }
+  function premioTexto(vol, dono){
+    if(!dono) return '✦ Uma estante e tanto — selada por um <b>'+esc(CFG.estante_brinde_titulo)+'</b>.';
+    var fim = vol ? 'Daqui em diante, cada 20 livros abre um novo <b>volume</b>.'
+                  : 'Sua estante segue <b>contínua</b> — e você pode organizá-la em <b>volumes</b> quando quiser.';
+    return '✦ Que estante! Você é um <b>'+esc(CFG.estante_brinde_titulo)+'</b> — isso dá direito a um <b>'+esc(CFG.estante_brinde_teaser)+'</b>. '+fim;
+  }
+  function linhasLivros(arr, base){
+    var html='';
+    for(var r=0;r<arr.length;r+=6){
+      var grupo = arr.slice(r, r+6);
+      html += '<div class="prateleira-linha"><div class="spines">'+grupo.map(function(b,k){ return spineLivro(b, base+r+k); }).join('')+'</div><div class="plank"></div></div>';
+    }
+    return html;
+  }
+  async function definirModo(vol){
+    if(!focoAtual) return;
+    var cod = (acharMinha(focoAtual.id)||{}).codigo; if(!cod) return;
+    focoAtual.volumes = vol; if(vol) focoVolume = 0;
+    var ent = estantes.find(function(x){ return String(x.id)===String(focoAtual.id); }); if(ent) ent.volumes = vol;
+    var pr = document.getElementById('foco-premio'); if(pr) pr.innerHTML = premioTexto(vol, true);
+    renderLivros();
+    try{ await rpc('definir_volumes', { p_codigo: cod, p_volumes: vol }); }catch(err){ console.error(err); }
+  }
+  function renderLivros(){
+    var alvo = document.getElementById('foco-livros'); if(!alvo) return;
+    if(!focoLivros.length){ alvo.innerHTML = '<div class="foco-vazia">Esta estante ainda está vazia.</div>'; return; }
+    var totVol = Math.max(1, Math.ceil(focoLivros.length / CAPACIDADE));
+    var vol = !!(focoAtual && focoAtual.volumes);
+    var dono = focoAtual ? ehMinhaId(focoAtual.id) : false;
+    var podeAlternar = dono && (focoLivros.length >= CAPACIDADE);
+    var topo='', corpo='', rodape='';
+    if(vol){
+      if(focoVolume < 0) focoVolume = 0;
+      if(focoVolume > totVol-1) focoVolume = totVol-1;
+      if(totVol > 1){
+        topo = '<div class="vol-nav">'+
+          '<button class="vol-seta" id="vol-prev"'+(focoVolume<=0?' disabled':'')+' aria-label="Volume anterior">‹</button>'+
+          '<span class="vol-rotulo">Volume '+romano(focoVolume+1)+' <i>de '+totVol+'</i></span>'+
+          '<button class="vol-seta" id="vol-next"'+(focoVolume>=totVol-1?' disabled':'')+' aria-label="Próximo volume">›</button>'+
+        '</div>';
+      }
+      var ini = focoVolume*CAPACIDADE;
+      corpo = linhasLivros(focoLivros.slice(ini, ini+CAPACIDADE), ini);
+      if(podeAlternar) rodape = '<div class="modo-linha"><button class="modo-btn" id="modo-cont">↩ voltar a estante contínua</button></div>';
+    } else {
+      if(podeAlternar) topo = '<div class="modo-linha"><button class="modo-btn" id="modo-vol">⊞ organizar em volumes</button></div>';
+      corpo = linhasLivros(focoLivros, 0);
+    }
+    alvo.innerHTML = topo + '<div class="vol-corpo">'+corpo+'</div>' + rodape;
+    alvo.querySelectorAll('.spine').forEach(function(sp){ sp.addEventListener('click', function(){ abrirLivro(sp.getAttribute('data-livro')); }); });
+    var pv=document.getElementById('vol-prev'); if(pv) pv.addEventListener('click', function(){ if(focoVolume>0){ focoVolume--; renderLivros(); } });
+    var nx=document.getElementById('vol-next'); if(nx) nx.addEventListener('click', function(){ focoVolume++; renderLivros(); });
+    var mv=document.getElementById('modo-vol'); if(mv) mv.addEventListener('click', function(){ definirModo(true); });
+    var mc=document.getElementById('modo-cont'); if(mc) mc.addEventListener('click', function(){ definirModo(false); });
+  }
   function spineLivro(b, i){
     var cor = SPINE_CORES[(b.pergaminho_id + i) % SPINE_CORES.length];
     var h = 150 + ((b.pergaminho_id*7 + i*11) % 36);
     return '<div class="spine" data-livro="'+b.pergaminho_id+'" style="height:'+h+'px;background:'+cor+';animation-delay:'+(i*0.06)+'s" title="'+esc(b.titulo)+'"><span>'+esc(b.titulo||'Sem título')+'</span></div>';
   }
-  async function abrirFoco(e){
+  async function abrirFoco(e, volAlvo){
     var foco = document.getElementById('foco');
     focoAtual = e;
     var ehMinha = ehMinhaId(e.id);
@@ -552,7 +620,7 @@
     var progHtml = prox ? '<div class="foco-prog" id="foco-prog">faltam '+(prox.n - n)+' '+((prox.n-n)===1?'livro':'livros')+' para o selo "'+esc(prox.nome)+'" · toque num selo para ver o que é</div>'
                         : '<div class="foco-prog" id="foco-prog">todos os selos conquistados ✦ · toque num selo para ver o que é</div>';
     var jaPegou = false; try{ jaPegou = localStorage.getItem('pp_brinde_'+e.id)==='1'; }catch(_){}
-    var premioHtml = (n >= CAPACIDADE) ? '<div class="premio">✦ Estante cheia! Você é um <b>'+esc(CFG.estante_brinde_titulo)+'</b> — e isso dá direito a um <b>'+esc(CFG.estante_brinde_teaser)+'</b>.</div>' : '';
+    var premioHtml = (n >= CAPACIDADE) ? '<div class="premio" id="foco-premio">'+premioTexto(!!e.volumes, ehMinha)+'</div>' : '';
     var acoes = '<div class="foco-acoes">';
     if(ehMinha){ acoes += '<button class="btn btn-cheio" id="foco-resgatar">'+IC.registrar+'Registrar um livro</button>'
                         + '<button class="btn" id="foco-renomear">'+IC.renomear+'Renomear</button>';
@@ -584,17 +652,10 @@
 
     try {
       var livros = await rpc('ler_prateleira', { p_id: e.id });
-      var alvo = document.getElementById('foco-livros');
-      if(!livros || !livros.length){ alvo.innerHTML = '<div class="foco-vazia">Esta estante ainda está vazia.</div>'; return; }
-      var html=''; var porLinha=6;
-      for(var r=0;r<livros.length;r+=porLinha){
-        var grupo = livros.slice(r, r+porLinha);
-        html += '<div class="prateleira-linha"><div class="spines">'+grupo.map(function(b,k){ return spineLivro(b, r+k); }).join('')+'</div><div class="plank"></div></div>';
-      }
-      alvo.innerHTML = html;
-      alvo.querySelectorAll('.spine').forEach(function(sp){
-        sp.addEventListener('click', function(){ abrirLivro(sp.getAttribute('data-livro')); });
-      });
+      focoLivros = livros || [];
+      var totVol = Math.max(1, Math.ceil(focoLivros.length / CAPACIDADE));
+      focoVolume = (volAlvo === 'last') ? totVol-1 : 0;
+      renderLivros();
     } catch(err){ console.error(err); document.getElementById('foco-livros').innerHTML = '<div class="foco-vazia">Não consegui abrir as prateleiras agora.</div>'; }
   }
 
@@ -684,7 +745,7 @@
       await carregar();
       var ent = acharMinhaPorCodigo(regCodigo);
       var atual = ent && estantes.find(function(x){ return String(x.id)===String(ent.id); });
-      if(atual && document.getElementById('foco-ov').classList.contains('on')) abrirFoco(atual);
+      if(atual && document.getElementById('foco-ov').classList.contains('on')) abrirFoco(atual, 'last');
     } catch(err){
       var msg = err && err.message ? err.message : 'Não consegui registrar agora.';
       if(/estante n[ãa]o encontrada/i.test(msg)){ fechar('resgatar-modal'); limparMinhaPorCodigo(regCodigo, true); return; }
