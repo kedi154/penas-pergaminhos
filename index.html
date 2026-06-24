@@ -430,7 +430,7 @@
         </a>
       </div>
       <div class="foot-note" id="contagem"></div>
-      <div class="foot-note"><span data-cfg="rodape">Cada pergaminho é lido antes de ser selado.</span> · <a id="abrir-sobre" style="cursor:pointer;color:var(--wax)">sobre a taverna</a> · <a id="abrir-legal" style="cursor:pointer;color:var(--wax)">termos · privacidade</a></div>
+      <div class="foot-note"><span data-cfg="rodape">Cada pergaminho é lido antes de ser selado.</span> · <a id="abrir-sobre" style="cursor:pointer;color:var(--wax)">sobre Penas &amp; Pergaminhos</a> · <a id="abrir-legal" style="cursor:pointer;color:var(--wax)">termos · privacidade</a></div>
       <button class="btn btn-ghost" id="instalar-btn" hidden>instalar na tela inicial</button>
     </footer>
   </div>
@@ -809,7 +809,7 @@
       abrirAutorDoLink();
     }catch(e){
       console.error('Falha ao carregar:', e);
-      els.scrolls.innerHTML = '<div class="state"><div class="big">O mural está trancado</div>Não consegui falar com a taverna. Veja o console (F12).</div>';
+      els.scrolls.innerHTML = '<div class="state"><div class="big">O mural está fechado por um instante</div>Não consegui carregar as histórias agora. Tente atualizar a página — deve voltar logo.</div>';
     }
   }
 
@@ -879,7 +879,14 @@
   function render(lista){
     els.scrolls.innerHTML = '';
     if(!lista.length){
-      els.scrolls.innerHTML = '<div class="state"><div class="big">Nada por aqui ainda</div>Nenhum pergaminho com estes filtros.</div>';
+      var temFiltro = soFavoritos || filtroAutor || (filtroGenero!=='Todos') || busca;
+      if(!textosAtuais.length){
+        els.scrolls.innerHTML = '<div class="state"><div class="big">O mural ainda está em branco</div>Seja o primeiro a deixar um conto, verso ou fragmento aqui.</div>';
+      } else if(temFiltro){
+        els.scrolls.innerHTML = '<div class="state"><div class="big">Nada por aqui ainda</div>Nenhum pergaminho com estes filtros.</div>';
+      } else {
+        els.scrolls.innerHTML = '<div class="state"><div class="big">Tudo em destaque por agora</div>As demais histórias aparecem aqui assim que chegarem.</div>';
+      }
       return;
     }
     lista.forEach(function(w,i){
@@ -1177,7 +1184,7 @@
       console.error('Falha ao enviar:', e);
       stamp.classList.remove('on');
       abrir(els.modal);
-      fb('Não consegui enviar agora. Veja o console (F12).','err');
+      fb('Não consegui enviar agora. Tente de novo daqui a pouco.','err');
     }finally{btn.disabled=false;btn.textContent='Selar mesmo assim';}
   });
 
@@ -1209,7 +1216,7 @@
       var ok=await supaPost('/rpc/verificar_autoria', { p_id: currentReaderId, p_chave_hash: hash }, 'return=representation');
       if(ok===true){ res.textContent='✓ Confere — este pergaminho é seu.'; res.className='verif-result ok'; }
       else { res.textContent='✗ Não confere com este pergaminho.'; res.className='verif-result no'; }
-    }catch(e){ console.error('Falha ao verificar:', e); res.textContent='Não consegui verificar agora. Veja o console (F12).'; res.className='verif-result no'; }
+    }catch(e){ console.error('Falha ao verificar:', e); res.textContent='Não consegui verificar agora. Tente de novo daqui a pouco.'; res.className='verif-result no'; }
     finally{ b.disabled=false; b.textContent='Verificar'; }
   });
 
