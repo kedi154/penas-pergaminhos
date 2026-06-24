@@ -131,6 +131,11 @@
   .spines{display:flex;align-items:flex-end;gap:6px;justify-content:flex-start;min-height:160px;padding:0 10px;flex-wrap:nowrap;overflow-x:auto}
   .plank{height:14px;background:linear-gradient(180deg,#876048,#6b4a32);border-radius:2px;margin-top:-2px;box-shadow:0 4px 8px rgba(74,52,34,.25)}
   .spine{flex:0 0 auto;width:38px;border-radius:3px 3px 0 0;border:1px solid rgba(0,0,0,.12);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:transform .18s, box-shadow .18s;animation:cair .5s both}
+  .spine-novo{position:absolute;top:-4px;right:-4px;width:10px;height:10px;border-radius:50%;background:var(--wax);border:2px solid var(--paper);z-index:3}
+  .coment-aviso{text-align:center;color:var(--wax);font-family:'EB Garamond',serif;font-style:italic;font-size:15px;margin:0 0 12px}
+  .ver-mural{display:inline-block;margin:2px 0 14px;font-family:'EB Garamond',serif;font-size:14px;font-style:italic;color:var(--wax);text-decoration:none}
+  .ver-mural:hover{text-decoration:underline}
+  .ver-mural[hidden]{display:none}
   @keyframes cair{from{opacity:0;transform:translateY(-26px) rotate(-3deg)}to{opacity:1;transform:none}}
   .spine:hover{transform:translateY(-8px);box-shadow:0 8px 16px rgba(0,0,0,.3);z-index:2}
   .spine span{writing-mode:vertical-rl;transform:rotate(180deg);color:#f4ecdd;font-family:'Cormorant Garamond',serif;font-weight:500;font-size:13px;letter-spacing:.02em;white-space:nowrap;overflow:hidden;max-height:128px;padding:8px 0}
@@ -240,6 +245,7 @@
       <div class="pag-genero" id="pag-genero"></div>
       <h2 class="pag-titulo" id="pag-titulo"></h2>
       <div class="pag-autor" id="pag-autor"></div>
+      <a class="ver-mural" id="ver-mural" target="_blank" rel="noopener" hidden></a>
       <div class="pag-corpo" id="pag-corpo"></div>
     </div>
     <div class="livro-capa" id="livro-capa">
@@ -437,7 +443,7 @@
   }
   var minhas = carregarMinhas();
   var focoAtual=null, regCodigo=null, renCodigo=null;
-  var focoLivros=[], focoVolume=0;
+  var focoLivros=[], focoVolume=0, focoComentarios={};
   function acharMinha(id){ return minhas.find(function(m){ return String(m.id)===String(id); }) || null; }
   function acharMinhaPorCodigo(cod){ return minhas.find(function(m){ return m.codigo===cod; }) || null; }
   function ehMinhaId(id){ return !!acharMinha(id); }
@@ -577,6 +583,18 @@
     renderLivros();
     try{ await rpc('definir_volumes', { p_codigo: cod, p_volumes: vol }); }catch(err){ console.error(err); }
   }
+  function lerComentVistos(){ try{ return JSON.parse(localStorage.getItem('pp_coment_vistos')||'{}')||{}; }catch(e){ return {}; } }
+  function salvarComentVistos(m){ try{ localStorage.setItem('pp_coment_vistos', JSON.stringify(m)); }catch(e){} }
+  function temNovos(id){ return (focoComentarios[id]||0) > (lerComentVistos()[id]||0); }
+  function contarNovos(){ if(!focoAtual || !ehMinhaId(focoAtual.id)) return 0; return focoLivros.filter(function(b){ return temNovos(b.pergaminho_id); }).length; }
+  function atualizarAvisoComent(){
+    var alvo=document.getElementById('foco-livros'); if(!alvo) return;
+    var av=alvo.querySelector('.coment-aviso'), n=contarNovos();
+    if(n>0){
+      var txt='✦ '+n+(n===1?' pergaminho com novos comentários':' pergaminhos com novos comentários');
+      if(av){ av.textContent=txt; } else { var d=document.createElement('div'); d.className='coment-aviso'; d.textContent=txt; alvo.insertBefore(d, alvo.firstChild); }
+    } else if(av){ av.parentNode.removeChild(av); }
+  }
   function renderLivros(){
     var alvo = document.getElementById('foco-livros'); if(!alvo) return;
     if(!focoLivros.length){ alvo.innerHTML = '<div class="foco-vazia">Esta estante ainda está vazia.</div>'; return; }
@@ -608,11 +626,13 @@
     var nx=document.getElementById('vol-next'); if(nx) nx.addEventListener('click', function(){ focoVolume++; renderLivros(); });
     var mv=document.getElementById('modo-vol'); if(mv) mv.addEventListener('click', function(){ definirModo(true); });
     var mc=document.getElementById('modo-cont'); if(mc) mc.addEventListener('click', function(){ definirModo(false); });
+    atualizarAvisoComent();
   }
   function spineLivro(b, i){
     var cor = SPINE_CORES[(b.pergaminho_id + i) % SPINE_CORES.length];
     var h = 150 + ((b.pergaminho_id*7 + i*11) % 36);
-    return '<div class="spine" data-livro="'+b.pergaminho_id+'" style="height:'+h+'px;background:'+cor+';animation-delay:'+(i*0.06)+'s" title="'+esc(b.titulo)+'"><span>'+esc(b.titulo||'Sem título')+'</span></div>';
+    var novo = temNovos(b.pergaminho_id) ? '<i class="spine-novo" title="novos comentários"></i>' : '';
+    return '<div class="spine" data-livro="'+b.pergaminho_id+'" style="height:'+h+'px;background:'+cor+';animation-delay:'+(i*0.06)+'s" title="'+esc(b.titulo)+'">'+novo+'<span>'+esc(b.titulo||'Sem título')+'</span></div>';
   }
   async function abrirFoco(e, volAlvo){
     var foco = document.getElementById('foco');
@@ -657,6 +677,14 @@
     try {
       var livros = await rpc('ler_prateleira', { p_id: e.id });
       focoLivros = livros || [];
+      focoComentarios = {};
+      if(ehMinha && focoLivros.length){
+        try{
+          var ids = focoLivros.map(function(b){ return b.pergaminho_id; }).join(',');
+          var cs = await supaGet('/comentarios?select=pergaminho_id&pergaminho_id=in.('+ids+')');
+          (cs||[]).forEach(function(c){ var k=c.pergaminho_id; focoComentarios[k]=(focoComentarios[k]||0)+1; });
+        }catch(_){ focoComentarios={}; }
+      }
       var totVol = Math.max(1, Math.ceil(focoLivros.length / CAPACIDADE));
       focoVolume = (volAlvo === 'last') ? totVol-1 : 0;
       renderLivros();
@@ -700,6 +728,15 @@
       document.getElementById('pag-titulo').textContent = t.titulo || 'Sem título';
       document.getElementById('pag-autor').textContent = t.autor ? ('por ' + t.autor) : '';
       document.getElementById('pag-corpo').textContent = t.conteudo || '';
+      var nc = focoComentarios[id] || 0;
+      var vm = document.getElementById('ver-mural');
+      if(vm){
+        if(nc > 0){ vm.hidden=false; vm.textContent='💬 '+nc+(nc===1?' comentário':' comentários')+' · ler no mural'; vm.href='index.html?texto='+encodeURIComponent(id); }
+        else { vm.hidden=true; vm.removeAttribute('href'); }
+      }
+      try{ var vis=lerComentVistos(); vis[id]=nc; salvarComentVistos(vis); }catch(_){}
+      var dot=document.querySelector('.spine[data-livro="'+id+'"] .spine-novo'); if(dot && dot.parentNode) dot.parentNode.removeChild(dot);
+      atualizarAvisoComent();
       aplicarFonte();
       var pg=document.querySelector('.livro-paginas'); if(pg) pg.scrollTop=0; atualizarProgresso();
       setTimeout(function(){ livro.classList.add('aberto'); }, 280);
