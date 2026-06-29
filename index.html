@@ -237,7 +237,6 @@
     .controls-right{width:100%;gap:8px;flex-wrap:nowrap}
     .busca{flex:1;min-width:0}
     .fav-toggle{padding:6px 12px;white-space:nowrap}
-    .fav-toggle .ft-label{display:none}
     .sort-sel{padding:6px 8px;font-size:14px}
     .r-actions{gap:8px;margin-top:24px;padding-top:18px}
     .act{padding:8px 13px;font-size:15px}
@@ -335,6 +334,8 @@
   .fav-toggle{font-family:'EB Garamond',serif;font-size:15px;padding:5px 13px;border:1px solid var(--line);border-radius:30px;background:transparent;color:var(--ink-soft);cursor:pointer;transition:.2s;white-space:nowrap}
   .fav-toggle:hover{border-color:var(--wax);color:var(--wax)}
   .fav-toggle.on{background:var(--wax);border-color:var(--wax);color:var(--paper)}
+  .citar-dica{font-family:'EB Garamond',serif;font-size:13px;font-style:italic;color:var(--ink-faint);margin:2px 0 8px;text-align:center}
+  .citar-dica b{font-style:normal;color:var(--ink-soft)}
   .s-foot .cmt-count{color:var(--ink-faint);font-size:15px;font-style:italic;margin-left:12px}
   .act.on{color:var(--wax)}
   .act-icon{border:none;background:none;padding:8px 10px}
@@ -479,6 +480,7 @@
         <button class="act act-text" id="abrir-denuncia" style="opacity:.65" title="Reportar este texto">denunciar</button>
         <span class="fonte-ctrl"><button class="act" id="fonte-menos" title="Diminuir fonte">A−</button><button class="act" id="fonte-mais" title="Aumentar fonte">A+</button><button class="act" id="entrelinha" title="Espaçamento entre linhas" aria-label="Espaçamento entre linhas">↕</button></span>
       </div>
+      <p class="citar-dica">✦ dica: selecione um trecho antes de <b>criar cartão</b> — senão usamos o início do texto.</p>
       <div class="verificar-area" id="verificar-area">
         <input id="verif-chave" placeholder="cole aqui a sua chave de autoria">
         <button class="btn btn-primary" id="verif-btn" style="align-self:flex-start">Verificar</button>
@@ -601,6 +603,7 @@
 
   <div class="fab-menu" id="fab-menu" hidden>
     <button class="fab-menu-item" id="fm-buscar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.7-4.7"/></svg>buscar textos</button>
+    <button class="fab-menu-item" id="fm-guardados"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17.3l-5.4 3 1-6-4.4-4.2 6-.9L12 3l2.8 6.2 6 .9-4.4 4.2 1 6z"/></svg>pergaminhos guardados</button>
     <button class="fab-menu-item" id="fm-acompanhar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h9l5 5v11H5z"/><path d="M9 13h6M9 16.5h6"/></svg>acompanhar o seu texto</button>
     <button class="fab-menu-item" id="fm-coletaneas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>coletâneas</button>
   </div>
@@ -905,9 +908,7 @@
   }
   function partilharPerfil(nome){
     var url = location.origin+location.pathname+'?autor='+encodeURIComponent(nome);
-    if(navigator.share){ navigator.share({ title:'Penas & Pergaminhos', text:'Os pergaminhos de '+nome+' na taverna', url:url }).catch(function(){}); }
-    else if(navigator.clipboard){ navigator.clipboard.writeText(url).then(function(){ ppToast('Link do perfil copiado!'); }).catch(function(){ prompt('Link do perfil:', url); }); }
-    else { prompt('Link do perfil:', url); }
+    partilharUrl(url, 'Os pergaminhos de '+nome+' na taverna', 'Penas & Pergaminhos');
   }
   function abrirAutorDoLink(){
     var a = new URLSearchParams(location.search).get('autor');
@@ -1043,18 +1044,25 @@
   document.getElementById('r-like').addEventListener('click', function(){ if(currentReaderId!=null) curtir(currentReaderId); });
   document.getElementById('r-share').addEventListener('click', function(){ if(currentReaderId!=null) compartilhar(currentReaderId); });
 
+  function copiarLink(url, msg){
+    msg = msg || 'Link copiado! ✦';
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url).then(function(){ ppToast(msg); }).catch(function(){ prompt('Copie o link:', url); });
+    } else { prompt('Copie o link:', url); }
+  }
+  function partilharUrl(url, text, title){
+    if(navigator.share){
+      navigator.share({ title: title||'Penas & Pergaminhos', text: text||'', url: url }).catch(function(e){
+        if(e && e.name==='AbortError') return; // o usuário fechou a folha de propósito
+        copiarLink(url);
+      });
+    } else { copiarLink(url); }
+  }
   function compartilhar(id){
-    var btn = document.getElementById('r-share');
     var w = textosAtuais.find(function(x){ return String(x.id)===String(id); });
     var titulo = w ? (w.title||'Sem título') : 'Penas & Pergaminhos';
     var url = OG_DINAMICO ? (SUPABASE_URL + '/functions/v1/partilha?id=' + id) : (location.origin + location.pathname + '?texto=' + id);
-    if(navigator.share){
-      navigator.share({ title:titulo, text:'“'+titulo+'” — na taverna Penas & Pergaminhos', url:url }).catch(function(){});
-    } else if(navigator.clipboard){
-      navigator.clipboard.writeText(url).then(function(){
-        btn.title='link copiado!'; btn.classList.add('on'); setTimeout(function(){ btn.title='Compartilhar'; btn.classList.remove('on'); },1800);
-      }).catch(function(){ btn.title='copie: '+url; });
-    } else { btn.title=url; }
+    partilharUrl(url, '“'+titulo+'” — na taverna Penas & Pergaminhos', titulo);
   }
 
   async function carregarComentarios(id){
@@ -1314,8 +1322,8 @@
   document.getElementById('r-fav').addEventListener('click', function(){
     if(currentReaderId==null) return; var key=String(currentReaderId);
     var star=this.querySelector('.fav-star');
-    if(favSet.has(key)){ favSet.delete(key); this.classList.remove('on'); if(star) star.textContent='☆'; this.title='Guardar'; }
-    else { favSet.add(key); this.classList.add('on'); if(star) star.textContent='★'; this.title='Guardado'; }
+    if(favSet.has(key)){ favSet.delete(key); this.classList.remove('on'); if(star) star.textContent='☆'; this.title='Guardar'; ppToast('Removido dos guardados'); }
+    else { favSet.add(key); this.classList.add('on'); if(star) star.textContent='★'; this.title='Guardado'; ppToast('Guardado nos seus pergaminhos ✦'); }
     salvarFavs(); if(soFavoritos) aplicarVista();
   });
 
@@ -1539,6 +1547,8 @@
     document.addEventListener('click', function(e){ if(!menu.hidden && !menu.contains(e.target) && e.target!==fabEx){ fecharMenu(); } });
     var fb=document.getElementById('fm-buscar');
     if(fb) fb.addEventListener('click', function(){ fecharMenu(); var bu=document.getElementById('busca'); if(bu){ bu.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(function(){ try{ bu.focus(); }catch(e){} }, 350); } });
+    var fg=document.getElementById('fm-guardados');
+    if(fg) fg.addEventListener('click', function(){ fecharMenu(); var ft=document.getElementById('fav-toggle'); if(ft){ if(!ft.classList.contains('on')) ft.click(); ft.scrollIntoView({behavior:'smooth',block:'center'}); } });
     var fa=document.getElementById('fm-acompanhar'); if(fa) fa.addEventListener('click', function(){ fecharMenu(); abrirAcompanhar(); });
     var fc=document.getElementById('fm-coletaneas'); if(fc) fc.addEventListener('click', function(){ fecharMenu(); abrirColetaneas(); });
   })();

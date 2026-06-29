@@ -815,11 +815,14 @@
     finally{ b.disabled=false; }
   });
 
+  function copiarLinkEstante(url){
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(function(){ toast('Link da estante copiado ✦'); }).catch(function(){ prompt('Copie o link:', url); }); }
+    else { prompt('Copie o link:', url); }
+  }
   function partilharEstante(e){
     var url = location.origin + location.pathname + '?estante=' + e.id;
-    if(navigator.share){ navigator.share({ title: tituloEstante(e.nome), text: 'Veja a minha estante na Taverna', url: url }).catch(function(){}); }
-    else if(navigator.clipboard){ navigator.clipboard.writeText(url).then(function(){ toast('Link da estante copiado ✦'); }).catch(function(){ toast(url); }); }
-    else { toast(url); }
+    if(navigator.share){ navigator.share({ title: tituloEstante(e.nome), text: 'Veja a minha estante na Taverna', url: url }).catch(function(ev){ if(ev && ev.name==='AbortError') return; copiarLinkEstante(url); }); }
+    else { copiarLinkEstante(url); }
   }
 
   document.getElementById('renomear-ok').addEventListener('click', async function(){
