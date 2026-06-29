@@ -54,6 +54,8 @@
   .tab.active{background:color-mix(in srgb,var(--accent) 16%,var(--field));border-color:var(--accent);color:var(--ink)}
   .tab.active svg{opacity:1}
   .tab .badge:not(:empty){margin-left:1px;font-size:12px;color:var(--accent);font-weight:700}
+  .tab .badge.pulsa{display:inline-block;animation:badgePulsa 1s ease 2}
+  @keyframes badgePulsa{0%,100%{transform:scale(1);color:var(--accent)}35%{transform:scale(1.5);color:var(--gold)}}
   .c-gold{--accent:var(--gold)}
   .c-red{--accent:var(--red)}
   .c-green{--accent:#8bb673}
@@ -144,7 +146,7 @@
           <button class="tab c-blue" data-aba="textos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h4"/></svg><span>Textos</span></button>
           <button class="tab c-blue" data-aba="assinantes"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M4 7l8 6 8-6"/></svg><span>Assinantes</span></button>
           <button class="tab c-blue" data-aba="estantes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4v15M9 4v15M13.5 5l3 14M18 5v14"/><path d="M3 19.5h18"/></svg><span>Estantes</span></button>
-          <button class="tab c-gold" data-aba="brindes"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="8" width="18" height="13" rx="1"/><path d="M3 12h18M12 8v13"/><path d="M12 8C12 8 10.5 4 8 4.5 5.5 5 7 8 12 8zM12 8C12 8 13.5 4 16 4.5 18.5 5 17 8 12 8z"/></svg><span>Brindes</span></button>
+          <button class="tab c-gold" data-aba="brindes"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="8" width="18" height="13" rx="1"/><path d="M3 12h18M12 8v13"/><path d="M12 8C12 8 10.5 4 8 4.5 5.5 5 7 8 12 8zM12 8C12 8 13.5 4 16 4.5 18.5 5 17 8 12 8z"/></svg><span>Brindes</span><span class="badge" id="badge-brindes"></span></button>
         </div>
         <button class="sair" id="sair">sair</button>
       </div>
@@ -166,6 +168,10 @@
           <div class="rcard c-red" data-ir="denuncias">
             <div class="rcard-top"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4h12l-2.5 4L17 12H5"/></svg><span class="rcard-label">Denúncias</span></div>
             <div class="rcard-num" id="rnum-den">—</div>
+          </div>
+          <div class="rcard c-gold" data-ir="brindes">
+            <div class="rcard-top"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="8" width="18" height="13" rx="1"/><path d="M3 12h18M12 8v13"/><path d="M12 8C12 8 10.5 4 8 4.5 5.5 5 7 8 12 8zM12 8C12 8 13.5 4 16 4.5 18.5 5 17 8 12 8z"/></svg><span class="rcard-label">Brindes a enviar</span></div>
+            <div class="rcard-num" id="rnum-brindes">—</div>
           </div>
         </div>
       </section>
@@ -334,18 +340,37 @@
 
   function setNum(id,n){ var el=document.getElementById(id); if(el){ el.textContent=n; el.classList.toggle('zero', n===0); } }
   function pintarBadge(id,n){ var el=document.getElementById(id); if(el) el.textContent = n? '('+n+')' : ''; }
-  async function carregarResumo(){
-    var txt=document.getElementById('resumo-aviso-txt'); txt.textContent='A carregar…';
-    try{
-      var r=await chamar('resumo');
-      var p=r.pendentes||0, c=r.comentarios||0, d=r.denuncias||0, total=p+c+d;
-      setNum('rnum-pend',p); setNum('rnum-com',c); setNum('rnum-den',d);
-      pintarBadge('badge-pend',p); pintarBadge('badge-com',c); pintarBadge('badge-den',d);
-      var dot=document.querySelector('#resumo-aviso .dot');
+  var contagensAnteriores=null, pollResumoAtivo=false;
+  function pulsarBadge(id){ var el=document.getElementById(id); if(!el) return; el.classList.remove('pulsa'); void el.offsetWidth; el.classList.add('pulsa'); }
+  function aplicarResumo(r){
+    var p=r.pendentes||0, c=r.comentarios||0, d=r.denuncias||0, b=r.brindes||0, total=p+c+d+b;
+    setNum('rnum-pend',p); setNum('rnum-com',c); setNum('rnum-den',d); setNum('rnum-brindes',b);
+    pintarBadge('badge-pend',p); pintarBadge('badge-com',c); pintarBadge('badge-den',d); pintarBadge('badge-brindes',b);
+    var dot=document.querySelector('#resumo-aviso .dot'), txt=document.getElementById('resumo-aviso-txt');
+    if(dot && txt){
       if(total>0){ dot.style.background='var(--gold)'; txt.innerHTML='<b>'+total+'</b> '+(total===1?'item espera':'itens esperam')+' por você.'; }
       else { dot.style.background='var(--ok)'; txt.textContent='Tudo em dia — a taverna está tranquila. ✦'; }
-      document.title = total>0 ? ('('+total+') Painel do Taberneiro') : 'Painel do Taberneiro';
-    }catch(err){ console.error('Falha no resumo:', err); txt.textContent='Não consegui carregar o resumo agora.'; }
+    }
+    document.title = total>0 ? ('('+total+') Painel do Taberneiro') : 'Painel do Taberneiro';
+    if(contagensAnteriores){
+      if(p>contagensAnteriores.p) pulsarBadge('badge-pend');
+      if(c>contagensAnteriores.c) pulsarBadge('badge-com');
+      if(d>contagensAnteriores.d) pulsarBadge('badge-den');
+      if(b>contagensAnteriores.b) pulsarBadge('badge-brindes');
+    }
+    contagensAnteriores={ p:p, c:c, d:d, b:b };
+  }
+  function iniciarPollResumo(){
+    if(pollResumoAtivo) return; pollResumoAtivo=true;
+    setInterval(async function(){ try{ var r=await chamar('resumo'); aplicarResumo(r); }catch(e){} }, 45000);
+  }
+  async function carregarResumo(){
+    var txt=document.getElementById('resumo-aviso-txt'); if(txt && !contagensAnteriores) txt.textContent='A carregar…';
+    try{
+      var r=await chamar('resumo');
+      aplicarResumo(r);
+      iniciarPollResumo();
+    }catch(err){ console.error('Falha no resumo:', err); if(txt) txt.textContent='Não consegui carregar o resumo agora.'; }
   }
 
   async function carregarAssinantes(){
