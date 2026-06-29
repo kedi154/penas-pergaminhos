@@ -336,6 +336,9 @@
   .fav-toggle.on{background:var(--wax);border-color:var(--wax);color:var(--paper)}
   .citar-dica{font-family:'EB Garamond',serif;font-size:13px;font-style:italic;color:var(--ink-faint);margin:2px 0 8px;text-align:center}
   .citar-dica b{font-style:normal;color:var(--ink-soft)}
+  .share-alvos{display:flex;flex-direction:column;gap:8px;margin:8px 0 4px}
+  .share-alvo{display:block;width:100%;box-sizing:border-box;text-align:center;padding:11px 14px;border:1px solid var(--line);border-radius:8px;background:var(--paper-2);color:var(--ink);font-family:'EB Garamond',serif;font-size:16px;text-decoration:none;cursor:pointer;transition:border-color .16s,color .16s}
+  .share-alvo:hover{border-color:var(--wax);color:var(--wax)}
   .s-foot .cmt-count{color:var(--ink-faint);font-size:15px;font-style:italic;margin-left:12px}
   .act.on{color:var(--wax)}
   .act-icon{border:none;background:none;padding:8px 10px}
@@ -586,7 +589,7 @@
   <div class="modal" id="bemvindo-modal">
     <div class="sheet">
       <h3>Bem-vindos a Penas &amp; Pergaminhos</h3>
-      <p class="note" data-cfg="boasvindas" style="font-size:17px;line-height:1.85;color:var(--ink-soft)">Aqui você deixa o que escreve — um conto, um verso, um fragmento — sem criar conta e, se quiser, sem dizer o seu nome. O taberneiro lê cada texto com cuidado antes de selá-lo no mural. Não há nota a tirar nem regra a decorar: escreva sem medo, e a taverna guarda.</p>
+      <p class="note" style="font-size:17px;line-height:1.85;color:var(--ink-soft)">Aqui você deixa o que escreve — um conto, um verso, um fragmento — sem criar conta e, se quiser, sem dizer o seu nome. O taberneiro lê cada texto com cuidado antes de selá-lo no mural. Não há nota a tirar nem regra a decorar: escreva sem medo, e Penas &amp; Pergaminhos guarda.</p>
       <div class="actions"><button class="btn btn-primary" id="bemvindo-ok">Entrar em Penas &amp; Pergaminhos</button></div>
     </div>
   </div>
@@ -594,8 +597,16 @@
   <div class="modal" id="saudacao-modal">
     <div class="sheet">
       <h3 id="saudacao-titulo"></h3>
-      <p class="note" style="font-size:17px;line-height:1.85;color:var(--ink-soft)">Que bom te ver de novo na taverna. O seu canto ficou guardado — entre e fique à vontade.</p>
+      <p class="note" style="font-size:17px;line-height:1.85;color:var(--ink-soft)">Que bom te ver de novo. O seu canto ficou guardado — entre e fique à vontade.</p>
       <div class="actions"><button class="btn btn-primary" id="saudacao-ok">Voltar ao mural</button></div>
+    </div>
+  </div>
+
+  <div class="modal" id="share-modal">
+    <div class="sheet">
+      <h3>Compartilhar</h3>
+      <div class="share-alvos" id="share-alvos"></div>
+      <div class="actions"><button class="btn btn-fraco" id="share-fechar">fechar</button></div>
     </div>
   </div>
 
@@ -612,7 +623,7 @@
   <div class="modal" id="citar-modal">
     <div class="sheet" style="max-width:560px">
       <h3>Cartão de citação</h3>
-      <p class="note">Selecione um trecho do texto antes de abrir, ou usamos o começo. Baixe e partilhe onde quiser.</p>
+      <p class="note">Selecione um trecho do texto antes de abrir, ou usamos o começo. Baixe e compartilhe onde quiser.</p>
       <div style="text-align:center"><canvas id="citar-canvas" width="1080" height="1350" style="width:100%;max-width:340px;border:1px solid var(--line);border-radius:6px"></canvas></div>
       <div class="actions">
         <button class="btn btn-ghost" id="citar-tema">alternar fundo</button>
@@ -626,7 +637,7 @@
       <button class="sheet-close" id="autor-fechar" aria-label="Fechar">×</button>
       <h3 id="autor-nome"></h3>
       <p class="note" id="autor-stats"></p>
-      <button class="act act-text" id="autor-share" style="opacity:.85;margin:0 0 10px">✦ partilhar este perfil</button>
+      <button class="act act-text" id="autor-share" style="opacity:.85;margin:0 0 10px">✦ compartilhar este perfil</button>
       <div class="autor-lista" id="autor-lista"></div>
     </div>
   </div>
@@ -908,7 +919,7 @@
   }
   function partilharPerfil(nome){
     var url = location.origin+location.pathname+'?autor='+encodeURIComponent(nome);
-    partilharUrl(url, 'Os pergaminhos de '+nome+' na taverna', 'Penas & Pergaminhos');
+    abrirCompartilhar(url, 'Os pergaminhos de '+nome+' em Penas & Pergaminhos', 'Penas & Pergaminhos');
   }
   function abrirAutorDoLink(){
     var a = new URLSearchParams(location.search).get('autor');
@@ -1044,25 +1055,42 @@
   document.getElementById('r-like').addEventListener('click', function(){ if(currentReaderId!=null) curtir(currentReaderId); });
   document.getElementById('r-share').addEventListener('click', function(){ if(currentReaderId!=null) compartilhar(currentReaderId); });
 
+  var shareModal=document.getElementById('share-modal');
   function copiarLink(url, msg){
     msg = msg || 'Link copiado! ✦';
     if(navigator.clipboard && navigator.clipboard.writeText){
       navigator.clipboard.writeText(url).then(function(){ ppToast(msg); }).catch(function(){ prompt('Copie o link:', url); });
     } else { prompt('Copie o link:', url); }
   }
-  function partilharUrl(url, text, title){
-    if(navigator.share){
-      navigator.share({ title: title||'Penas & Pergaminhos', text: text||'', url: url }).catch(function(e){
-        if(e && e.name==='AbortError') return; // o usuário fechou a folha de propósito
-        copiarLink(url);
-      });
-    } else { copiarLink(url); }
+  function abrirCompartilhar(url, texto, titulo){
+    var alvos=document.getElementById('share-alvos');
+    if(!alvos || !shareModal){ copiarLink(url); return; }
+    var t=encodeURIComponent(texto||titulo||'Penas & Pergaminhos'), u=encodeURIComponent(url);
+    var msg=encodeURIComponent((texto?texto+' ':'')+url), corpo=encodeURIComponent((texto?texto+'\n\n':'')+url);
+    var links=[
+      ['WhatsApp','https://wa.me/?text='+msg],
+      ['Telegram','https://t.me/share/url?url='+u+'&text='+t],
+      ['X','https://twitter.com/intent/tweet?text='+t+'&url='+u],
+      ['Facebook','https://www.facebook.com/sharer/sharer.php?u='+u],
+      ['E-mail','mailto:?subject='+encodeURIComponent(titulo||'Penas & Pergaminhos')+'&body='+corpo]
+    ];
+    var html=links.map(function(l){ return '<a class="share-alvo" href="'+l[1]+'" target="_blank" rel="noopener">'+l[0]+'</a>'; }).join('');
+    html+='<button class="share-alvo" id="share-copiar">Copiar link</button>';
+    if(navigator.share) html+='<button class="share-alvo" id="share-nativo">Mais opções…</button>';
+    alvos.innerHTML=html;
+    document.getElementById('share-copiar').addEventListener('click', function(){ copiarLink(url); fechar(shareModal); });
+    var sn=document.getElementById('share-nativo'); if(sn) sn.addEventListener('click', function(){ navigator.share({ title:titulo||'Penas & Pergaminhos', text:texto||'', url:url }).catch(function(){}); fechar(shareModal); });
+    abrir(shareModal);
+  }
+  if(shareModal){
+    var sfb=document.getElementById('share-fechar'); if(sfb) sfb.addEventListener('click', function(){ fechar(shareModal); });
+    shareModal.addEventListener('click', function(e){ if(e.target===shareModal) fechar(shareModal); });
   }
   function compartilhar(id){
     var w = textosAtuais.find(function(x){ return String(x.id)===String(id); });
     var titulo = w ? (w.title||'Sem título') : 'Penas & Pergaminhos';
     var url = OG_DINAMICO ? (SUPABASE_URL + '/functions/v1/partilha?id=' + id) : (location.origin + location.pathname + '?texto=' + id);
-    partilharUrl(url, '“'+titulo+'” — na taverna Penas & Pergaminhos', titulo);
+    abrirCompartilhar(url, '“'+titulo+'” em Penas & Pergaminhos', titulo);
   }
 
   async function carregarComentarios(id){
